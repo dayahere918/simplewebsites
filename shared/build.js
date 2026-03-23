@@ -8,7 +8,8 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const SITES_DIR = path.join(ROOT, 'sites');
 const SHARED_DIR = path.join(ROOT, 'shared');
-const BASE_URL = process.env.BASE_URL || 'https://example.com';
+const BASE_URL = process.env.BASE_URL || 'https://stacky.pages.dev';
+const GLOBAL_DIST = path.join(ROOT, 'dist');
 
 function getAllSites() {
   if (!fs.existsSync(SITES_DIR)) return [];
@@ -83,6 +84,10 @@ function buildSite(siteName) {
 </urlset>`;
   fs.writeFileSync(path.join(distDir, 'sitemap.xml'), sitemapXml);
 
+  // Copy to global dist
+  const globalSiteDir = path.join(GLOBAL_DIST, siteName);
+  copyDir(distDir, globalSiteDir);
+
   console.log(`✅ Built: ${siteName}`);
 }
 
@@ -92,9 +97,46 @@ function buildAll() {
     console.log('No sites found in sites/ directory.');
     return;
   }
-  console.log(`Building ${sites.length} sites...`);
+  
+  // Clean/Create global dist
+  if (fs.existsSync(GLOBAL_DIST)) {
+    fs.rmSync(GLOBAL_DIST, { recursive: true, force: true });
+  }
+  fs.mkdirSync(GLOBAL_DIST, { recursive: true });
+
+  console.log(`Building ${sites.length} sites into ${GLOBAL_DIST}...`);
+  
+  // Copy shared assets to global dist root if needed (e.g. for a hub page)
+  copyFileSync(path.join(SHARED_DIR, 'styles.css'), path.join(GLOBAL_DIST, 'shared-styles.css'));
+  copyFileSync(path.join(SHARED_DIR, 'theme-toggle.js'), path.join(GLOBAL_DIST, 'shared-theme-toggle.js'));
+
   sites.forEach(buildSite);
-  console.log(`\n🎉 All ${sites.length} sites built successfully!`);
+
+  // Generate a simple Index/Hub page for stacky.pages.dev root
+  const siteLinks = sites.map(s => `<li><a href="${s}/">${s.replace(/-/g, ' ').toUpperCase()}</a></li>`).join('\n');
+  const hubHtml = `<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><title>Stacky — Simple Tool Collection</title>
+<link rel="stylesheet" href="shared-styles.css">
+<style>
+  .hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: var(--space-4); margin-top: var(--space-8); }
+  .hub-card { padding: var(--space-6); text-align: center; border: 1px solid var(--color-border); border-radius: var(--radius-lg); transition: all 0.3s ease; text-decoration: none; color: inherit; }
+  .hub-card:hover { border-color: var(--color-primary); box-shadow: var(--shadow-glow); transform: translateY(-4px); }
+</style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero"><h1>📚 <span class="text-gradient">Stacky</span></h1><p>21+ Premium small tools. Open source, fast, and free.</p></section>
+    <div class="hub-grid">
+      ${sites.map(s => `<a href="${s}/" class="hub-card"><h4>${s.replace(/-/g, ' ').toUpperCase()}</h4></a>`).join('')}
+    </div>
+  </div>
+  <script src="shared-theme-toggle.js"></script>
+</body>
+</html>`;
+  fs.writeFileSync(path.join(GLOBAL_DIST, 'index.html'), hubHtml);
+
+  console.log(`\n🎉 All ${sites.length} sites built successfully into global dist!`);
 }
 
 // Run if called directly

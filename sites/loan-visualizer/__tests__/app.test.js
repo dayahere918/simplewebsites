@@ -198,7 +198,8 @@ describe('LoanVisualizer', () => {
     test('updates pie gradient', () => {
       updatePieChart(200000, 100000);
       const pie = document.getElementById('pie-visual');
-      expect(pie.style.background).toContain('conic-gradient');
+      // In JSDOM, background shorthand might not parse conic-gradient fully, check raw style
+      expect(pie.getAttribute('style')).toContain('conic-gradient');
     });
 
     test('updates legend text', () => {

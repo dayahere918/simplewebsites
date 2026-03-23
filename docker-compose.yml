@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  tester:
+    build: .
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+      - CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID:-placeholder}
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN:-placeholder}
+    command: npm test -- --coverage

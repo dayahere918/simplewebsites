@@ -1,11 +1,11 @@
 # Simple Tool Websites Monorepo — Requirements Document
 
 ## 1. Project Overview
-The goal is to build a single GitHub monorepo containing 21 simple, high-quality tool websites. Each site is independently testable, SEO-optimized, and deployed automatically to Cloudflare Pages.
+The goal is to build a single GitHub monorepo containing 21 simple, high-quality tool websites. All sites are hosted under a single brand at [stacky.pages.dev](https://stacky.pages.dev).
 
 ## 2. Global Technical Requirements
 - **Monorepo Structure**: Organized under `sites/` with a `shared/` directory for common assets.
-- **Independent Deployment**: Each site must be provisioned via Terraform as a separate Cloudflare Pages project.
+- **Unified Deployment**: All 21 sites are deployed as subdirectories of a single Cloudflare Pages project (`stacky.pages.dev`).
 - **Automated CI/CD**: Unified GitHub Actions pipeline for testing, building, and deploying all sites.
 - **Premium Aesthetics**: High-end dark theme by default with glassmorphism, vibrant gradients, and smooth animations.
 - **Theme Support**: Seamless toggle between Dark and Light modes using a shared component.

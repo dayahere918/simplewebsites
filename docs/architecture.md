@@ -24,12 +24,12 @@ The project follows a modular monorepo architecture for independent development 
 ```
 
 ## 2. Infrastructure & Infrastructure-as-Code (IaC)
-- **Terraform**: Automates the provisioning of 21 Cloudflare Pages projects using `terraform/main.tf`, `variables.tf`, and `outputs.tf`.
+- **Terraform**: Automates the provisioning of the root `stacky` Cloudflare Pages project.
 - **Cloudflare Pages**: High-performance static hosting for all tools.
 - **CI/CD (GitHub Actions)**:
   - **Test Phase**: Runs Jest unit tests and Playwright E2E tests in a Dockerized environment.
   - **Build Phase**: Executes `shared/build.js` to process shared assets and SEO metadata.
-  - **Deploy Phase**: Uses Terraform to ensure infra is up-to-date and deploys the `dist/` folder via Wrangler.
+  - **Deploy Phase**: Uses Terraform to ensure the `stacky` project exists and deploys the unified `dist/` folder via Wrangler.
 
 ## 3. Shared Modules Overview
 - **Shared Styles (`shared/styles.css`)**: 
