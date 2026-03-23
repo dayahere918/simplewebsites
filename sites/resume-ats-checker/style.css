@@ -1,0 +1,23 @@
+/* Resume ATS Checker Styles */
+.form-group { display: flex; flex-direction: column; }
+.score-circle-wrap { padding: var(--space-8) 0; }
+.score-circle { width: 180px; height: 180px; border-radius: 50%; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 6px solid var(--color-border); transition: all 0.5s ease; }
+.score-circle.excellent { border-color: var(--color-success); box-shadow: 0 0 40px rgba(0,184,148,0.3); }
+.score-circle.good { border-color: var(--color-accent); box-shadow: 0 0 30px var(--color-accent-glow); }
+.score-circle.fair { border-color: var(--color-warning); box-shadow: 0 0 30px rgba(253,203,110,0.3); }
+.score-circle.poor { border-color: var(--color-error); box-shadow: 0 0 30px rgba(225,112,85,0.3); }
+.score-value { font-size: var(--text-5xl); font-weight: 800; font-family: var(--font-mono); }
+.score-label { font-size: var(--text-sm); color: var(--color-text-muted); }
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+.mini-stat { text-align: center; padding: var(--space-4); }
+.mini-stat .val { font-size: var(--text-2xl); font-weight: 800; font-family: var(--font-mono); }
+.mini-stat .lab { font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; }
+.keyword-grid { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.keyword-chip { font-size: var(--text-xs); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-weight: 600; }
+.keyword-chip.found { background: rgba(0,184,148,0.15); color: var(--color-success); border: 1px solid rgba(0,184,148,0.3); }
+.keyword-chip.missing { background: rgba(225,112,85,0.15); color: var(--color-error); border: 1px solid rgba(225,112,85,0.3); }
+.tips-list { list-style: none; padding: 0; }
+.tips-list li { padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border); font-size: var(--text-sm); color: var(--color-text-secondary); }
+.tips-list li:last-child { border: none; }
+.tips-list li::before { content: '💡 '; }
+@media (max-width: 768px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }

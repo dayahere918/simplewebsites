@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terraform Snippet Generator — IaC Code Generator</title>
+    <meta name="description" content="Generate Terraform code snippets instantly. AWS, GCP, Azure resources — EC2, S3, VPC, and more. Free IaC code generator for DevOps engineers.">
+    <meta name="keywords" content="terraform generator, terraform code snippets, infrastructure as code, IaC generator, terraform AWS, terraform templates">
+    <link rel="canonical" href="https://terraform-snippet-generator.pages.dev/">
+    <meta property="og:title" content="Terraform Snippet Generator"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Terraform Snippet Generator","url":"https://terraform-snippet-generator.pages.dev/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container">
+        <section class="hero"><h1>🔧 <span class="text-gradient">Terraform Snippet Generator</span></h1><p>Generate production-ready Terraform code snippets for AWS, GCP, and Azure in seconds.</p></section>
+        <div class="gen-grid">
+            <div class="card config-panel">
+                <h4 class="mb-4">Configuration</h4>
+                <div class="form-group mb-4"><label class="label">Cloud Provider</label><select class="input" id="provider" onchange="updateResources()"><option value="aws">AWS</option><option value="gcp">Google Cloud</option><option value="azure">Azure</option></select></div>
+                <div class="form-group mb-4"><label class="label">Resource Type</label><select class="input" id="resource-type" onchange="updateParams()"></select></div>
+                <div class="params-area" id="params-area"></div>
+                <button class="btn btn-accent w-full mt-4" onclick="generateSnippet()">⚡ Generate Terraform</button>
+            </div>
+            <div class="code-panel">
+                <div class="card code-card">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4>Generated Code</h4>
+                        <button class="btn btn-secondary" onclick="copyCode()">📋 Copy</button>
+                    </div>
+                    <pre class="code-output" id="code-output"><code>// Select a resource and click Generate</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Terraform Snippet Generator. DevOps tooling made easy.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

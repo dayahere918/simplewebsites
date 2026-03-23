@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Board Generator — Create Visual Mood Boards Online</title>
+    <meta name="description" content="Create stunning mood boards from keywords. Generate color palettes, typography suggestions, and visual inspiration for your creative projects.">
+    <meta name="keywords" content="mood board generator, visual inspiration board, design mood board, creative mood board, color palette mood board">
+    <link rel="canonical" href="https://mood-board-generator.pages.dev/">
+    <meta property="og:title" content="Mood Board Generator"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Mood Board Generator","url":"https://mood-board-generator.pages.dev/","applicationCategory":"DesignApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container">
+        <section class="hero"><h1>🎨 <span class="text-gradient">Mood Board Generator</span></h1><p>Enter a theme or keywords and get an instant visual mood board with colors, fonts, and design inspiration.</p></section>
+        <div class="card input-section mb-8 text-center">
+            <div class="flex gap-4 justify-center items-center flex-wrap">
+                <input class="input" type="text" id="theme-input" placeholder="Enter a theme (e.g., 'Ocean Sunset', 'Cyberpunk')" style="max-width:400px">
+                <button class="btn btn-accent" id="generate-btn" onclick="generateBoard()">✨ Generate</button>
+            </div>
+            <div class="presets mt-4"><p class="label">Try:</p>
+                <div class="flex gap-2 justify-center flex-wrap">
+                    <button class="btn btn-secondary preset-btn" onclick="quickGenerate('Tropical Paradise')">🏝️ Tropical</button>
+                    <button class="btn btn-secondary preset-btn" onclick="quickGenerate('Cyberpunk Neon')">🌃 Cyberpunk</button>
+                    <button class="btn btn-secondary preset-btn" onclick="quickGenerate('Minimalist Zen')">🧘 Zen</button>
+                    <button class="btn btn-secondary preset-btn" onclick="quickGenerate('Vintage Retro')">📻 Retro</button>
+                    <button class="btn btn-secondary preset-btn" onclick="quickGenerate('Forest Nature')">🌲 Forest</button>
+                    <button class="btn btn-secondary preset-btn" onclick="quickGenerate('Space Galaxy')">🚀 Space</button>
+                </div>
+            </div>
+        </div>
+        <div class="board-container hidden" id="board-container">
+            <div class="board-grid" id="board-grid"></div>
+            <div class="board-meta mt-8">
+                <div class="card palette-section mb-4"><h4 class="mb-4">🎨 Color Palette</h4><div class="palette-row" id="palette-row"></div></div>
+                <div class="card font-section mb-4"><h4 class="mb-4">🔤 Typography</h4><div id="font-suggestions"></div></div>
+                <div class="card keyword-section"><h4 class="mb-4">💡 Keywords</h4><div class="keyword-tags" id="keyword-tags"></div></div>
+            </div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Mood Board Generator. Creative inspiration tool.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Shape Detector — Analyze Your Face Shape with AI</title>
+    <meta name="description" content="Upload a photo and AI will detect your face shape — oval, round, square, heart, oblong, diamond, or triangle. Get personalized hairstyle recommendations.">
+    <link rel="canonical" href="https://face-shape-detector.pages.dev/">
+    <meta property="og:title" content="Face Shape Detector"><meta property="og:type" content="website">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Face Shape Detector","url":"https://face-shape-detector.pages.dev/","applicationCategory":"LifestyleApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-sm">
+        <section class="hero"><h1>👤 <span class="text-gradient">Face Shape Detector</span></h1><p>Upload a selfie and our AI will analyze your face shape and suggest the best hairstyles and accessories.</p></section>
+        <div class="card upload-area mb-8" id="upload-area">
+            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <div class="drop-icon">📸</div><p>Upload a clear selfie or portrait photo</p><p class="hint">Best results with a front-facing photo</p>
+            </div><input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleUpload(event)">
+        </div>
+        <div class="results hidden" id="results">
+            <div class="result-header text-center mb-8">
+                <canvas id="face-canvas" class="face-preview"></canvas>
+                <div class="shape-badge animate-fadeIn" id="shape-badge">Loading...</div>
+                <div class="confidence" id="confidence"></div>
+            </div>
+            <div class="card mb-4"><h4 class="mb-4">📊 Shape Analysis</h4><div class="shape-bars" id="shape-bars"></div></div>
+            <div class="card mb-4"><h4 class="mb-4">💇 Recommended Hairstyles</h4><div class="rec-grid" id="hairstyle-recs"></div></div>
+            <div class="card mb-4"><h4 class="mb-4">🕶️ Best Accessories</h4><div class="rec-grid" id="accessory-recs"></div></div>
+            <div class="flex justify-center mt-8"><button class="btn btn-secondary" onclick="resetAnalysis()">↺ Analyze Another Photo</button></div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Face Shape Detector. AI-powered face analysis.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

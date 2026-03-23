@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startup Idea Generator — Random Business Ideas Instantly</title>
+    <meta name="description" content="Generate random startup ideas instantly. Get creative business concepts with problem-solution pairs. Perfect for entrepreneurs and hackathons.">
+    <meta name="keywords" content="startup idea generator, business idea tool, random startup ideas, entrepreneurship, hackathon ideas">
+    <link rel="canonical" href="https://startup-idea-generator.pages.dev/">
+    <meta property="og:title" content="Startup Idea Generator"><meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Startup Idea Generator","url":"https://startup-idea-generator.pages.dev/","applicationCategory":"BusinessApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT" data-full-width-responsive="true" data-ad-format="auto"></ins></div>
+    <div class="container container-sm">
+        <section class="hero">
+            <h1>🚀 <span class="text-gradient">Startup Idea Generator</span></h1>
+            <p>Need inspiration? Generate creative startup ideas with the click of a button.</p>
+        </section>
+        <div class="flex justify-center mb-8">
+            <button class="btn btn-accent generate-btn" id="generate-btn" onclick="generateIdea()">⚡ Generate Idea</button>
+        </div>
+        <div class="card idea-card animate-fadeIn" id="idea-card">
+            <div class="idea-category" id="idea-category">Click Generate to start</div>
+            <h2 class="idea-name" id="idea-name">Your next big idea awaits...</h2>
+            <p class="idea-problem" id="idea-problem"></p>
+            <p class="idea-solution" id="idea-solution"></p>
+            <div class="idea-tags" id="idea-tags"></div>
+            <div class="flex gap-4 justify-center mt-8">
+                <button class="btn btn-primary" id="save-btn" onclick="saveIdea()">💾 Save</button>
+                <button class="btn btn-secondary" id="share-btn" onclick="shareIdea()">📤 Share</button>
+            </div>
+        </div>
+        <div class="saved-section mt-8" id="saved-section">
+            <h3 class="mb-4">💡 Saved Ideas</h3>
+            <div id="saved-list"></div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT" data-full-width-responsive="true" data-ad-format="auto"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Startup Idea Generator. Fuel your entrepreneurial spirit.</p></footer>
+    <script src="app.js"></script>
+</body>
+</html>

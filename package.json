@@ -1,0 +1,22 @@
+{
+  "name": "simple-tool-websites",
+  "version": "1.0.0",
+  "description": "Monorepo of simple tool websites deployed to Cloudflare Pages",
+  "private": true,
+  "scripts": {
+    "test": "jest --coverage --passWithNoTests",
+    "test:ci": "jest --coverage --ci --passWithNoTests",
+    "test:e2e": "npx playwright test",
+    "build": "node shared/build.js",
+    "lint": "eslint sites/*/app.js shared/*.js"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "@playwright/test": "^1.42.0",
+    "eslint": "^8.56.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

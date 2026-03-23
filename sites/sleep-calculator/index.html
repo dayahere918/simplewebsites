@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleep Calculator — Find Your Best Sleep & Wake Times</title>
+    <meta name="description" content="Free sleep calculator. Find the best times to sleep and wake up based on sleep cycles. Get optimal rest with our science-based sleep scheduler.">
+    <meta name="keywords" content="sleep calculator, best time to sleep, sleep cycle calculator, wake up time, sleep schedule, optimal sleep">
+    <link rel="canonical" href="https://sleep-calculator.pages.dev/">
+    <meta property="og:title" content="Sleep Calculator — Optimize Your Sleep Schedule">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Sleep Calculator","url":"https://sleep-calculator.pages.dev/","applicationCategory":"HealthApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT" data-full-width-responsive="true" data-ad-format="auto"></ins></div>
+    <div class="container container-sm">
+        <section class="hero">
+            <h1>🌙 <span class="text-gradient">Sleep Calculator</span></h1>
+            <p>Calculate optimal bedtimes and wake-up times based on 90-minute sleep cycles for the best rest.</p>
+        </section>
+        <div class="card mode-selector mb-8">
+            <div class="flex gap-4 justify-center">
+                <button class="btn btn-primary mode-btn active" id="mode-wake" onclick="setMode('wake')">I need to wake up at...</button>
+                <button class="btn btn-secondary mode-btn" id="mode-sleep" onclick="setMode('sleep')">I want to sleep at...</button>
+            </div>
+        </div>
+        <div class="card input-section mb-8">
+            <label class="label" id="time-label" for="time-input">What time do you need to wake up?</label>
+            <input class="input time-input" type="time" id="time-input" value="07:00" onchange="calculateSleep()">
+            <button class="btn btn-accent mt-4 w-full" id="calc-btn" onclick="calculateSleep()">Calculate Best Times</button>
+        </div>
+        <div class="results-section" id="results-section">
+            <h3 class="text-center mb-4" id="results-title">Recommended Bedtimes</h3>
+            <div class="cycles-grid" id="cycles-grid"></div>
+            <div class="card sleep-tips mt-8">
+                <h4>💡 Sleep Tips</h4>
+                <ul id="tips-list">
+                    <li>Average time to fall asleep: ~14 minutes</li>
+                    <li>Each sleep cycle lasts ~90 minutes</li>
+                    <li>Waking between cycles feels more refreshing</li>
+                    <li>Adults need 5-6 complete cycles (7.5-9 hours)</li>
+                    <li>Keep a consistent schedule, even on weekends</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT" data-full-width-responsive="true" data-ad-format="auto"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Sleep Calculator. Science-based sleep optimization.</p></footer>
+    <script src="app.js"></script>
+</body>
+</html>

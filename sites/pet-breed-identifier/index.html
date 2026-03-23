@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Breed Identifier — Identify Your Pet's Breed with AI</title>
+    <meta name="description" content="Upload a photo of your pet and identify its breed instantly. Support for dogs, cats, and more. Get breed details, temperament, and care tips.">
+    <link rel="canonical" href="https://pet-breed-identifier.pages.dev/">
+    <meta property="og:title" content="Pet Breed Identifier"><meta property="og:type" content="website">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Pet Breed Identifier","url":"https://pet-breed-identifier.pages.dev/","applicationCategory":"LifestyleApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-sm">
+        <section class="hero"><h1>🐾 <span class="text-gradient">Pet Breed Identifier</span></h1><p>Upload a photo of your dog or cat and discover its breed. Get personality traits, care tips, and more.</p></section>
+        <div class="card upload-area mb-8" id="upload-area">
+            <div class="pet-type-selector flex gap-4 justify-center mb-4">
+                <button class="btn btn-primary pet-btn active" id="btn-dog" onclick="setPetType('dog')">🐕 Dog</button>
+                <button class="btn btn-secondary pet-btn" id="btn-cat" onclick="setPetType('cat')">🐈 Cat</button>
+            </div>
+            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <div class="drop-icon">📸</div><p>Upload a photo of your pet</p><p class="hint">Clear, well-lit photos work best</p>
+            </div><input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleUpload(event)">
+        </div>
+        <div class="results hidden" id="results">
+            <div class="card text-center mb-8">
+                <canvas id="pet-canvas" class="pet-preview"></canvas>
+                <div class="breed-badge animate-fadeIn mt-4" id="breed-badge">Loading...</div>
+                <div class="confidence-text" id="confidence-text"></div>
+            </div>
+            <div class="card mb-4"><h4 class="mb-4">🔍 Breed Probabilities</h4><div class="breed-bars" id="breed-bars"></div></div>
+            <div class="card mb-4" id="breed-info-card"><h4 class="mb-4">📖 Breed Information</h4><div id="breed-info"></div></div>
+            <div class="card mb-4"><h4 class="mb-4">📋 Care Tips</h4><ul class="tips-list" id="care-tips"></ul></div>
+            <div class="flex justify-center mt-8"><button class="btn btn-secondary" onclick="resetAnalysis()">↺ Identify Another Pet</button></div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Pet Breed Identifier. AI-powered breed detection.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

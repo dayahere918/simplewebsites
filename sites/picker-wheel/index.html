@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Picker Wheel — Free Random Selection Spinner Tool</title>
+    <meta name="description" content="Free online random picker wheel. Add your choices, spin the wheel, and let fate decide! Perfect for decision making, giveaways, and classroom activities.">
+    <meta name="keywords" content="random picker, decision wheel, spinner wheel, random selector, picker wheel online, random name picker">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://picker-wheel.pages.dev/">
+    <meta property="og:title" content="Picker Wheel — Free Random Selection Spinner">
+    <meta property="og:description" content="Spin the wheel to make random decisions! Add items, customize, and spin.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://picker-wheel.pages.dev/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Picker Wheel — Free Random Selection Spinner">
+    <meta name="twitter:description" content="Spin the wheel to make random decisions!">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Picker Wheel",
+      "description": "Free online random picker wheel for making random selections and decisions.",
+      "url": "https://picker-wheel.pages.dev/",
+      "applicationCategory": "UtilityApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    }
+    </script>
+    <link rel="stylesheet" href="shared-styles.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Top Ad Banner -->
+    <div class="ad-container ad-banner" id="ad-top">
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT" data-full-width-responsive="true" data-ad-format="auto"></ins>
+    </div>
+
+    <div class="container">
+        <section class="hero">
+            <h1><span class="text-gradient">Picker Wheel</span></h1>
+            <p>Add your choices, spin the wheel, and let fate decide! Perfect for giveaways, classrooms, and instant decisions.</p>
+        </section>
+
+        <div class="app-layout">
+            <!-- Input Panel -->
+            <div class="card input-panel" id="input-panel">
+                <h3>Your Choices</h3>
+                <div class="input-group mt-4">
+                    <textarea class="input" id="items-input" placeholder="Enter items, one per line&#10;e.g.&#10;Pizza&#10;Sushi&#10;Tacos&#10;Burgers" rows="8"></textarea>
+                </div>
+                <div class="flex gap-4 mt-4">
+                    <button class="btn btn-primary" id="update-btn" onclick="updateWheel()">Update Wheel</button>
+                    <button class="btn btn-secondary" id="clear-btn" onclick="clearItems()">Clear</button>
+                </div>
+                <div class="presets mt-8">
+                    <p class="label">Quick Presets:</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="btn btn-secondary preset-btn" onclick="loadPreset('yesno')">Yes / No</button>
+                        <button class="btn btn-secondary preset-btn" onclick="loadPreset('numbers')">1–10</button>
+                        <button class="btn btn-secondary preset-btn" onclick="loadPreset('colors')">Colors</button>
+                        <button class="btn btn-secondary preset-btn" onclick="loadPreset('food')">Food</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wheel -->
+            <div class="wheel-container">
+                <div class="wheel-wrapper">
+                    <div class="pointer" id="pointer">▼</div>
+                    <canvas id="wheel-canvas" width="400" height="400"></canvas>
+                </div>
+                <button class="btn btn-accent spin-btn" id="spin-btn" onclick="spinWheel()">🎰 SPIN</button>
+            </div>
+        </div>
+
+        <!-- Result Modal -->
+        <div class="modal-overlay hidden" id="result-modal">
+            <div class="card modal-content animate-slideUp">
+                <div class="modal-close" onclick="closeModal()">✕</div>
+                <div class="result-icon">🎉</div>
+                <h2>Winner!</h2>
+                <p class="result-text" id="result-text"></p>
+                <div class="flex gap-4 justify-center mt-8">
+                    <button class="btn btn-primary" onclick="closeModal(); spinWheel();">Spin Again</button>
+                    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Ad Banner -->
+    <div class="ad-container ad-banner" id="ad-bottom">
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT" data-full-width-responsive="true" data-ad-format="auto"></ins>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 Picker Wheel. Free online random selection tool.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Palette Extractor — Extract Colors from Any Image</title>
+    <meta name="description" content="Extract dominant colors from any image. Upload a photo and get Hex, RGB color codes instantly. Free color palette generator for designers.">
+    <meta name="keywords" content="color palette generator, image color extractor, extract colors from image, hex color picker, dominant colors">
+    <link rel="canonical" href="https://color-palette-extractor.pages.dev/">
+    <meta property="og:title" content="Color Palette Extractor"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Color Palette Extractor","url":"https://color-palette-extractor.pages.dev/","applicationCategory":"DesignApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-sm">
+        <section class="hero"><h1>🎨 <span class="text-gradient">Color Palette Extractor</span></h1><p>Upload any image and instantly extract its dominant color palette. Get Hex & RGB codes for your designs.</p></section>
+        <div class="card upload-area mb-8" id="upload-area">
+            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <div class="drop-icon">📁</div>
+                <p>Drag & drop an image here or <strong>click to browse</strong></p>
+                <p class="hint">Supports PNG, JPG, GIF, WebP</p>
+            </div>
+            <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFile(event)">
+        </div>
+        <div class="preview-section hidden" id="preview-section">
+            <div class="card mb-8"><canvas id="image-canvas" class="image-preview"></canvas></div>
+            <h3 class="text-center mb-4">Extracted Palette</h3>
+            <div class="palette-grid" id="palette-grid"></div>
+            <div class="flex justify-center mt-8 gap-4">
+                <button class="btn btn-primary" onclick="exportPalette()">📋 Copy CSS</button>
+                <button class="btn btn-secondary" onclick="resetUpload()">↺ New Image</button>
+            </div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Color Palette Extractor. Free design tool.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

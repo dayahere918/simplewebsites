@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Translator — Convert Text to Emojis Online</title>
+    <meta name="description" content="Free emoji translator. Convert any text into emoji-only sentences instantly. Fun text to emoji converter for social media.">
+    <meta name="keywords" content="emoji translator, emoji converter, text to emoji, emoji text generator, emoji language">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://emoji-translator.pages.dev/">
+    <meta property="og:title" content="Emoji Translator — Text to Emoji Converter">
+    <meta property="og:description" content="Convert text to emojis instantly!">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebApplication","name":"Emoji Translator","description":"Convert text to emoji sentences.","url":"https://emoji-translator.pages.dev/","applicationCategory":"UtilityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+    </script>
+    <link rel="stylesheet" href="shared-styles.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT" data-full-width-responsive="true" data-ad-format="auto"></ins></div>
+    <div class="container container-sm">
+        <section class="hero">
+            <h1><span class="text-gradient">Emoji Translator</span></h1>
+            <p>Type any text and watch it transform into emojis! Perfect for social media, messaging, and fun.</p>
+        </section>
+        <div class="translator-layout">
+            <div class="card pane">
+                <label class="label" for="text-input">Your Text</label>
+                <textarea class="input" id="text-input" rows="6" placeholder="Type something like: I love pizza and coffee..." oninput="translate()"></textarea>
+                <div class="char-count mt-2" id="char-count">0 characters</div>
+            </div>
+            <div class="arrow-indicator">➡️</div>
+            <div class="card pane output-pane">
+                <label class="label">Emoji Translation</label>
+                <div class="emoji-output" id="emoji-output">🔤 Start typing to see emojis...</div>
+                <div class="flex gap-4 mt-4">
+                    <button class="btn btn-primary" id="copy-btn" onclick="copyOutput()">📋 Copy</button>
+                    <button class="btn btn-secondary" id="clear-btn" onclick="clearAll()">Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT" data-full-width-responsive="true" data-ad-format="auto"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Emoji Translator. Free text to emoji converter.</p></footer>
+    <script src="app.js"></script>
+</body>
+</html>

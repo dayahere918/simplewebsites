@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baby Face Generator — Predict What Your Baby Will Look Like</title>
+    <meta name="description" content="Upload two parent photos and see what your baby might look like. Fun AI-powered baby face predictor using photo blending.">
+    <link rel="canonical" href="https://baby-face-generator.pages.dev/">
+    <meta property="og:title" content="Baby Face Generator"><meta property="og:type" content="website">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Baby Face Generator","url":"https://baby-face-generator.pages.dev/","applicationCategory":"EntertainmentApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-sm">
+        <section class="hero"><h1>👶 <span class="text-gradient">Baby Face Generator</span></h1><p>Upload two parent photos and see a fun prediction of what your baby might look like!</p></section>
+        <div class="parent-uploads mb-8">
+            <div class="card upload-slot" id="parent1-slot">
+                <div class="drop-zone" onclick="document.getElementById('parent1-input').click()"><div class="drop-icon">👨</div><p>Parent 1 Photo</p></div>
+                <input type="file" id="parent1-input" accept="image/*" class="hidden" onchange="loadParent(event, 1)">
+                <canvas id="parent1-canvas" class="hidden preview-canvas"></canvas>
+            </div>
+            <div class="plus-sign">+</div>
+            <div class="card upload-slot" id="parent2-slot">
+                <div class="drop-zone" onclick="document.getElementById('parent2-input').click()"><div class="drop-icon">👩</div><p>Parent 2 Photo</p></div>
+                <input type="file" id="parent2-input" accept="image/*" class="hidden" onchange="loadParent(event, 2)">
+                <canvas id="parent2-canvas" class="hidden preview-canvas"></canvas>
+            </div>
+        </div>
+        <div class="flex justify-center mb-8"><button class="btn btn-accent" id="generate-btn" onclick="generateBaby()" disabled>👶 Generate Baby Face</button></div>
+        <div class="result-section hidden" id="result-section">
+            <div class="card text-center"><h3 class="mb-4">Your Future Baby! 👶</h3>
+                <canvas id="baby-canvas" class="baby-preview"></canvas>
+                <div class="baby-traits mt-4" id="baby-traits"></div>
+                <div class="flex justify-center gap-4 mt-4"><button class="btn btn-primary" onclick="downloadResult()">📥 Download</button><button class="btn btn-secondary" onclick="resetAll()">↺ Try Again</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Baby Face Generator. For entertainment only — results are simulated.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI/CD Visualizer — Pipeline Builder & Diagram Tool</title>
+    <meta name="description" content="Visually build and diagram CI/CD pipelines. Drag and drop stages for GitHub Actions, GitLab CI, and Jenkins. Free DevOps pipeline designer.">
+    <link rel="canonical" href="https://cicd-visualizer.pages.dev/">
+    <meta property="og:title" content="CI/CD Visualizer"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"CI/CD Visualizer","url":"https://cicd-visualizer.pages.dev/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container">
+        <section class="hero"><h1>🔄 <span class="text-gradient">CI/CD Visualizer</span></h1><p>Build and visualize CI/CD pipelines. Add stages, configure steps, and export as YAML.</p></section>
+        <div class="toolbar card mb-4 flex gap-4 items-center flex-wrap justify-center">
+            <span class="label" style="margin:0">Add Stage:</span>
+            <button class="btn btn-secondary" onclick="addStage('build')">🔨 Build</button>
+            <button class="btn btn-secondary" onclick="addStage('test')">🧪 Test</button>
+            <button class="btn btn-secondary" onclick="addStage('lint')">📝 Lint</button>
+            <button class="btn btn-secondary" onclick="addStage('deploy')">🚀 Deploy</button>
+            <button class="btn btn-secondary" onclick="addStage('notify')">📢 Notify</button>
+            <button class="btn btn-secondary" onclick="addStage('custom')">⚙️ Custom</button>
+            <span class="divider"></span>
+            <select class="input" id="format-select" style="max-width:180px"><option value="github">GitHub Actions</option><option value="gitlab">GitLab CI</option><option value="jenkins">Jenkinsfile</option></select>
+            <button class="btn btn-accent" onclick="exportPipeline()">📋 Export YAML</button>
+            <button class="btn btn-secondary" onclick="clearPipeline()">Clear</button>
+        </div>
+        <div class="pipeline-area">
+            <div class="pipeline-flow" id="pipeline-flow"><div class="empty-state" id="empty-state">Add stages above to build your pipeline →</div></div>
+        </div>
+        <div class="card code-output-section mt-8 hidden" id="code-output-section">
+            <div class="flex justify-between items-center mb-4"><h4>Exported Configuration</h4><button class="btn btn-secondary" onclick="copyExport()">📋 Copy</button></div>
+            <pre class="code-output" id="yaml-output"><code></code></pre>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 CI/CD Visualizer. Design pipelines visually.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

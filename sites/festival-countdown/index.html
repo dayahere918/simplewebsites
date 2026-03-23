@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Festival Countdown — Days Until Your Favorite Festivals</title>
+    <meta name="description" content="Countdown timer for festivals worldwide. Track days until Diwali, Holi, Christmas, Eid, and more with beautiful animated timers.">
+    <meta name="keywords" content="Diwali countdown, Holi countdown, Christmas countdown, festival timer, days until festival, countdown clock">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://festival-countdown.pages.dev/">
+    <meta property="og:title" content="Festival Countdown — Track Days Until Festivals">
+    <meta property="og:description" content="Beautiful countdown timers for festivals worldwide.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebApplication","name":"Festival Countdown","description":"Countdown timers for festivals worldwide.","url":"https://festival-countdown.pages.dev/","applicationCategory":"UtilityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+    </script>
+    <link rel="stylesheet" href="shared-styles.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT" data-full-width-responsive="true" data-ad-format="auto"></ins></div>
+    <div class="container">
+        <section class="hero">
+            <h1><span class="text-gradient">Festival Countdown</span></h1>
+            <p>Never miss a celebration! Track days, hours, minutes, and seconds until your favorite festivals.</p>
+        </section>
+        <div class="festival-selector mb-8">
+            <label class="label" for="festival-select">Choose a Festival:</label>
+            <select class="input" id="festival-select" onchange="selectFestival()">
+                <option value="">-- Select a Festival --</option>
+            </select>
+        </div>
+        <div class="countdown-display card" id="countdown-display">
+            <div class="festival-name" id="festival-name">Select a festival above</div>
+            <div class="festival-date" id="festival-date"></div>
+            <div class="timer-grid" id="timer-grid">
+                <div class="timer-unit"><div class="timer-value" id="days">00</div><div class="timer-label">Days</div></div>
+                <div class="timer-sep">:</div>
+                <div class="timer-unit"><div class="timer-value" id="hours">00</div><div class="timer-label">Hours</div></div>
+                <div class="timer-sep">:</div>
+                <div class="timer-unit"><div class="timer-value" id="minutes">00</div><div class="timer-label">Minutes</div></div>
+                <div class="timer-sep">:</div>
+                <div class="timer-unit"><div class="timer-value" id="seconds">00</div><div class="timer-label">Seconds</div></div>
+            </div>
+        </div>
+        <div class="festivals-grid mt-8" id="festivals-grid"></div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT" data-full-width-responsive="true" data-ad-format="auto"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Festival Countdown. Track festivals worldwide.</p></footer>
+    <script src="app.js"></script>
+</body>
+</html>

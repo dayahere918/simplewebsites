@@ -1,0 +1,156 @@
+name: CI/CD — Test, Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      sites: ${{ steps.changes.outputs.sites }}
+      shared: ${{ steps.changes.outputs.shared }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed sites
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            CHANGED=$(git diff --name-only HEAD~1 HEAD | grep '^sites/' | cut -d'/' -f2 | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            SHARED=$(git diff --name-only HEAD~1 HEAD | grep -c '^shared/' || true)
+          else
+            CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }} HEAD | grep '^sites/' | cut -d'/' -f2 | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            SHARED=$(git diff --name-only ${{ github.event.pull_request.base.sha }} HEAD | grep -c '^shared/' || true)
+          fi
+          echo "sites=${CHANGED:-[]}" >> $GITHUB_OUTPUT
+          echo "shared=${SHARED}" >> $GITHUB_OUTPUT
+
+  test:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Jest tests with coverage
+        run: npm run test:ci
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: coverage/
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build all sites
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: sites/*/dist/
+
+  terraform:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.7.0'
+
+      - name: Terraform Init
+        run: terraform init
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy:
+    needs: [build, terraform]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        site:
+          - picker-wheel
+          - festival-countdown
+          - bill-splitter
+          - emoji-translator
+          - sleep-calculator
+          - startup-idea-generator
+          - loan-visualizer
+          - height-comparison
+          - color-palette-extractor
+          - typing-speed-race
+          - noise-meter
+          - voice-to-text-counter
+          - mood-board-generator
+          - aws-cost-estimator
+          - terraform-snippet-generator
+          - cicd-visualizer
+          - cloud-service-comparison
+          - resume-ats-checker
+          - face-shape-detector
+          - baby-face-generator
+          - pet-breed-identifier
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: sites/
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy sites/${{ matrix.site }}/dist --project-name=${{ matrix.site }}

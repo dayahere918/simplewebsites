@@ -1,0 +1,12 @@
+/* Terraform Snippet Generator Styles */
+.gen-grid { display: grid; grid-template-columns: 360px 1fr; gap: var(--space-8); align-items: start; }
+.form-group { display: flex; flex-direction: column; }
+.code-card { position: sticky; top: var(--space-4); }
+.code-output { background: #0d1117; color: #c9d1d9; padding: var(--space-6); border-radius: var(--radius-md); overflow-x: auto; font-family: var(--font-mono); font-size: var(--text-sm); line-height: 1.6; min-height: 300px; white-space: pre; border: 1px solid rgba(255,255,255,0.05); }
+.code-output .keyword { color: #ff7b72; }
+.code-output .string { color: #a5d6ff; }
+.code-output .comment { color: #8b949e; }
+.code-output .type { color: #d2a8ff; }
+.code-output .value { color: #79c0ff; }
+.params-area .form-group { margin-bottom: var(--space-3); }
+@media (max-width: 768px) { .gen-grid { grid-template-columns: 1fr; } .code-card { position: static; } }

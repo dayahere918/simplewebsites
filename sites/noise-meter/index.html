@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noise Meter — Measure Sound Level Online</title>
+    <meta name="description" content="Free online noise meter. Measure ambient sound levels in real-time using your microphone. Get dB readings instantly.">
+    <meta name="keywords" content="noise meter online, sound level checker, decibel meter, dB meter, noise level measurement">
+    <link rel="canonical" href="https://noise-meter.pages.dev/">
+    <meta property="og:title" content="Noise Meter — Online Sound Level Checker"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Noise Meter","url":"https://noise-meter.pages.dev/","applicationCategory":"UtilityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-sm">
+        <section class="hero"><h1>🔊 <span class="text-gradient">Noise Meter</span></h1>
+            <p>Measure ambient sound levels in real-time using your microphone. Monitor noise pollution instantly.</p></section>
+        <div class="card meter-card mb-8">
+            <div class="meter-display">
+                <div class="db-circle" id="db-circle"><div class="db-value" id="db-value">--</div><div class="db-unit">dB</div></div>
+                <div class="db-label" id="db-label">Press Start to begin</div>
+            </div>
+            <div class="meter-bar-wrap"><div class="meter-bar" id="meter-bar"><div class="meter-fill" id="meter-fill"></div></div>
+                <div class="meter-scale"><span>0</span><span>30</span><span>60</span><span>90</span><span>120</span></div>
+            </div>
+            <div class="flex justify-center gap-4 mt-8">
+                <button class="btn btn-accent" id="start-btn" onclick="toggleMeter()">🎙️ Start Measuring</button>
+                <button class="btn btn-secondary" onclick="resetReadings()">↺ Reset</button>
+            </div>
+        </div>
+        <div class="stats-grid mb-8">
+            <div class="card stat-card"><div class="stat-label">Current</div><div class="stat-value" id="current-db">-- dB</div></div>
+            <div class="card stat-card"><div class="stat-label">Average</div><div class="stat-value" id="avg-db">-- dB</div></div>
+            <div class="card stat-card"><div class="stat-label">Peak</div><div class="stat-value" id="peak-db">-- dB</div></div>
+            <div class="card stat-card"><div class="stat-label">Min</div><div class="stat-value" id="min-db">-- dB</div></div>
+        </div>
+        <div class="card mb-8"><h4 class="mb-4">📊 Sound Level Guide</h4>
+            <div class="guide-list" id="guide-list">
+                <div class="guide-row"><span class="guide-level safe">0-30 dB</span><span>Whisper, quiet library</span></div>
+                <div class="guide-row"><span class="guide-level moderate">30-60 dB</span><span>Normal conversation, office</span></div>
+                <div class="guide-row"><span class="guide-level loud">60-85 dB</span><span>Traffic, vacuum cleaner</span></div>
+                <div class="guide-row"><span class="guide-level danger">85-120 dB</span><span>Concert, power tools ⚠️ Hearing damage risk</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Noise Meter. Monitor sound levels in real-time.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

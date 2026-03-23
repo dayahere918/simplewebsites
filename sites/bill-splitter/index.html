@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Splitter — Split Expenses Easily Among Friends</title>
+    <meta name="description" content="Free bill splitter tool. Split restaurant bills, group expenses, and shared costs easily. Calculate tips and share results with friends.">
+    <meta name="keywords" content="bill splitter, expense sharing tool, split bill calculator, tip calculator, group expense splitter">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://bill-splitter.pages.dev/">
+    <meta property="og:title" content="Bill Splitter — Split Expenses Easily">
+    <meta property="og:description" content="Split bills and expenses among friends instantly.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebApplication","name":"Bill Splitter","description":"Free tool to split bills and expenses among friends.","url":"https://bill-splitter.pages.dev/","applicationCategory":"UtilityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+    </script>
+    <link rel="stylesheet" href="shared-styles.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT" data-full-width-responsive="true" data-ad-format="auto"></ins></div>
+    <div class="container container-sm">
+        <section class="hero">
+            <h1><span class="text-gradient">Bill Splitter</span></h1>
+            <p>Split expenses among friends in seconds. Add items, set tip, and share the breakdown.</p>
+        </section>
+        <div class="card mb-8">
+            <h3 class="mb-4">Bill Details</h3>
+            <div class="form-row">
+                <div class="form-group"><label class="label" for="bill-amount">Total Bill ($)</label><input class="input" type="number" id="bill-amount" placeholder="0.00" min="0" step="0.01" oninput="calculate()"></div>
+                <div class="form-group"><label class="label" for="num-people">Number of People</label><input class="input" type="number" id="num-people" placeholder="2" min="1" value="2" oninput="calculate()"></div>
+            </div>
+            <div class="form-row mt-4">
+                <div class="form-group"><label class="label" for="tip-percent">Tip (%)</label><input class="input" type="number" id="tip-percent" placeholder="15" min="0" value="15" oninput="calculate()"></div>
+                <div class="form-group"><label class="label">Quick Tip</label>
+                    <div class="flex gap-2">
+                        <button class="btn btn-secondary tip-btn" onclick="setTip(10)">10%</button>
+                        <button class="btn btn-secondary tip-btn" onclick="setTip(15)">15%</button>
+                        <button class="btn btn-secondary tip-btn" onclick="setTip(20)">20%</button>
+                        <button class="btn btn-secondary tip-btn" onclick="setTip(25)">25%</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card results-card mb-8" id="results-card">
+            <h3 class="mb-4">Split Breakdown</h3>
+            <div class="result-row"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+            <div class="result-row"><span>Tip Amount</span><span id="tip-amount">$0.00</span></div>
+            <div class="result-row total"><span>Total (incl. tip)</span><span id="total-amount">$0.00</span></div>
+            <div class="result-row per-person"><span>Per Person</span><span id="per-person" class="text-gradient">$0.00</span></div>
+        </div>
+        <div class="card mb-8">
+            <h3 class="mb-4">Custom Items (Optional)</h3>
+            <div id="items-list"></div>
+            <div class="flex gap-4 mt-4">
+                <input class="input" type="text" id="item-name" placeholder="Item name">
+                <input class="input" type="number" id="item-price" placeholder="Price" min="0" step="0.01">
+                <button class="btn btn-primary" id="add-item-btn" onclick="addItem()">Add</button>
+            </div>
+        </div>
+        <div class="flex justify-center gap-4 mb-8">
+            <button class="btn btn-accent" id="share-btn" onclick="shareResults()">📤 Share Results</button>
+            <button class="btn btn-secondary" id="reset-btn" onclick="resetAll()">↺ Reset</button>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT" data-full-width-responsive="true" data-ad-format="auto"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Bill Splitter. Free expense sharing tool.</p></footer>
+    <script src="app.js"></script>
+</body>
+</html>

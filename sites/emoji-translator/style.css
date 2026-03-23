@@ -1,0 +1,18 @@
+/* Emoji Translator Styles */
+.translator-layout { display: flex; gap: var(--space-4); align-items: stretch; }
+.pane { flex: 1; }
+.arrow-indicator { display: flex; align-items: center; font-size: 2rem; padding: 0 var(--space-2); }
+.emoji-output {
+  font-size: var(--text-3xl); line-height: 1.8;
+  min-height: 150px; padding: var(--space-4);
+  background: var(--color-surface); border-radius: var(--radius-md);
+  word-break: break-word;
+}
+.char-count { font-size: var(--text-sm); color: var(--color-text-muted); }
+.output-pane { background: linear-gradient(145deg, rgba(26,26,46,0.9), rgba(10,10,15,0.95)); }
+
+@media (max-width: 768px) {
+  .translator-layout { flex-direction: column; }
+  .arrow-indicator { justify-content: center; transform: rotate(90deg); padding: var(--space-2) 0; }
+  .emoji-output { font-size: var(--text-2xl); }
+}

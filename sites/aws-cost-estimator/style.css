@@ -1,0 +1,22 @@
+/* AWS Cost Estimator Styles */
+.estimator-grid { display: grid; grid-template-columns: 1fr 360px; gap: var(--space-8); align-items: start; }
+.form-group { margin-bottom: var(--space-4); }
+.service-card h4 { margin-bottom: var(--space-4); }
+
+.total-card { text-align: center; padding: var(--space-8); position: sticky; top: var(--space-4); }
+.total-label { font-size: var(--text-sm); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--space-2); }
+.total-value { font-size: var(--text-5xl); font-weight: 800; font-family: var(--font-mono); }
+.total-annual { font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2); }
+
+.breakdown-list .row { display: flex; justify-content: space-between; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border); }
+.breakdown-list .row:last-child { border: none; }
+.breakdown-list .service-name { font-weight: 600; font-size: var(--text-sm); }
+.breakdown-list .service-cost { font-family: var(--font-mono); font-weight: 700; color: var(--color-accent); }
+
+.chart-bars .bar-row { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-2); }
+.bar-row .bar-label { min-width: 60px; font-size: var(--text-xs); font-weight: 600; }
+.bar-row .bar-track { flex: 1; height: 20px; background: var(--color-surface); border-radius: var(--radius-full); overflow: hidden; }
+.bar-row .bar-fill { height: 100%; border-radius: var(--radius-full); transition: width 0.5s ease; }
+.bar-row .bar-value { min-width: 70px; text-align: right; font-size: var(--text-xs); font-family: var(--font-mono); font-weight: 600; }
+
+@media (max-width: 768px) { .estimator-grid { grid-template-columns: 1fr; } .total-card { position: static; } }

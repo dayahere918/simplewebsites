@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Visualizer — EMI Calculator with Amortization Charts</title>
+    <meta name="description" content="Free loan EMI calculator with visual amortization charts. Calculate monthly payments, total interest, and view repayment schedules for home, car, and personal loans.">
+    <meta name="keywords" content="loan EMI calculator, loan repayment chart, amortization schedule, mortgage calculator, loan interest calculator">
+    <link rel="canonical" href="https://loan-visualizer.pages.dev/">
+    <meta property="og:title" content="Loan Visualizer — EMI Calculator"><meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Loan Visualizer","url":"https://loan-visualizer.pages.dev/","applicationCategory":"FinanceApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT" data-full-width-responsive="true" data-ad-format="auto"></ins></div>
+    <div class="container">
+        <section class="hero">
+            <h1>💰 <span class="text-gradient">Loan Visualizer</span></h1>
+            <p>Calculate your loan EMI and visualize the entire repayment schedule with interactive charts.</p>
+        </section>
+        <div class="app-grid">
+            <div class="card input-panel">
+                <h3 class="mb-4">Loan Details</h3>
+                <div class="form-group mb-4">
+                    <label class="label" for="principal">Loan Amount ($)</label>
+                    <input class="input" type="number" id="principal" value="250000" min="1000" step="1000" oninput="calculate()">
+                </div>
+                <div class="form-group mb-4">
+                    <label class="label" for="rate">Annual Interest Rate (%)</label>
+                    <input class="input" type="number" id="rate" value="6.5" min="0.1" step="0.1" oninput="calculate()">
+                </div>
+                <div class="form-group mb-4">
+                    <label class="label" for="term">Loan Term (Years)</label>
+                    <input class="input" type="number" id="term" value="30" min="1" max="50" oninput="calculate()">
+                </div>
+                <div class="presets mt-4">
+                    <p class="label">Quick Presets:</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="btn btn-secondary preset-btn" onclick="loadPreset('home')">🏠 Home</button>
+                        <button class="btn btn-secondary preset-btn" onclick="loadPreset('car')">🚗 Car</button>
+                        <button class="btn btn-secondary preset-btn" onclick="loadPreset('personal')">👤 Personal</button>
+                        <button class="btn btn-secondary preset-btn" onclick="loadPreset('student')">🎓 Student</button>
+                    </div>
+                </div>
+            </div>
+            <div class="results-panel">
+                <div class="stats-grid mb-4">
+                    <div class="card stat-card"><div class="stat-label">Monthly EMI</div><div class="stat-value text-gradient" id="emi">$0</div></div>
+                    <div class="card stat-card"><div class="stat-label">Total Interest</div><div class="stat-value" id="total-interest" style="color:var(--color-error)">$0</div></div>
+                    <div class="card stat-card"><div class="stat-label">Total Payment</div><div class="stat-value" id="total-payment">$0</div></div>
+                </div>
+                <div class="card chart-card mb-4">
+                    <h4 class="mb-4">Payment Breakdown</h4>
+                    <div class="pie-chart" id="pie-chart">
+                        <div class="pie-visual" id="pie-visual"></div>
+                        <div class="pie-legend">
+                            <div class="legend-item"><span class="dot principal-dot"></span> Principal: <span id="pie-principal">$0</span></div>
+                            <div class="legend-item"><span class="dot interest-dot"></span> Interest: <span id="pie-interest">$0</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card chart-card">
+                    <h4 class="mb-4">Amortization Schedule</h4>
+                    <div class="table-wrap">
+                        <table class="amort-table" id="amort-table">
+                            <thead><tr><th>Year</th><th>Principal</th><th>Interest</th><th>Balance</th></tr></thead>
+                            <tbody id="amort-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT" data-full-width-responsive="true" data-ad-format="auto"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Loan Visualizer. Free EMI calculator and amortization tool.</p></footer>
+    <script src="app.js"></script>
+</body>
+</html>

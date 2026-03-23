@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Height Comparison — Compare Heights Visually Side by Side</title>
+    <meta name="description" content="Compare heights of people visually with side-by-side figures. Enter heights in cm or feet and see the difference instantly. Compare celebrity heights.">
+    <meta name="keywords" content="height comparison, celebrity height, compare heights, height difference, side by side height">
+    <link rel="canonical" href="https://height-comparison.pages.dev/">
+    <meta property="og:title" content="Height Comparison — Visual Height Comparison Tool">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Height Comparison","url":"https://height-comparison.pages.dev/","applicationCategory":"UtilityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT" data-full-width-responsive="true"></ins></div>
+    <div class="container">
+        <section class="hero">
+            <h1>📏 <span class="text-gradient">Height Comparison</span></h1>
+            <p>Compare heights visually! Add people, enter their heights, and see a side-by-side comparison.</p>
+        </section>
+        <div class="controls-bar card mb-8">
+            <div class="flex flex-wrap gap-4 items-center justify-center">
+                <div class="form-group"><label class="label" for="person-name">Name</label><input class="input" type="text" id="person-name" placeholder="e.g. Tom Hanks"></div>
+                <div class="form-group"><label class="label" for="person-height">Height (cm)</label><input class="input" type="number" id="person-height" placeholder="180" min="50" max="300"></div>
+                <div class="form-group"><label class="label" for="person-color">Color</label><input class="input" type="color" id="person-color" value="#6c5ce7" style="height:42px;padding:4px;"></div>
+                <button class="btn btn-primary" id="add-person-btn" onclick="addPerson()">Add Person</button>
+                <button class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+            </div>
+            <div class="presets mt-4 text-center">
+                <p class="label">Quick Compare:</p>
+                <div class="flex flex-wrap gap-2 justify-center">
+                    <button class="btn btn-secondary preset-btn" onclick="loadPreset('basketball')">🏀 NBA Players</button>
+                    <button class="btn btn-secondary preset-btn" onclick="loadPreset('actors')">🎬 Actors</button>
+                    <button class="btn btn-secondary preset-btn" onclick="loadPreset('average')">📊 World Averages</button>
+                </div>
+            </div>
+        </div>
+        <div class="comparison-area card" id="comparison-area">
+            <div class="ruler" id="ruler"></div>
+            <div class="figures-row" id="figures-row">
+                <div class="empty-state" id="empty-state">Add people above to compare heights</div>
+            </div>
+        </div>
+        <div class="people-list mt-8" id="people-list"></div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT" data-full-width-responsive="true"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Height Comparison. Free visual height comparison tool.</p></footer>
+    <script src="app.js"></script>
+    <script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

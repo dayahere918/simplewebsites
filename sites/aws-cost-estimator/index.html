@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Cost Estimator — Cloud Pricing Calculator</title>
+    <meta name="description" content="Estimate your monthly AWS costs. Compare EC2, S3, RDS, and Lambda pricing. Free cloud infrastructure cost calculator.">
+    <meta name="keywords" content="AWS cost estimator, cloud pricing calculator, EC2 cost, S3 pricing, AWS monthly cost, cloud budget">
+    <link rel="canonical" href="https://aws-cost-estimator.pages.dev/">
+    <meta property="og:title" content="AWS Cost Estimator"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"AWS Cost Estimator","url":"https://aws-cost-estimator.pages.dev/","applicationCategory":"BusinessApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container">
+        <section class="hero"><h1>☁️ <span class="text-gradient">AWS Cost Estimator</span></h1><p>Estimate your monthly cloud bill. Configure EC2, S3, RDS, Lambda, and more — see costs in real-time.</p></section>
+        <div class="estimator-grid">
+            <div class="services-panel">
+                <div class="card service-card mb-4" id="ec2-card">
+                    <h4>🖥️ EC2 Instances</h4>
+                    <div class="form-group"><label class="label">Instance Type</label><select class="input" id="ec2-type" onchange="calculate()">
+                        <option value="t3.micro" data-price="0.0104">t3.micro ($0.0104/hr)</option>
+                        <option value="t3.medium" data-price="0.0416">t3.medium ($0.0416/hr)</option>
+                        <option value="t3.large" data-price="0.0832" selected>t3.large ($0.0832/hr)</option>
+                        <option value="m5.large" data-price="0.096">m5.large ($0.096/hr)</option>
+                        <option value="m5.xlarge" data-price="0.192">m5.xlarge ($0.192/hr)</option>
+                        <option value="c5.xlarge" data-price="0.17">c5.xlarge ($0.17/hr)</option>
+                        <option value="r5.large" data-price="0.126">r5.large ($0.126/hr)</option>
+                    </select></div>
+                    <div class="form-group"><label class="label">Number of Instances</label><input class="input" type="number" id="ec2-count" value="2" min="0" max="100" onchange="calculate()"></div>
+                    <div class="form-group"><label class="label">Hours/Month</label><input class="input" type="number" id="ec2-hours" value="730" min="0" max="730" onchange="calculate()"></div>
+                </div>
+                <div class="card service-card mb-4" id="s3-card">
+                    <h4>📦 S3 Storage</h4>
+                    <div class="form-group"><label class="label">Storage (GB)</label><input class="input" type="number" id="s3-storage" value="100" min="0" onchange="calculate()"></div>
+                    <div class="form-group"><label class="label">Requests/Month (thousands)</label><input class="input" type="number" id="s3-requests" value="100" min="0" onchange="calculate()"></div>
+                    <div class="form-group"><label class="label">Data Transfer Out (GB)</label><input class="input" type="number" id="s3-transfer" value="50" min="0" onchange="calculate()"></div>
+                </div>
+                <div class="card service-card mb-4" id="rds-card">
+                    <h4>🗄️ RDS Database</h4>
+                    <div class="form-group"><label class="label">Instance Type</label><select class="input" id="rds-type" onchange="calculate()">
+                        <option value="db.t3.micro" data-price="0.017">db.t3.micro ($0.017/hr)</option>
+                        <option value="db.t3.medium" data-price="0.068" selected>db.t3.medium ($0.068/hr)</option>
+                        <option value="db.r5.large" data-price="0.25">db.r5.large ($0.25/hr)</option>
+                        <option value="db.r5.xlarge" data-price="0.50">db.r5.xlarge ($0.50/hr)</option>
+                    </select></div>
+                    <div class="form-group"><label class="label">Storage (GB)</label><input class="input" type="number" id="rds-storage" value="50" min="0" onchange="calculate()"></div>
+                    <div class="form-group"><label class="label">Multi-AZ</label><select class="input" id="rds-multiaz" onchange="calculate()"><option value="no">No</option><option value="yes">Yes (2x cost)</option></select></div>
+                </div>
+                <div class="card service-card mb-4" id="lambda-card">
+                    <h4>⚡ Lambda</h4>
+                    <div class="form-group"><label class="label">Requests/Month (millions)</label><input class="input" type="number" id="lambda-requests" value="1" min="0" step="0.1" onchange="calculate()"></div>
+                    <div class="form-group"><label class="label">Avg Duration (ms)</label><input class="input" type="number" id="lambda-duration" value="200" min="0" onchange="calculate()"></div>
+                    <div class="form-group"><label class="label">Memory (MB)</label><input class="input" type="number" id="lambda-memory" value="256" min="128" max="10240" step="64" onchange="calculate()"></div>
+                </div>
+            </div>
+            <div class="results-panel">
+                <div class="card total-card mb-4"><div class="total-label">Estimated Monthly Cost</div><div class="total-value text-gradient" id="total-cost">$0.00</div><div class="total-annual" id="annual-cost">$0.00/year</div></div>
+                <div class="breakdown-card card">
+                    <h4 class="mb-4">Cost Breakdown</h4>
+                    <div class="breakdown-list" id="breakdown-list"></div>
+                    <div class="chart-bars mt-4" id="chart-bars"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 AWS Cost Estimator. Prices are estimates — check AWS for current pricing.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

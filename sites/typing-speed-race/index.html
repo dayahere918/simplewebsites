@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Speed Race — Test Your Typing Speed Online</title>
+    <meta name="description" content="Challenge your typing speed with real-time WPM tracking. Race against time, improve accuracy, and climb the leaderboard. Free typing speed test.">
+    <meta name="keywords" content="typing speed test, typing race game, WPM test, typing practice, keyboard speed test, typing competition">
+    <link rel="canonical" href="https://typing-speed-race.pages.dev/">
+    <meta property="og:title" content="Typing Speed Race — WPM Test"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Typing Speed Race","url":"https://typing-speed-race.pages.dev/","applicationCategory":"GameApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-sm">
+        <section class="hero"><h1>⌨️ <span class="text-gradient">Typing Speed Race</span></h1><p>Test your typing speed and accuracy. How fast can you type?</p></section>
+        <div class="stats-bar card mb-4">
+            <div class="stat"><div class="stat-value" id="wpm">0</div><div class="stat-label">WPM</div></div>
+            <div class="stat"><div class="stat-value" id="accuracy">100</div><div class="stat-label">Accuracy %</div></div>
+            <div class="stat"><div class="stat-value" id="timer">60</div><div class="stat-label">Seconds</div></div>
+            <div class="stat"><div class="stat-value" id="errors">0</div><div class="stat-label">Errors</div></div>
+        </div>
+        <div class="race-settings card mb-4 flex gap-4 justify-center items-center">
+            <label class="label" style="margin-bottom:0">Duration:</label>
+            <button class="btn btn-secondary time-btn active" onclick="setDuration(30)">30s</button>
+            <button class="btn btn-secondary time-btn" onclick="setDuration(60)">60s</button>
+            <button class="btn btn-secondary time-btn" onclick="setDuration(120)">120s</button>
+        </div>
+        <div class="card typing-area mb-8">
+            <div class="text-display" id="text-display"></div>
+            <textarea class="input typing-input" id="typing-input" placeholder="Click here and start typing..." rows="3" oninput="handleTyping()" onfocus="startRace()"></textarea>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        </div>
+        <div class="flex justify-center gap-4 mb-8">
+            <button class="btn btn-accent" id="restart-btn" onclick="restartRace()">🔄 Restart</button>
+        </div>
+        <div class="card leaderboard mb-8"><h3 class="mb-4">🏆 Your Best Scores</h3><div id="leaderboard"></div></div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Typing Speed Race. Free typing test.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

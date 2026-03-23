@@ -1,0 +1,24 @@
+/* Mood Board Generator Styles */
+.preset-btn { font-size: var(--text-xs) !important; text-transform: none !important; padding: var(--space-2) var(--space-3) !important; }
+.board-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 200px; gap: var(--space-3); }
+.board-tile { border-radius: var(--radius-md); overflow: hidden; position: relative; cursor: pointer; transition: all var(--transition-base); display: flex; align-items: center; justify-content: center; }
+.board-tile:hover { transform: scale(1.02); z-index: 2; box-shadow: var(--shadow-lg); }
+.board-tile.span-2 { grid-column: span 2; }
+.board-tile.tall { grid-row: span 2; }
+.board-tile .tile-text { color: white; font-size: var(--text-xl); font-weight: 700; text-shadow: 0 2px 8px rgba(0,0,0,0.5); text-align: center; padding: var(--space-4); }
+.board-tile .tile-pattern { position: absolute; inset: 0; opacity: 0.15; }
+
+.palette-row { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.palette-color { width: 80px; height: 60px; border-radius: var(--radius-sm); cursor: pointer; transition: all var(--transition-base); position: relative; }
+.palette-color:hover { transform: scale(1.1); }
+.palette-color .hex-label { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); font-size: 9px; font-family: var(--font-mono); color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+
+.font-sample { padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border); }
+.font-sample:last-child { border: none; }
+.font-name { font-size: var(--text-sm); color: var(--color-text-muted); font-family: var(--font-mono); margin-bottom: 4px; }
+.font-preview { font-size: var(--text-2xl); }
+
+.keyword-tags { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.keyword-tag { font-size: var(--text-xs); padding: var(--space-1) var(--space-3); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full); color: var(--color-text-secondary); }
+
+@media (max-width: 768px) { .board-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 150px; } }

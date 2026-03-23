@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Service Comparison — AWS vs GCP vs Azure Pricing</title>
+    <meta name="description" content="Compare cloud service pricing across AWS, Google Cloud, and Azure. Side-by-side comparison of compute, storage, database, and serverless services.">
+    <link rel="canonical" href="https://cloud-service-comparison.pages.dev/">
+    <meta property="og:title" content="Cloud Service Comparison"><meta property="og:type" content="website">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Cloud Service Comparison","url":"https://cloud-service-comparison.pages.dev/","applicationCategory":"BusinessApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container">
+        <section class="hero"><h1>☁️ <span class="text-gradient">Cloud Service Comparison</span></h1><p>Compare AWS, Google Cloud, and Azure services side-by-side. Pricing, features, and equivalents at a glance.</p></section>
+        <div class="filter-bar card mb-8 flex gap-4 items-center justify-center flex-wrap">
+            <label class="label" style="margin:0">Category:</label>
+            <button class="btn btn-primary filter-btn active" onclick="filterCategory('all')">All</button>
+            <button class="btn btn-secondary filter-btn" onclick="filterCategory('compute')">🖥️ Compute</button>
+            <button class="btn btn-secondary filter-btn" onclick="filterCategory('storage')">📦 Storage</button>
+            <button class="btn btn-secondary filter-btn" onclick="filterCategory('database')">🗄️ Database</button>
+            <button class="btn btn-secondary filter-btn" onclick="filterCategory('serverless')">⚡ Serverless</button>
+            <button class="btn btn-secondary filter-btn" onclick="filterCategory('networking')">🌐 Networking</button>
+            <button class="btn btn-secondary filter-btn" onclick="filterCategory('ai')">🤖 AI/ML</button>
+        </div>
+        <div class="comparison-table-wrap"><table class="comparison-table" id="comparison-table"><thead>
+            <tr><th>Category</th><th><span class="provider aws">AWS</span></th><th><span class="provider gcp">GCP</span></th><th><span class="provider azure">Azure</span></th><th>Starting Price</th></tr>
+        </thead><tbody id="table-body"></tbody></table></div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Cloud Service Comparison. Prices are approximate.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

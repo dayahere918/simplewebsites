@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice to Text Counter — Speech Word Counter & Filler Detector</title>
+    <meta name="description" content="Record your speech, get real-time transcription with word count and filler word detection. Improve your public speaking skills.">
+    <meta name="keywords" content="voice to text counter, speech analysis tool, filler word detector, word count speech, presentation practice">
+    <link rel="canonical" href="https://voice-to-text-counter.pages.dev/">
+    <meta property="og:title" content="Voice to Text Counter"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Voice to Text Counter","url":"https://voice-to-text-counter.pages.dev/","applicationCategory":"UtilityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-sm">
+        <section class="hero"><h1>🎤 <span class="text-gradient">Voice to Text Counter</span></h1><p>Record your speech, detect filler words, and analyze your speaking patterns in real-time.</p></section>
+        <div class="stats-bar mb-4">
+            <div class="card stat"><div class="stat-value" id="word-count">0</div><div class="stat-label">Words</div></div>
+            <div class="card stat"><div class="stat-value" id="filler-count">0</div><div class="stat-label">Fillers</div></div>
+            <div class="card stat"><div class="stat-value" id="wpm-rate">0</div><div class="stat-label">WPM</div></div>
+            <div class="card stat"><div class="stat-value" id="duration">0:00</div><div class="stat-label">Duration</div></div>
+        </div>
+        <div class="card recording-area mb-8">
+            <div class="flex justify-center gap-4 mb-8">
+                <button class="btn btn-accent record-btn" id="record-btn" onclick="toggleRecording()"><span class="rec-dot" id="rec-dot"></span> Start Recording</button>
+                <button class="btn btn-secondary" onclick="clearTranscript()">Clear</button>
+            </div>
+            <div class="transcript-area">
+                <label class="label">Transcript</label>
+                <div class="transcript" id="transcript">Press "Start Recording" and begin speaking...</div>
+            </div>
+        </div>
+        <div class="card mb-8"><h4 class="mb-4">📊 Filler Words Detected</h4><div class="filler-grid" id="filler-grid"></div></div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Voice to Text Counter. Improve your speaking.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>
