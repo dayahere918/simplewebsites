@@ -9,13 +9,20 @@ $sites = @(
     "baby-face-generator", "pet-breed-identifier"
 )
 
-Write-Host "🚀 Starting Batch Import to Terraform Cloud..." -ForegroundColor Cyan
+Write-Host "🚀 Starting Idempotent Batch Import to Terraform Cloud..." -ForegroundColor Cyan
+
+# Fetch current state to avoid redundant imports
+Write-Host "📊 Fetching current state from Terraform Cloud..." -ForegroundColor Gray
+$currentState = .\scripts\tf.ps1 state list
 
 foreach ($site in $sites) {
-    Write-Host "🔍 Importing $site..." -ForegroundColor Gray
-    # The resource address must match the code: cloudflare_pages_project.sites["site-name"]
-    # The ID for Cloudflare Pages project is just the project name.
-    terraform import "cloudflare_pages_project.sites[`"$site`"]" "$site"
+    if ($currentState -notmatch "cloudflare_pages_project.sites\[`"$site`"\]") {
+        Write-Host "🔍 Importing missing site: $site..." -ForegroundColor Yellow
+        # The resource address must match the code: cloudflare_pages_project.sites["site-name"]
+        .\scripts\tf.ps1 import "cloudflare_pages_project.sites[`"$site`"]" "$site"
+    } else {
+        Write-Host "✅ $site already in state, skipping import." -ForegroundColor Gray
+    }
 }
 
-Write-Host "🏁 Import process complete! Review the output above for any errors." -ForegroundColor Green
+Write-Host "🏁 Idempotent process complete! Review the output above." -ForegroundColor Green
