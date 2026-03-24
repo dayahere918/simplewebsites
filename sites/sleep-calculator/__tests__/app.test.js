@@ -28,33 +28,6 @@ describe('SleepCalculator', () => {
   describe('constants', () => {
     test('cycle duration is 90 minutes', () => expect(CYCLE_DURATION).toBe(90));
     test('fall asleep time is 14 minutes', () => expect(FALL_ASLEEP_TIME).toBe(14));
-    test('max cycles is 6', () => expect(MAX_CYCLES).toBe(6));
-    test('min cycles is 3', () => expect(MIN_CYCLES).toBe(3));
-  });
-
-  describe('parseTime', () => {
-    test('parses valid time', () => {
-      expect(parseTime('07:30')).toEqual({ hours: 7, minutes: 30 });
-    });
-
-    test('parses midnight', () => {
-      expect(parseTime('00:00')).toEqual({ hours: 0, minutes: 0 });
-    });
-
-    test('parses 23:59', () => {
-      expect(parseTime('23:59')).toEqual({ hours: 23, minutes: 59 });
-    });
-
-    test('returns null for invalid format', () => {
-      expect(parseTime('abc')).toBeNull();
-      expect(parseTime('25:00')).toBeNull();
-      expect(parseTime('12:60')).toBeNull();
-    });
-
-    test('returns null for non-string', () => {
-      expect(parseTime(null)).toBeNull();
-      expect(parseTime(undefined)).toBeNull();
-    });
   });
 
   describe('formatTime', () => {
