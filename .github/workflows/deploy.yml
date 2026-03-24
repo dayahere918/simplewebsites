@@ -104,7 +104,7 @@ jobs:
         continue-on-error: true
         run: |
           for site in picker-wheel festival-countdown bill-splitter emoji-translator sleep-calculator startup-idea-generator loan-visualizer height-comparison color-palette-extractor typing-speed-race noise-meter voice-to-text-counter mood-board-generator aws-cost-estimator terraform-snippet-generator cicd-visualizer cloud-service-comparison resume-ats-checker face-shape-detector baby-face-generator pet-breed-identifier; do
-            terraform import "cloudflare_pages_project.sites[\"$site\"]" "$site" || echo "Project $site not found or already in state"
+            terraform import "cloudflare_pages_project.sites[\"$site\"]" "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/$site" || echo "Project $site not found or already in state"
           done
         env:
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
