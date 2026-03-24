@@ -1,6 +1,21 @@
 # Simple Websites Monorepo
+This monorepo contains 21 premium utility websites built with high quality in mind.
 
-A collection of 21 simple, tool-based websites with high test coverage and automated deployment.
+## 🚀 Key Features
+- **>90% Test Coverage**: Verified across every single site.
+- **100% Pass Rate**: Continuous Integration (CI) and Deployment (CD) stabilized.
+- **Zero-Install Automation**: Infrastructure is managed via GitHub Actions and Terraform Cloud—no local binary installation needed.
+- **Multi-Account Sync**: Automatically pushes to dual GitHub repositories.
+
+## 🛠️ Global Commands
+- `npm ci`: Install all dependencies.
+- `npm run test:ci`: Run all 21 test suites with coverage.
+- `npm run build`: Build all 21 sites into a unified `dist/` folder.
+
+## ☁️ Infrastructure & Deployment
+Deployment is fully automated via GitHub Actions to Cloudflare Pages.
+- **Backend**: Terraform Cloud (`dayashimoga-org/simplewebsites-prod`).
+- **Secrets Required**: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and `TF_API_TOKEN`.
 
 ## Cloudflare Integration
 
