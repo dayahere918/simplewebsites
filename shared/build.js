@@ -1,6 +1,7 @@
 /**
  * Build Script
  * Copies shared assets into each site's dist/ folder, generates sitemap.xml and robots.txt.
+ * Injects shared navigation bar, contact email in footer, and preconnect hints.
  */
 const fs = require('fs');
 const path = require('path');
@@ -9,6 +10,8 @@ const ROOT = path.resolve(__dirname, '..');
 const SITES_DIR = path.join(ROOT, 'sites');
 const SHARED_DIR = path.join(ROOT, 'shared');
 const BASE_URL = process.env.BASE_URL || 'https://stacky.pages.dev';
+const CONTACT_EMAIL = process.env.CONTACT_EMAIL || '';
+const ADSENSE_PUB_ID = process.env.ADSENSE_PUB_ID || '';
 const GLOBAL_DIST = path.join(ROOT, 'dist');
 
 function getAllSites() {
@@ -42,6 +45,57 @@ function copyDir(src, dest) {
   }
 }
 
+/**
+ * Format site name for display (e.g. "picker-wheel" -> "Picker Wheel")
+ */
+function formatSiteName(name) {
+  return name.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+/**
+ * Generate the shared navigation bar HTML
+ */
+function generateNavBar(siteName) {
+  return `<nav class="site-nav" aria-label="Site navigation">
+  <a href="/" aria-label="Back to all tools">← All Tools</a>
+  <span class="nav-title">${formatSiteName(siteName)}</span>
+  <span></span>
+</nav>`;
+}
+
+/**
+ * Inject nav bar, preconnect, and contact footer into HTML
+ */
+function processHtml(html, siteName) {
+  let processed = html;
+
+  // Inject preconnect hints after <head> opening tags
+  const preconnect = `<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`;
+  if (!processed.includes('preconnect')) {
+    processed = processed.replace(/<head>/i, `<head>\n    ${preconnect}`);
+  }
+
+  // Inject nav bar after <body> tag (skip ad-container if present)
+  const navHtml = generateNavBar(siteName);
+  processed = processed.replace(/<body([^>]*)>/i, `<body$1>\n${navHtml}`);
+
+  // Replace placeholder AdSense publisher IDs if configured
+  const currentAdsense = process.env.ADSENSE_PUB_ID || ADSENSE_PUB_ID;
+  if (currentAdsense) {
+    processed = processed.replace(/ca-pub-XXXXXXXXXXXXXXXX/g, currentAdsense);
+  }
+
+  // Add contact email to footer if configured
+  const currentEmail = process.env.CONTACT_EMAIL || CONTACT_EMAIL;
+  if (currentEmail && processed.includes('<footer')) {
+    const contactHtml = `<br><a href="mailto:${currentEmail}">📧 Contact Us</a>`;
+    processed = processed.replace(/<\/footer>/i, `${contactHtml}\n</footer>`);
+  }
+
+  return processed;
+}
+
 function buildSite(siteName) {
   const siteDir = path.join(SITES_DIR, siteName);
   const distDir = path.join(siteDir, 'dist');
@@ -64,8 +118,26 @@ function buildSite(siteName) {
     }
   }
 
+  // Process HTML files (inject nav, preconnect, contact, AdSense)
+  const indexPath = path.join(distDir, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    let html = fs.readFileSync(indexPath, 'utf-8');
+    html = processHtml(html, siteName);
+    fs.writeFileSync(indexPath, html);
+  }
+
   // Copy shared styles
   copyFileSync(path.join(SHARED_DIR, 'styles.css'), path.join(distDir, 'shared-styles.css'));
+
+  // Copy ads.txt to each site dist
+  const adsTxtSrc = path.join(SHARED_DIR, 'ads.txt');
+  if (fs.existsSync(adsTxtSrc)) {
+    let adsTxt = fs.readFileSync(adsTxtSrc, 'utf-8');
+    if (ADSENSE_PUB_ID) {
+      adsTxt = adsTxt.replace(/ca-pub-XXXXXXXXXXXXXXXX/g, ADSENSE_PUB_ID);
+    }
+    fs.writeFileSync(path.join(distDir, 'ads.txt'), adsTxt);
+  }
 
   // Generate robots.txt
   const siteUrl = `${BASE_URL}/${siteName}`;
@@ -121,10 +193,13 @@ function buildAll() {
   sites.forEach(buildSite);
 
   // Generate a simple Index/Hub page for stacky.pages.dev root
-  const siteLinks = sites.map(s => `<li><a href="${s}/">${s.replace(/-/g, ' ').toUpperCase()}</a></li>`).join('\n');
   const hubHtml = `<!DOCTYPE html>
 <html lang="en" data-theme="dark">
-<head><meta charset="UTF-8"><title>Stacky — Simple Tool Collection</title>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stacky — Free Online Tools Collection</title>
+<meta name="description" content="21+ free premium online tools: picker wheel, baby face generator, noise meter, and more. Fast, open source, and free.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="shared-styles.css">
 <style>
   .hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: var(--space-4); margin-top: var(--space-8); }
@@ -136,9 +211,10 @@ function buildAll() {
   <div class="container">
     <section class="hero"><h1>📚 <span class="text-gradient">Stacky</span></h1><p>21+ Premium small tools. Open source, fast, and free.</p></section>
     <div class="hub-grid">
-      ${sites.map(s => `<a href="${s}/" class="hub-card"><h4>${s.replace(/-/g, ' ').toUpperCase()}</h4></a>`).join('')}
+      ${sites.map(s => `<a href="${s}/" class="hub-card"><h4>${formatSiteName(s)}</h4></a>`).join('\n      ')}
     </div>
   </div>
+  ${CONTACT_EMAIL ? `<footer class="footer"><p>&copy; ${new Date().getFullYear()} Stacky. All tools are free and open source.</p><a href="mailto:${CONTACT_EMAIL}">📧 Contact Us</a></footer>` : '<footer class="footer"><p>&copy; ' + new Date().getFullYear() + ' Stacky. All tools are free and open source.</p></footer>'}
   <script src="shared-theme-toggle.js"></script>
 </body>
 </html>`;
@@ -152,4 +228,4 @@ if (require.main === module) {
   buildAll();
 }
 
-module.exports = { buildSite, buildAll, getAllSites, copyFileSync, copyDir };
+module.exports = { buildSite, buildAll, getAllSites, copyFileSync, copyDir, formatSiteName, generateNavBar, processHtml };

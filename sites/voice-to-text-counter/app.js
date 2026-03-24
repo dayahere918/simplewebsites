@@ -46,7 +46,14 @@ function toggleRecording() {
 
 function startRecording() {
   if (typeof window === 'undefined' || !('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-    alert('Speech recognition is not supported in this browser. Try Chrome.'); return;
+    if (typeof document !== 'undefined') {
+      const errEl = document.getElementById('speech-error');
+      if (errEl) {
+        errEl.textContent = '⚠️ Speech recognition is not supported in this browser. Please use Chrome.';
+        errEl.classList.remove('hidden');
+      }
+    }
+    return;
   }
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SpeechRecognition();

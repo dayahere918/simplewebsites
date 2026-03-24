@@ -27,7 +27,8 @@ function loadParent(event, num) {
       const w = img.width * scale, h = img.height * scale;
       ctx.drawImage(img, (200 - w) / 2, (200 - h) / 2, w, h);
       canvas.classList.remove('hidden');
-      const dz = canvas.previousElementSibling;
+      const slot = canvas.closest('.upload-slot');
+      const dz = slot ? slot.querySelector('.drop-zone') : null;
       if (dz) dz.classList.add('hidden');
       if (num === 1) parent1Loaded = true;
       if (num === 2) parent2Loaded = true;
@@ -93,7 +94,8 @@ function resetAll() {
   ['parent1', 'parent2'].forEach(p => {
     const canvas = document.getElementById(p + '-canvas');
     const input = document.getElementById(p + '-input');
-    const dz = canvas?.previousElementSibling;
+    const slot = canvas?.closest('.upload-slot');
+    const dz = slot ? slot.querySelector('.drop-zone') : null;
     if (canvas) canvas.classList.add('hidden');
     if (dz) dz.classList.remove('hidden');
     if (input) input.value = '';

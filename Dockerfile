@@ -5,10 +5,10 @@ FROM mcr.microsoft.com/playwright:v1.42.1-jammy
 WORKDIR /app
 
 # Copy package.json and root config files
-COPY package.json jest.config.js playwright.config.js ./
+COPY package.json package-lock.json jest.config.js playwright.config.js ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies (deterministic)
+RUN npm ci
 
 # Copy the rest of the application code
 COPY . .

@@ -38,7 +38,11 @@ function setDuration(secs) {
   duration = secs;
   if (typeof document === 'undefined') return;
   document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
-  event?.target?.classList.add('active');
+  try {
+    if (typeof event !== 'undefined' && event && event.target) {
+      event.target.classList.add('active');
+    }
+  } catch (e) {}
   restartRace();
 }
 
@@ -53,9 +57,11 @@ function updateTimer() {
   if (typeof document === 'undefined') return;
   const elapsed = (Date.now() - startTime) / 1000;
   const remaining = Math.max(0, duration - elapsed);
-  document.getElementById('timer').textContent = Math.ceil(remaining);
+  const timerEl = document.getElementById('timer');
+  if (timerEl) timerEl.textContent = Math.ceil(remaining);
   const seconds = Math.min(elapsed, duration);
-  document.getElementById('wpm').textContent = calculateWPM(correctChars, seconds);
+  const wpmEl = document.getElementById('wpm');
+  if (wpmEl) wpmEl.textContent = calculateWPM(correctChars, seconds);
   if (remaining <= 0) finishRace();
 }
 
@@ -70,8 +76,10 @@ function handleTyping() {
     if (i < currentText.length && typed[i] === currentText[i]) correctChars++;
     else errorCount++;
   }
-  document.getElementById('accuracy').textContent = calculateAccuracy(correctChars, totalCharsTyped);
-  document.getElementById('errors').textContent = errorCount;
+  const accEl = document.getElementById('accuracy');
+  if (accEl) accEl.textContent = calculateAccuracy(correctChars, totalCharsTyped);
+  const errEl = document.getElementById('errors');
+  if (errEl) errEl.textContent = errorCount;
   const progress = Math.min(100, (typed.length / currentText.length) * 100);
   const progressFill = document.getElementById('progress-fill');
   if (progressFill) progressFill.style.width = progress + '%';
@@ -108,7 +116,8 @@ function finishRace() {
   const elapsed = Math.min((Date.now() - startTime) / 1000, duration);
   const finalWPM = calculateWPM(correctChars, elapsed);
   const finalAcc = calculateAccuracy(correctChars, totalCharsTyped);
-  document.getElementById('wpm').textContent = finalWPM;
+  const wpmEl = document.getElementById('wpm');
+  if (wpmEl) wpmEl.textContent = finalWPM;
   saveScore(finalWPM, finalAcc);
   // Show overlay
   const area = document.querySelector('.typing-area');
@@ -126,10 +135,10 @@ function restartRace() {
   startTime = null; totalCharsTyped = 0; correctChars = 0; errorCount = 0;
   currentText = getRandomText();
   if (typeof document === 'undefined') return;
-  document.getElementById('wpm').textContent = '0';
-  document.getElementById('accuracy').textContent = '100';
-  document.getElementById('timer').textContent = duration;
-  document.getElementById('errors').textContent = '0';
+  const wEl = document.getElementById('wpm'); if (wEl) wEl.textContent = '0';
+  const aEl = document.getElementById('accuracy'); if (aEl) aEl.textContent = '100';
+  const tEl = document.getElementById('timer'); if (tEl) tEl.textContent = duration;
+  const eEl = document.getElementById('errors'); if (eEl) eEl.textContent = '0';
   const input = document.getElementById('typing-input');
   if (input) { input.value = ''; input.disabled = false; }
   const progressFill = document.getElementById('progress-fill');
@@ -168,7 +177,7 @@ if (typeof document !== 'undefined') {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { TEXTS, getRandomText, calculateWPM, calculateAccuracy, setDuration, handleTyping, renderText, finishRace, restartRace, renderLeaderboard,
+  module.exports = { TEXTS, getRandomText, calculateWPM, calculateAccuracy, setDuration, startRace, handleTyping, renderText, finishRace, restartRace, renderLeaderboard,
     getState: () => ({ currentText, duration, isRunning, isFinished, totalCharsTyped, correctChars, errorCount }),
     setCurrentText: t => { currentText = t; }, setIsRunning: v => { isRunning = v; }, setIsFinished: v => { isFinished = v; } };
 }

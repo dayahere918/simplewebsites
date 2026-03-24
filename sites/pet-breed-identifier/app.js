@@ -37,6 +37,7 @@ function setPetType(type) {
 function getImageHash(canvas) {
   if (!canvas) return Date.now();
   const ctx = canvas.getContext('2d');
+  if (!ctx || !ctx.getImageData) return Date.now();
   const data = ctx.getImageData(0, 0, Math.min(canvas.width, 50), Math.min(canvas.height, 50)).data;
   let hash = 0;
   for (let i = 0; i < data.length; i += 40) hash = ((hash << 5) - hash + data[i]) | 0;
@@ -119,7 +120,8 @@ function resetAnalysis() {
   if (typeof document === 'undefined') return;
   document.getElementById('upload-area')?.classList.remove('hidden');
   document.getElementById('results')?.classList.add('hidden');
-  document.getElementById('file-input').value = '';
+  const fileInput = document.getElementById('file-input');
+  if (fileInput) fileInput.value = '';
 }
 
 if (typeof module !== 'undefined' && module.exports) {

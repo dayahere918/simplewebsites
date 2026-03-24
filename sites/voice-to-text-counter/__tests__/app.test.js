@@ -17,11 +17,13 @@ function setupDOM() {
     <div id="duration">0:00</div>
     <div id="transcript"></div>
     <div id="filler-grid"></div>
+    <div id="speech-error" class="hidden"></div>
     <button id="record-btn"><span id="rec-dot"></span> Start Recording</button>
   `;
 }
 
 // Full SpeechRecognition Mock
+let lastRecognitionInstance = null;
 class MockSpeechRecognition {
   constructor() {
     this.continuous = false;
@@ -30,13 +32,10 @@ class MockSpeechRecognition {
     this.onresult = null;
     this.onend = null;
     this.onerror = null;
+    lastRecognitionInstance = this;
   }
-  start() {
-    // In our app logic, we expect this to exist
-  }
-  stop() { 
-    if (this.onend) this.onend(); 
-  }
+  start() {}
+  stop() { if (this.onend) this.onend(); }
 }
 global.SpeechRecognition = MockSpeechRecognition;
 global.webkitSpeechRecognition = MockSpeechRecognition;
@@ -125,10 +124,39 @@ describe('Voice to Text Counter', () => {
 
     test('SpeechRecognition events', () => {
       startRecording();
-      const recInstance = MockSpeechRecognition.mockInstances ? MockSpeechRecognition.mockInstances[0] : null; 
-      // Manual mock inspection or just triggering the handler manually if we had it
-      // Since it's internal to startRecording, we can't easily grab the instance
-      // unless we mock the constructor to capture it.
+      expect(lastRecognitionInstance).not.toBeNull();
+      
+      // Mock result event
+      const mockEvent = {
+        results: [
+          { isFinal: true, 0: { transcript: 'hello' } },
+          { isFinal: false, 0: { transcript: ' world' } }
+        ]
+      };
+      lastRecognitionInstance.onresult(mockEvent);
+      expect(document.getElementById('word-count').textContent).toBe('2');
+      
+      // Mock error
+      lastRecognitionInstance.onerror();
+      expect(getIsRecording()).toBe(false);
+      
+      // Mock end
+      startRecording();
+      lastRecognitionInstance.onend(); // Should restart if isRecording is true
+    });
+
+    test('browser support failure', () => {
+      const originalSR = window.SpeechRecognition;
+      const originalWSR = window.webkitSpeechRecognition;
+      delete window.SpeechRecognition;
+      delete window.webkitSpeechRecognition;
+      
+      setupDOM();
+      startRecording();
+      expect(document.getElementById('speech-error').textContent).toContain('not supported');
+      
+      window.SpeechRecognition = originalSR;
+      window.webkitSpeechRecognition = originalWSR;
     });
   });
 });

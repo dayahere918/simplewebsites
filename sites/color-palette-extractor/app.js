@@ -119,7 +119,8 @@ function resetUpload() {
   if (typeof document === 'undefined') return;
   document.getElementById('upload-area')?.classList.remove('hidden');
   document.getElementById('preview-section')?.classList.add('hidden');
-  document.getElementById('file-input').value = '';
+  const fileInput = document.getElementById('file-input');
+  if (fileInput) fileInput.value = '';
   extractedColors = [];
 }
 

@@ -1,6 +1,7 @@
 /**
  * SEO Utility Module
- * Injects meta tags, Open Graph, Twitter Cards, and JSON-LD schema.org markup.
+ * Injects meta tags, Open Graph, Twitter Cards, JSON-LD schema.org markup,
+ * FAQ schema, and breadcrumb schema.
  */
 
 /**
@@ -96,6 +97,52 @@ function generateJsonLd(config) {
 }
 
 /**
+ * Generate FAQ schema (JSON-LD)
+ * @param {Array<{question: string, answer: string}>} faqs
+ * @returns {string} Script tag with FAQ JSON-LD
+ */
+function generateFAQSchema(faqs) {
+  if (!Array.isArray(faqs) || faqs.length === 0) return '';
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(faq => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer
+      }
+    }))
+  };
+
+  return `<script type="application/ld+json">${JSON.stringify(schema)}</script>`;
+}
+
+/**
+ * Generate Breadcrumb schema (JSON-LD)
+ * @param {Array<{name: string, url: string}>} items - Breadcrumb items in order
+ * @returns {string} Script tag with BreadcrumbList JSON-LD
+ */
+function generateBreadcrumbSchema(items) {
+  if (!Array.isArray(items) || items.length === 0) return '';
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.url
+    }))
+  };
+
+  return `<script type="application/ld+json">${JSON.stringify(schema)}</script>`;
+}
+
+/**
  * Generate sitemap.xml content
  * @param {Array<{url: string, lastmod?: string, priority?: string}>} pages
  * @returns {string} XML content
@@ -160,5 +207,5 @@ function escapeXml(str) {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { generateMetaTags, generateJsonLd, generateSitemap, generateRobotsTxt, escapeHtml, escapeXml };
+  module.exports = { generateMetaTags, generateJsonLd, generateFAQSchema, generateBreadcrumbSchema, generateSitemap, generateRobotsTxt, escapeHtml, escapeXml };
 }

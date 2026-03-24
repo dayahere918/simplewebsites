@@ -101,6 +101,26 @@ describe('Picker Wheel', () => {
       closeModal();
       expect(document.getElementById('result-modal').className).toContain('hidden');
     });
+
+    test('modal closes on overlay click', () => {
+      // Simulate DOMContentLoaded event to attach listeners
+      document.dispatchEvent(new Event('DOMContentLoaded'));
+      showResult('Winner!');
+      
+      const modal = document.getElementById('result-modal');
+      // Click on modal background
+      modal.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      expect(modal.className).toContain('hidden');
+    });
+
+    test('modal closes on Escape keydown', () => {
+      document.dispatchEvent(new Event('DOMContentLoaded'));
+      showResult('Winner!');
+      
+      // Press Escape
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      expect(document.getElementById('result-modal').className).toContain('hidden');
+    });
   });
 
   describe('Spin Animation', () => {

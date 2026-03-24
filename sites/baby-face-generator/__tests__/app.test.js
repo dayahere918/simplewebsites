@@ -8,13 +8,16 @@ const {
 
 function setupDOM() {
   document.body.innerHTML = `
-    <div id="drop-zone1" class="drop-zone"></div>
-    <input id="parent1-input">
-    <canvas id="parent1-canvas" class="hidden"></canvas>
-    
-    <div id="drop-zone2" class="drop-zone"></div>
-    <input id="parent2-input">
-    <canvas id="parent2-canvas" class="hidden"></canvas>
+    <div class="upload-slot">
+      <div id="drop-zone1" class="drop-zone"></div>
+      <input id="parent1-input">
+      <canvas id="parent1-canvas" class="hidden"></canvas>
+    </div>
+    <div class="upload-slot">
+      <div id="drop-zone2" class="drop-zone"></div>
+      <input id="parent2-input">
+      <canvas id="parent2-canvas" class="hidden"></canvas>
+    </div>
     
     <button id="generate-btn" disabled>Generate</button>
     <section id="result-section" class="hidden">
@@ -87,7 +90,25 @@ describe('Baby Face Generator', () => {
 
   test('resetAll cleanup', () => {
     setParent1(true);
+    setParent2(true);
+    
+    // Set some elements to 'hidden' to test if reset un-hides them
+    document.getElementById('parent1-canvas').classList.remove('hidden');
+    document.getElementById('drop-zone1').classList.add('hidden');
+    
     resetAll();
+    
     expect(getState().parent1Loaded).toBe(false);
+    expect(getState().parent2Loaded).toBe(false);
+    
+    // Canvases should be hidden again
+    expect(document.getElementById('parent1-canvas').className).toContain('hidden');
+    
+    // Drop zones should be un-hidden
+    expect(document.getElementById('drop-zone1').className).not.toContain('hidden');
+    expect(document.getElementById('drop-zone2').className).not.toContain('hidden');
+    
+    // Result section should be hidden
+    expect(document.getElementById('result-section').className).toContain('hidden');
   });
 });

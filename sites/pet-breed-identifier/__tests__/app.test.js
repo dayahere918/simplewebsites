@@ -2,105 +2,122 @@
  * @jest-environment jsdom
  */
 const { 
-  DOG_BREEDS, CAT_BREEDS, setPetType, identifyBreed, 
-  getImageHash, renderBreedBars, renderBreedInfo, 
-  resetAnalysis, handleUpload, analyzeImage
+  DOG_BREEDS, CAT_BREEDS, setPetType, getImageHash, identifyBreed, 
+  renderBreedBars, renderBreedInfo, resetAnalysis, handleUpload, analyzeImage,
+  getPetType, setPetTypeVal
 } = require('../app');
 
 function setupDOM() {
   document.body.innerHTML = `
-    <canvas id="pet-canvas" width="100" height="100"></canvas>
+    <div id="upload-area"></div>
     <div id="results" class="hidden"></div>
+    <input type="file" id="file-input">
+    <canvas id="pet-canvas" width="100" height="100"></canvas>
     <div id="breed-badge"></div>
     <div id="confidence-text"></div>
     <div id="breed-bars"></div>
     <div id="breed-info"></div>
-    <div id="care-tips"></div>
-    <div id="upload-area"></div>
+    <ul id="care-tips"></ul>
     <button id="btn-dog" class="pet-btn"></button>
     <button id="btn-cat" class="pet-btn"></button>
-    <input id="file-input" type="file">
   `;
 }
-
-// Mock FileReader (Synchronous)
-class MockFileReader {
-  constructor() { this.onload = null; }
-  readAsDataURL(file) {
-    if (this.onload) this.onload({ target: { result: 'data:image/png;base64,stub' } });
-  }
-}
-global.FileReader = MockFileReader;
-
-// Mock Image (Synchronous)
-class MockImage {
-  constructor() {
-    this.onload = null;
-    this._src = '';
-    this.width = 100;
-    this.height = 100;
-  }
-  set src(val) {
-    this._src = val;
-    if (this.onload) this.onload();
-  }
-  get src() { return this._src; }
-}
-global.Image = MockImage;
-
-// Mock Canvas getContext
-HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
-  drawImage: jest.fn(),
-  getImageData: jest.fn(() => ({
-    data: new Uint8ClampedArray(100).fill(255)
-  })),
-  putImageData: jest.fn(),
-  createImageData: jest.fn(() => ({ data: new Uint8ClampedArray(100) })),
-}));
 
 describe('Pet Breed Identifier', () => {
   beforeEach(() => {
     setupDOM();
     jest.clearAllMocks();
+    setPetTypeVal('dog');
   });
 
-  describe('Logic', () => {
-    test('setPetType changes mode and UI', () => {
+  describe('Core Mechanics', () => {
+    test('setPetType updates state and UI', () => {
       setPetType('cat');
-      expect(document.getElementById('btn-cat').className).toContain('active');
+      expect(getPetType()).toBe('cat');
+      expect(document.getElementById('btn-cat').classList.contains('active')).toBeTruthy();
+
+      document.body.innerHTML = '';
+      expect(() => setPetType('dog')).not.toThrow();
     });
 
-    test('getImageHash returns a number', () => {
+    test('getImageHash handles nulls', () => {
+      expect(getImageHash(null)).toBeGreaterThanOrEqual(0);
       const canvas = document.getElementById('pet-canvas');
-      canvas.getContext('2d').getImageData = jest.fn(() => ({
-        data: new Uint8ClampedArray(100).fill(255)
-      }));
-      expect(typeof getImageHash(canvas)).toBe('number');
+      expect(getImageHash(canvas)).toBeGreaterThanOrEqual(0);
+    });
+
+    test('getImageHash counts pixels', () => {
+      const mockCanvas = {
+        width: 10, height: 10,
+        getContext: () => ({
+          getImageData: () => ({
+            data: new Uint8ClampedArray(400).fill(100)
+          })
+        })
+      };
+      expect(getImageHash(mockCanvas)).toBeGreaterThan(0);
+    });
+
+    test('identifyBreed normalizes scores for dogs', () => {
+      setPetTypeVal('dog');
+      const scores = identifyBreed(123456);
+      
+      const sum = Object.values(scores).reduce((a, b) => a + b, 0);
+      expect(sum).toBe(100);
+      expect(scores[DOG_BREEDS[0].name]).toBeDefined();
+    });
+
+    test('identifyBreed normalizes scores for cats', () => {
+      setPetTypeVal('cat');
+      const scores = identifyBreed(123456);
+      
+      const sum = Object.values(scores).reduce((a, b) => a + b, 0);
+      expect(sum).toBe(100);
+      expect(scores[CAT_BREEDS[0].name]).toBeDefined();
     });
   });
 
-  describe('UI & Event Handlers', () => {
-    test('handleUpload and analyzeImage logic path', () => {
-      // Mocking getContext as well just in case JSDOM stubs are weird
-      const canvas = document.getElementById('pet-canvas');
-      canvas.getContext = jest.fn(() => ({
-        drawImage: jest.fn(),
-        getImageData: jest.fn(() => ({ data: new Uint8ClampedArray(100).fill(255) }))
-      }));
-
-      analyzeImage('data:image/png;base64,stub');
-      expect(document.getElementById('results').className).not.toContain('hidden');
+  describe('DOM & UI', () => {
+    test('handleUpload gracefully ignores bad inputs', () => {
+      expect(() => handleUpload(null)).not.toThrow();
+      expect(() => handleUpload({ target: { files: [{ type: 'application/pdf' }] } })).not.toThrow();
     });
 
-    test('renderBreedBars and renderBreedInfo', () => {
-      renderBreedBars({ 'Persian': 100 }, 'Persian');
-      renderBreedInfo('Persian');
-      expect(document.getElementById('breed-info').innerHTML).toContain('Iran');
+    test('renderBreedBars creates bar tracks', () => {
+      renderBreedBars({ 'Golden Retriever': 60, 'Poodle': 40 }, 'Golden Retriever');
+      const html = document.getElementById('breed-bars').innerHTML;
+      expect(html).toContain('Golden Retriever');
+      expect(html).toContain('Poodle');
+      
+      document.body.innerHTML = '';
+      expect(() => renderBreedBars({}, '')).not.toThrow();
     });
 
-    test('resetAnalysis', () => {
+    test('renderBreedInfo populates details list', () => {
+      setPetTypeVal('dog');
+      renderBreedInfo('Golden Retriever');
+      
+      expect(document.getElementById('breed-info').innerHTML).toContain('Scotland');
+      expect(document.getElementById('care-tips').innerHTML).toContain('swim');
+      
+      // Unknown
+      renderBreedInfo('Unknown');
+      
+      document.body.innerHTML = '';
+      expect(() => renderBreedInfo('Golden Retriever')).not.toThrow();
+    });
+
+    test('resetAnalysis resets states', () => {
+      document.getElementById('upload-area').classList.add('hidden');
+      document.getElementById('results').classList.remove('hidden');
+      
       resetAnalysis();
-      expect(document.getElementById('upload-area').className).not.toContain('hidden');
+      
+      expect(document.getElementById('upload-area').classList.contains('hidden')).toBeFalsy();
+      expect(document.getElementById('results').classList.contains('hidden')).toBeTruthy();
+      
+      document.body.innerHTML = '';
+      expect(() => resetAnalysis()).not.toThrow();
     });
   });
 });

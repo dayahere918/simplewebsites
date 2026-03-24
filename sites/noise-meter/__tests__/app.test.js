@@ -18,6 +18,7 @@ function setupDOM() {
     <div id="peak-db"></div>
     <div id="min-db"></div>
     <button id="start-btn"></button>
+    <div id="mic-error" class="hidden"></div>
   `;
 }
 
@@ -95,6 +96,12 @@ describe('Noise Meter', () => {
       // Stop
       await toggleMeter();
       expect(mockAudioContext.close).toHaveBeenCalled();
+    });
+
+    test('toggleMeter handles denied permissions', async () => {
+      navigator.mediaDevices.getUserMedia.mockRejectedValue(new Error('Denied'));
+      await toggleMeter();
+      expect(document.getElementById('mic-error').textContent).toContain('required');
     });
 
     test('updateMeter frame loop', () => {

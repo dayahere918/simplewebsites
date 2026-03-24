@@ -45,7 +45,13 @@ async function toggleMeter() {
     if (btn) { btn.textContent = '⏹️ Stop'; btn.classList.remove('btn-accent'); btn.classList.add('btn-primary'); }
     updateMeter();
   } catch (e) {
-    alert('Microphone access is required. Please allow microphone permissions.');
+    if (typeof document !== 'undefined') {
+      const errEl = document.getElementById('mic-error');
+      if (errEl) {
+        errEl.textContent = '⚠️ Microphone access is required. Please allow microphone permissions.';
+        errEl.classList.remove('hidden');
+      }
+    }
   }
 }
 

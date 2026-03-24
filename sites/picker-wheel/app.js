@@ -268,6 +268,18 @@ if (typeof document !== 'undefined') {
     const textarea = document.getElementById('items-input');
     if (textarea) textarea.value = items.join('\n');
     drawWheel(items, 0);
+
+    // Close modal on overlay click
+    const modal = document.getElementById('result-modal');
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+    }
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
   });
 }
 

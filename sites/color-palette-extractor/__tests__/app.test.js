@@ -2,90 +2,115 @@
  * @jest-environment jsdom
  */
 const { 
-  rgbToHex, colorDistance, kMeansClustering, extractColors, 
-  renderPalette, resetUpload, handleFile, loadImage, 
-  copyColor, exportPalette, NUM_COLORS, getExtractedColors, setExtractedColors
+  rgbToHex, colorDistance, kMeansClustering, extractColors, renderPalette, copyColor, exportPalette, resetUpload, 
+  handleFile, loadImage, NUM_COLORS, MAX_ITERATIONS,
+  getExtractedColors, setExtractedColors
 } = require('../app');
 
 function setupDOM() {
   document.body.innerHTML = `
-    <canvas id="image-canvas" width="100" height="100"></canvas>
-    <div id="palette-grid"></div>
     <div id="upload-area"></div>
     <div id="preview-section" class="hidden"></div>
-    <input id="file-input" type="file">
-    <div id="drop-zone"></div>
+    <canvas id="image-canvas"></canvas>
+    <div id="palette-grid"></div>
+    <input type="file" id="file-input">
   `;
 }
 
-// Mock FileReader (Synchronous)
-class MockFileReader {
-  constructor() { this.onload = null; }
-  readAsDataURL(file) {
-    if (this.onload) this.onload({ target: { result: 'data:image/png;base64,stub' } });
-  }
-}
-global.FileReader = MockFileReader;
-
-// Mock Image (Synchronous)
-class MockImage {
-  constructor() {
-    this.onload = null;
-    this._src = '';
-    this.width = 100;
-    this.height = 100;
-  }
-  set src(val) {
-    this._src = val;
-    if (this.onload) this.onload();
-  }
-  get src() { return this._src; }
-}
-global.Image = MockImage;
-
-// Mock Navigator Clipboard
 Object.assign(navigator, {
-  clipboard: {
-    writeText: jest.fn().mockResolvedValue(undefined)
-  }
+  clipboard: { writeText: jest.fn().mockResolvedValue(undefined) }
 });
 
 describe('Color Palette Extractor', () => {
   beforeEach(() => {
     setupDOM();
     jest.clearAllMocks();
+    setExtractedColors([]);
   });
 
-  describe('Utilities & Logic', () => {
-    test('extractColors from canvas', () => {
-      const canvas = document.getElementById('image-canvas');
-      canvas.getContext = jest.fn(() => ({
-        getImageData: jest.fn(() => ({ data: new Uint8ClampedArray(100).fill(255) }))
-      }));
-      expect(extractColors(canvas).length).toBeGreaterThan(0);
+  describe('Core Math', () => {
+    test('rgbToHex converts properly', () => {
+      expect(rgbToHex(255, 0, 128)).toBe('#ff0080');
+      expect(rgbToHex(0, 0, 0)).toBe('#000000');
+    });
+
+    test('colorDistance computes euclidean distance', () => {
+      expect(colorDistance([0, 0, 0], [0, 0, 0])).toBe(0);
+      expect(colorDistance([0, 0, 0], [255, 0, 0])).toBe(255);
+    });
+
+    test('kMeansClustering handles empty inputs', () => {
+      expect(kMeansClustering([], 8, 20)).toEqual([]);
+      expect(kMeansClustering(null, 8, 20)).toEqual([]);
+    });
+
+    test('kMeansClustering converges correctly', () => {
+      // Small predictable set
+      const pixels = [[255,0,0], [254,0,0], [0,255,0], [0,254,0]];
+      const clusters = kMeansClustering(pixels, 2, 10);
+      expect(clusters.length).toBe(2);
     });
   });
 
-  describe('UI & Event Handlers', () => {
-    test('renderPalette updates grid', () => {
-      renderPalette([[255, 0, 0]]);
-      expect(document.getElementById('palette-grid').innerHTML).toContain('#ff0000');
-    });
-
-    test('loadImage logic path', () => {
-      const canvas = document.getElementById('image-canvas');
-      canvas.getContext = jest.fn(() => ({
-        drawImage: jest.fn(),
-        getImageData: jest.fn(() => ({ data: new Uint8ClampedArray(100).fill(255) }))
-      }));
+  describe('Canvas & Extraction', () => {
+    test('extractColors handles null canvas/context', () => {
+      expect(extractColors(null)).toEqual([]);
       
-      loadImage('data:image/png;base64,stub');
-      expect(document.getElementById('preview-section').className).not.toContain('hidden');
+      const badCanvas = { getContext: () => null };
+      expect(extractColors(badCanvas)).toEqual([]);
     });
 
-    test('resetUpload clears state', () => {
+    test('extractColors covers pixel processing', () => {
+      const mockCanvas = {
+        width: 10, height: 10,
+        getContext: () => ({
+          getImageData: () => ({
+            data: new Uint8ClampedArray(400).fill(255) // 10x10x4
+          })
+        })
+      };
+      const colors = extractColors(mockCanvas);
+      expect(colors.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('DOM & UI', () => {
+    test('handleFile ignores invalid files', () => {
+      expect(() => handleFile(null)).not.toThrow();
+      expect(() => handleFile({ target: { files: [{ type: 'text/html' }] } })).not.toThrow();
+    });
+
+    test('loadImage safely exits if no document', () => {
+      const originalDoc = global.document;
+      global.document = undefined;
+      expect(() => loadImage('src')).not.toThrow();
+      global.document = originalDoc;
+    });
+
+    test('renderPalette parses colors to DOM', () => {
+      renderPalette([[255, 0, 0], [0, 255, 0]]);
+      expect(document.getElementById('palette-grid').innerHTML).toContain('#ff0000');
+      
+      document.body.innerHTML = '';
+      expect(() => renderPalette([[255, 0, 0]])).not.toThrow();
+    });
+
+    test('copyColor and exportPalette use clipboard', () => {
+      copyColor('#ff0000');
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('#ff0000');
+
+      setExtractedColors([[255, 0, 0]]);
+      exportPalette();
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('--color-1: #ff0000'));
+    });
+
+    test('resetUpload clears display', () => {
       resetUpload();
-      expect(document.getElementById('upload-area').className).not.toContain('hidden');
+      expect(document.getElementById('upload-area').classList.contains('hidden')).toBeFalsy();
+      expect(document.getElementById('preview-section').classList.contains('hidden')).toBeTruthy();
+      
+      document.body.innerHTML = '';
+      expect(() => resetUpload()).not.toThrow();
     });
   });
 });

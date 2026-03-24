@@ -6,7 +6,7 @@
 function initThemeToggle() {
   const saved = localStorage.getItem('theme');
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const theme = saved || (prefersDark ? 'dark' : 'dark'); // default dark
+  const theme = saved || (prefersDark ? 'dark' : 'light');
   applyTheme(theme);
   createToggleButton();
 }

@@ -44,7 +44,7 @@ function calculatePerPerson(total, numPeople) {
  */
 function formatCurrency(amount) {
   if (typeof amount !== 'number' || isNaN(amount)) return '$0.00';
-  return '$' + Math.abs(amount).toFixed(2);
+  return '$' + (Math.round(Math.abs(amount) * 100) / 100).toFixed(2);
 }
 
 /**

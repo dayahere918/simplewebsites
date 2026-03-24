@@ -78,7 +78,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: sites/
+          path: dist/
 
   terraform:
     needs: build
@@ -113,10 +113,13 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
-          terraform plan -detailed-exitcode -out=tfplan || export EXIT=$?
-          if [ "$EXIT" == "0" ]; then 
+          set +e
+          terraform plan -detailed-exitcode -out=tfplan
+          EXIT=$?
+          set -e
+          if [ "$EXIT" -eq 0 ]; then 
             echo "changes=false" >> $GITHUB_OUTPUT
-          elif [ "$EXIT" == "2" ]; then 
+          elif [ "$EXIT" -eq 2 ]; then 
             echo "changes=true" >> $GITHUB_OUTPUT
           else 
             exit $EXIT
@@ -146,11 +149,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
-          path: ./
+          path: dist/
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist/${{ matrix.site }} --project-name=${{ matrix.site }}
+          command: pages deploy ${{ matrix.site }} --project-name=${{ matrix.site }}

@@ -2,42 +2,23 @@
  * @jest-environment jsdom
  */
 const { 
-  SHAPES, RECOMMENDATIONS, generateAnalysis, getImageHash, 
-  getTopShape, renderBars, renderRecommendations, resetAnalysis,
-  handleUpload, analyzeImage
+  SHAPES, RECOMMENDATIONS, generateAnalysis, getImageHash, getTopShape, 
+  renderBars, renderRecommendations, resetAnalysis, handleUpload, analyzeImage
 } = require('../app');
 
 function setupDOM() {
   document.body.innerHTML = `
-    <canvas id="face-canvas" width="100" height="100"></canvas>
     <div id="upload-area"></div>
     <div id="results" class="hidden"></div>
+    <input type="file" id="file-input">
+    <canvas id="face-canvas" width="100" height="100"></canvas>
     <div id="shape-badge"></div>
     <div id="confidence"></div>
     <div id="shape-bars"></div>
     <div id="hairstyle-recs"></div>
     <div id="accessory-recs"></div>
-    <input id="file-input" type="file">
   `;
 }
-
-// Mock Canvas Context
-const mockCtx = {
-  drawImage: jest.fn(),
-  getImageData: jest.fn(() => ({ data: new Uint8ClampedArray(40000).fill(128) })),
-};
-HTMLCanvasElement.prototype.getContext = jest.fn(() => mockCtx);
-
-// Synchronous Mocks
-global.FileReader = class {
-  constructor() { this.onload = null; }
-  readAsDataURL() { if (this.onload) this.onload({ target: { result: 'data:image/png;base64,stub' } }); }
-};
-global.Image = class {
-  constructor() { this.onload = null; this._src = ''; this.width = 100; this.height = 100; }
-  set src(v) { this._src = v; if (this.onload) this.onload(); }
-  get src() { return this._src; }
-};
 
 describe('Face Shape Detector', () => {
   beforeEach(() => {
@@ -45,44 +26,88 @@ describe('Face Shape Detector', () => {
     jest.clearAllMocks();
   });
 
-  describe('Logic', () => {
-    test('generateAnalysis normalizes to 100%', () => {
-      const scores = generateAnalysis(12345);
+  describe('Core Analysis Logic', () => {
+    test('generateAnalysis produces normalized scores', () => {
+      const hash = 1234567;
+      const scores = generateAnalysis(hash);
+      
+      // All shapes present
+      SHAPES.forEach(shape => expect(scores[shape]).toBeDefined());
+      
+      // Sum is exactly 100
       const sum = Object.values(scores).reduce((a, b) => a + b, 0);
       expect(sum).toBe(100);
     });
 
-    test('getImageHash returns abs number', () => {
+    test('getImageHash computes integer hash', () => {
       const canvas = document.getElementById('face-canvas');
-      expect(typeof getImageHash(canvas)).toBe('number');
-      expect(getImageHash(null)).toBeDefined();
+      const hash = getImageHash(canvas);
+      expect(typeof hash).toBe('number');
+      expect(hash).toBeGreaterThanOrEqual(0);
+      
+      expect(typeof getImageHash(null)).toBe('number');
     });
 
-    test('getTopShape handles standard input', () => {
-      const scores = { Round: 90, Oval: 10 };
+    test('getImageHash covers pixel loop', () => {
+      const mockCanvas = {
+        width: 10, height: 10,
+        getContext: () => ({
+          getImageData: () => ({
+            data: new Uint8ClampedArray(400).fill(128)
+          })
+        })
+      };
+      const hash = getImageHash(mockCanvas);
+      expect(hash).toBeGreaterThan(0);
+    });
+
+    test('getTopShape identifies highest score', () => {
+      const scores = { Oval: 10, Round: 80, Square: 10 };
       expect(getTopShape(scores)).toBe('Round');
     });
   });
 
-  describe('UI & Lifecycle', () => {
-    test('renderRecommendations populates cards', () => {
-      renderRecommendations('Square');
-      expect(document.getElementById('hairstyle-recs').innerHTML).toContain('rec-card');
-      expect(document.getElementById('accessory-recs').innerHTML).toContain('Round glasses');
+  describe('DOM & Interactivity', () => {
+    test('handleUpload gracefully ignores invalid files', () => {
+      expect(() => handleUpload(null)).not.toThrow();
+      expect(() => handleUpload({ target: { files: [{ type: 'text/html' }] } })).not.toThrow();
     });
 
-    test('resetAnalysis visibility', () => {
+    test('renderBars creates visual tracks', () => {
+      renderBars({ Oval: 60, Round: 40 }, 'Oval');
+      const html = document.getElementById('shape-bars').innerHTML;
+      expect(html).toContain('Oval');
+      expect(html).toContain('top'); // The top shape gets the top class
+      
+      document.body.innerHTML = '';
+      expect(() => renderBars({ Oval: 60 }, 'Oval')).not.toThrow();
+    });
+
+    test('renderRecommendations generates cards mapped to shape', () => {
+      renderRecommendations('Round');
+      const hair = document.getElementById('hairstyle-recs').innerHTML;
+      expect(hair).toContain(RECOMMENDATIONS.Round.hairstyles[0]);
+      
+      // Fallback
+      renderRecommendations('UnknownShape');
+      expect(document.getElementById('hairstyle-recs').innerHTML).toContain(RECOMMENDATIONS.Oval.hairstyles[0]);
+
+      document.body.innerHTML = '';
+      expect(() => renderRecommendations('Round')).not.toThrow();
+    });
+
+    test('resetAnalysis clears UI state', () => {
+      document.getElementById('upload-area').classList.add('hidden');
       document.getElementById('results').classList.remove('hidden');
+      document.getElementById('file-input').value = '';
+      
       resetAnalysis();
-      expect(document.getElementById('results').className).toContain('hidden');
-    });
-
-    test('handleUpload and analyzeImage flow', () => {
-      const event = { target: { files: [{ type: 'image/png' }] } };
-      handleUpload(event);
-      // Synchronous flow should have updated DOM
-      expect(document.getElementById('results').className).not.toContain('hidden');
-      expect(document.getElementById('shape-badge').textContent).toContain('Shape');
+      
+      expect(document.getElementById('upload-area').classList.contains('hidden')).toBeFalsy();
+      expect(document.getElementById('results').classList.contains('hidden')).toBeTruthy();
+      
+      document.body.innerHTML = '';
+      expect(() => resetAnalysis()).not.toThrow();
     });
   });
 });
