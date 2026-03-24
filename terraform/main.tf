@@ -1,6 +1,7 @@
-resource "cloudflare_pages_project" "stacky" {
+resource "cloudflare_pages_project" "sites" {
+  for_each          = toset(var.site_names)
   account_id        = var.cloudflare_account_id
-  name              = "stacky-tools"
+  name              = each.key
   production_branch = "main"
 
   build_config {
