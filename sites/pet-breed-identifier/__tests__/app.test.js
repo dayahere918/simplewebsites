@@ -48,6 +48,16 @@ class MockImage {
 }
 global.Image = MockImage;
 
+// Mock Canvas getContext
+HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
+  drawImage: jest.fn(),
+  getImageData: jest.fn(() => ({
+    data: new Uint8ClampedArray(100).fill(255)
+  })),
+  putImageData: jest.fn(),
+  createImageData: jest.fn(() => ({ data: new Uint8ClampedArray(100) })),
+}));
+
 describe('Pet Breed Identifier', () => {
   beforeEach(() => {
     setupDOM();

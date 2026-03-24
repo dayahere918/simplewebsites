@@ -114,6 +114,6 @@ function copyExport() {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { STAGE_TEMPLATES, addStage, removeStage, clearPipeline, renderPipeline, exportPipeline, toGitHubActions, toGitLabCI, toJenkinsfile,
+  module.exports = { STAGE_TEMPLATES, addStage, removeStage, clearPipeline, renderPipeline, exportPipeline, toGitHubActions, toGitLabCI, toJenkinsfile, copyExport,
     getStages: () => stages, setStages: s => { stages = s; } };
 }
