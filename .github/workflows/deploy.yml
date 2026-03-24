@@ -111,12 +111,22 @@ jobs:
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Terraform Plan
-        run: terraform plan -out=tfplan
+        id: plan
+        run: |
+          terraform plan -detailed-exitcode -out=tfplan || export EXIT=$?
+          if [ "$EXIT" == "0" ]; then 
+            echo "changes=false" >> $GITHUB_OUTPUT
+          elif [ "$EXIT" == "2" ]; then 
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else 
+            exit $EXIT
+          fi
         env:
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Terraform Apply
+        if: steps.plan.outputs.changes == 'true'
         run: terraform apply -auto-approve tfplan
         env:
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
