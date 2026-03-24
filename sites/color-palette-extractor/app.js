@@ -47,6 +47,7 @@ function kMeansClustering(pixels, k, maxIter) {
 function extractColors(canvas) {
   if (!canvas) return [];
   const ctx = canvas.getContext('2d');
+  if (!ctx) return [];
   const { width, height } = canvas;
   const imageData = ctx.getImageData(0, 0, width, height);
   const pixels = [];
@@ -73,6 +74,7 @@ function loadImage(src) {
     const canvas = document.getElementById('image-canvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
     const maxW = 600, maxH = 400;
     let w = img.width, h = img.height;
     if (w > maxW) { h = h * maxW / w; w = maxW; }
@@ -136,6 +138,10 @@ if (typeof document !== 'undefined') {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { rgbToHex, colorDistance, kMeansClustering, extractColors, renderPalette, copyColor, exportPalette, resetUpload, NUM_COLORS, MAX_ITERATIONS,
-    getExtractedColors: () => extractedColors, setExtractedColors: (c) => { extractedColors = c; } };
+  module.exports = { 
+    rgbToHex, colorDistance, kMeansClustering, extractColors, renderPalette, copyColor, exportPalette, resetUpload, 
+    handleFile, loadImage, NUM_COLORS, MAX_ITERATIONS,
+    getExtractedColors: () => extractedColors, 
+    setExtractedColors: (c) => { extractedColors = c; } 
+  };
 }

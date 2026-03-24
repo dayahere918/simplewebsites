@@ -4,7 +4,7 @@
 const { 
   CATEGORIES, PROBLEMS, SOLUTIONS, TAGS_POOL,
   getRandomItem, getRandomItems, generateName, generateIdeaData,
-  generateIdea, saveIdea, removeSavedIdea, renderSaved,
+  generateIdea, saveIdea, removeSavedIdea, renderSaved, shareIdea,
   getCurrentIdea, setCurrentIdea, getSavedIdeas, setSavedIdeas 
 } = require('../app');
 
@@ -21,48 +21,57 @@ function setupDOM() {
   `;
 }
 
+// Mock Clipboard
+Object.assign(navigator, {
+  clipboard: {
+    writeText: jest.fn().mockResolvedValue(undefined)
+  }
+});
+
 describe('Startup Idea Generator', () => {
   beforeEach(() => {
     setupDOM();
     setSavedIdeas([]);
     setCurrentIdea(null);
+    jest.clearAllMocks();
   });
 
-  test('getRandomItem returns element from array', () => {
-    const arr = [1, 2, 3];
-    expect(arr).toContain(getRandomItem(arr));
+  describe('Logic', () => {
+    test('getRandomItem handles empty', () => {
+      expect(getRandomItem([])).toBeNull();
+    });
+
+    test('generateIdeaData returns 4 tags', () => {
+      const idea = generateIdeaData();
+      expect(idea.tags.length).toBe(4);
+    });
   });
 
-  test('generateName returns a string', () => {
-    const name = generateName('SaaS', 'Problem');
-    expect(typeof name).toBe('string');
-    expect(name.length).toBeGreaterThan(0);
-  });
+  describe('UI', () => {
+    test('generateIdea re-triggers animation', () => {
+      generateIdea();
+      expect(document.getElementById('idea-name').textContent).not.toBe('');
+    });
 
-  test('generateIdeaData creates valid object', () => {
-    const idea = generateIdeaData();
-    expect(idea).toHaveProperty('name');
-    expect(idea).toHaveProperty('tags');
-    expect(idea.tags.length).toBe(4);
-  });
+    test('saveIdea prevents duplicates', () => {
+      const idea = { name: 'Dedupe', category: 'SaaS', problem: 'P', solution: 'S', tags: [] };
+      setCurrentIdea(idea);
+      saveIdea();
+      saveIdea();
+      expect(getSavedIdeas().length).toBe(1);
+    });
 
-  test('generateIdea updates DOM', () => {
-    generateIdea();
-    expect(document.getElementById('idea-name').textContent).not.toBe('');
-  });
+    test('removeSavedIdea bounds check', () => {
+      setSavedIdeas([{ name: 'A' }]);
+      removeSavedIdea(5);
+      expect(getSavedIdeas().length).toBe(1);
+    });
 
-  test('saveIdea adds to list and renders', () => {
-    const idea = { name: 'TestStart', category: 'SaaS', problem: 'P', solution: 'S', tags: [] };
-    setCurrentIdea(idea);
-    saveIdea();
-    expect(getSavedIdeas().length).toBe(1);
-    expect(document.getElementById('saved-list').innerHTML).toContain('TestStart');
-  });
-
-  test('removeSavedIdea removes by index', () => {
-    setSavedIdeas([{ name: 'A' }, { name: 'B' }]);
-    removeSavedIdea(0);
-    expect(getSavedIdeas().length).toBe(1);
-    expect(getSavedIdeas()[0].name).toBe('B');
+    test('shareIdea uses clipboard', () => {
+      const idea = { name: 'ShareMe', category: 'SaaS', problem: 'P', solution: 'S', tags: [] };
+      setCurrentIdea(idea);
+      shareIdea();
+      expect(navigator.clipboard.writeText).toHaveBeenCalled();
+    });
   });
 });

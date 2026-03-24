@@ -201,6 +201,11 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     PRESETS_DATA, calculateEMI, calculateTotalPayment, calculateTotalInterest,
     generateAmortization, formatCurrency, loadPreset, calculate,
-    updateDisplay, updatePieChart, renderAmortization
+    updateDisplay, updatePieChart, renderAmortization,
+    calculateMonthlyPayment: (amount, rate, term) => {
+      const r = rate / 1200;
+      return (amount * r * Math.pow(1 + r, term)) / (Math.pow(1 + r, term) - 1);
+    }
   };
 }
+

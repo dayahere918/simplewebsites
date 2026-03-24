@@ -112,5 +112,8 @@ function resetAnalysis() {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { SHAPES, RECOMMENDATIONS, generateAnalysis, getImageHash, getTopShape, renderBars, renderRecommendations, resetAnalysis };
+  module.exports = { 
+    SHAPES, RECOMMENDATIONS, generateAnalysis, getImageHash, getTopShape, renderBars, renderRecommendations, resetAnalysis,
+    handleUpload, analyzeImage
+  };
 }

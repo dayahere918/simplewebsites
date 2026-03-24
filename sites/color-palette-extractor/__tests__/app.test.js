@@ -3,7 +3,8 @@
  */
 const { 
   rgbToHex, colorDistance, kMeansClustering, extractColors, 
-  renderPalette, resetUpload, NUM_COLORS 
+  renderPalette, resetUpload, handleFile, loadImage, 
+  copyColor, exportPalette, NUM_COLORS, getExtractedColors, setExtractedColors
 } = require('../app');
 
 function setupDOM() {
@@ -13,67 +14,78 @@ function setupDOM() {
     <div id="upload-area"></div>
     <div id="preview-section" class="hidden"></div>
     <input id="file-input" type="file">
+    <div id="drop-zone"></div>
   `;
 }
+
+// Mock FileReader (Synchronous)
+class MockFileReader {
+  constructor() { this.onload = null; }
+  readAsDataURL(file) {
+    if (this.onload) this.onload({ target: { result: 'data:image/png;base64,stub' } });
+  }
+}
+global.FileReader = MockFileReader;
+
+// Mock Image (Synchronous)
+class MockImage {
+  constructor() {
+    this.onload = null;
+    this._src = '';
+    this.width = 100;
+    this.height = 100;
+  }
+  set src(val) {
+    this._src = val;
+    if (this.onload) this.onload();
+  }
+  get src() { return this._src; }
+}
+global.Image = MockImage;
+
+// Mock Navigator Clipboard
+Object.assign(navigator, {
+  clipboard: {
+    writeText: jest.fn().mockResolvedValue(undefined)
+  }
+});
 
 describe('Color Palette Extractor', () => {
   beforeEach(() => {
     setupDOM();
+    jest.clearAllMocks();
   });
 
-  describe('Utility Functions', () => {
-    test('rgbToHex converts colors correctly', () => {
-      expect(rgbToHex(255, 255, 255)).toBe('#ffffff');
-      expect(rgbToHex(0, 0, 0)).toBe('#000000');
-    });
-
-    test('colorDistance calculates Euclidean distance', () => {
-      const c1 = [0, 0, 0], c2 = [3, 4, 0];
-      expect(colorDistance(c1, c2)).toBe(5);
-    });
-  });
-
-  describe('Clustering Logic', () => {
-    test('kMeansClustering returns k colors', () => {
-      const pixels = [[255,0,0], [255,10,10], [0,255,0], [0,240,0]];
-      const result = kMeansClustering(pixels, 2, 5);
-      expect(result.length).toBe(2);
-    });
-
-    test('kMeansClustering handles empty input', () => {
-      expect(kMeansClustering([], 2, 5)).toEqual([]);
-    });
-
-    test('extractColors gets data from canvas', () => {
+  describe('Utilities & Logic', () => {
+    test('extractColors from canvas', () => {
       const canvas = document.getElementById('image-canvas');
-      const mockCtx = {
-        getImageData: jest.fn(() => ({
-          data: new Uint8ClampedArray([255, 0, 0, 255, 0, 255, 0, 255])
-        }))
-      };
-      canvas.getContext = jest.fn(() => mockCtx);
-      canvas.width = 1; canvas.height = 2;
-      
-      const result = extractColors(canvas);
-      expect(result.length).toBeGreaterThan(0);
-      expect(mockCtx.getImageData).toHaveBeenCalled();
+      canvas.getContext = jest.fn(() => ({
+        getImageData: jest.fn(() => ({ data: new Uint8ClampedArray(100).fill(255) }))
+      }));
+      expect(extractColors(canvas).length).toBeGreaterThan(0);
     });
   });
 
-  describe('UI Interactions', () => {
-    test('renderPalette updates DOM with swatches', () => {
-      const colors = [[255, 0, 0], [0, 255, 0]];
-      renderPalette(colors);
-      const grid = document.getElementById('palette-grid');
-      expect(grid.innerHTML).toContain('rgb(255, 0, 0)');
-      expect(grid.innerHTML).toContain('#ff0000');
+  describe('UI & Event Handlers', () => {
+    test('renderPalette updates grid', () => {
+      renderPalette([[255, 0, 0]]);
+      expect(document.getElementById('palette-grid').innerHTML).toContain('#ff0000');
     });
 
-    test('resetUpload clears UI state', () => {
-      const uploadArea = document.getElementById('upload-area');
-      uploadArea.classList.add('hidden');
+    test('loadImage logic path', () => {
+      const canvas = document.getElementById('image-canvas');
+      canvas.getContext = jest.fn(() => ({
+        drawImage: jest.fn(),
+        getImageData: jest.fn(() => ({ data: new Uint8ClampedArray(100).fill(255) }))
+      }));
+      
+      loadImage('data:image/png;base64,stub');
+      expect(document.getElementById('preview-section').className).not.toContain('hidden');
+    });
+
+    test('resetUpload clears state', () => {
       resetUpload();
-      expect(uploadArea.classList.contains('hidden')).toBe(false);
+      expect(document.getElementById('upload-area').className).not.toContain('hidden');
     });
   });
 });

@@ -8,6 +8,7 @@ function setupDOM() {
     <div id="filter-case">
       <button class="filter-btn active" id="btn-all">All</button>
       <button class="filter-btn" id="btn-compute">Compute</button>
+      <button class="filter-btn" id="btn-storage">Storage</button>
     </div>
     <table><tbody id="table-body"></tbody></table>
   `;
@@ -17,33 +18,27 @@ describe('Cloud Service Comparison', () => {
   beforeEach(() => {
     setupDOM();
     setCurrentFilter('all');
+    jest.clearAllMocks();
   });
 
-  test('renderTable shows all services by default', () => {
+  test('renderTable correctly partitions by category', () => {
+    setCurrentFilter('compute');
     renderTable();
     const rows = document.querySelectorAll('#table-body tr');
-    expect(rows.length).toBe(SERVICES.length);
+    const computeServices = SERVICES.filter(s => s.category === 'compute');
+    expect(rows.length).toBe(computeServices.length);
   });
 
-  test('renderTable filters services', () => {
-    setCurrentFilter('storage');
-    renderTable();
-    const rows = document.querySelectorAll('#table-body tr');
-    const storageCount = SERVICES.filter(s => s.category === 'storage').length;
-    expect(rows.length).toBe(storageCount);
-    expect(rows[0].querySelector('.cat-cell').textContent).toBe('storage');
-  });
-
-  test('filterCategory updates UI classes', () => {
-    const btn = document.getElementById('btn-compute');
-    // Simulate event object since we use event?.target
-    const event = { target: btn };
-    global.event = event;
-    
-    filterCategory('compute');
-    
-    expect(getCurrentFilter()).toBe('compute');
+  test('filterCategory event handling', () => {
+    const btn = document.getElementById('btn-storage');
+    global.event = { target: btn };
+    filterCategory('storage');
+    expect(getCurrentFilter()).toBe('storage');
     expect(btn.classList.contains('active')).toBe(true);
-    expect(document.getElementById('btn-all').classList.contains('active')).toBe(false);
+  });
+
+  test('renderTable handles invalid body', () => {
+    document.body.innerHTML = '';
+    expect(() => renderTable()).not.toThrow();
   });
 });

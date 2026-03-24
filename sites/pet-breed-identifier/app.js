@@ -123,6 +123,10 @@ function resetAnalysis() {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { DOG_BREEDS, CAT_BREEDS, setPetType, getImageHash, identifyBreed, renderBreedBars, renderBreedInfo, resetAnalysis,
-    getPetType: () => petType, setPetTypeVal: t => { petType = t; } };
+  module.exports = { 
+    DOG_BREEDS, CAT_BREEDS, setPetType, getImageHash, identifyBreed, 
+    renderBreedBars, renderBreedInfo, resetAnalysis, handleUpload, analyzeImage,
+    getPetType: () => petType, 
+    setPetTypeVal: t => { petType = t; } 
+  };
 }

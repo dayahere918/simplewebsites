@@ -2,7 +2,9 @@
  * @jest-environment jsdom
  */
 const {
-  extractKeywords, findMatches, checkSections, calculateScore, getScoreClass, generateTips, analyzeResume, renderResults
+  extractKeywords, findMatches, checkSections, calculateScore, 
+  getScoreClass, generateTips, analyzeResume, renderResults,
+  COMMON_SECTIONS
 } = require('../app');
 
 function setupDOM() {
@@ -21,41 +23,61 @@ function setupDOM() {
 }
 
 describe('Resume ATS Checker', () => {
-  beforeEach(() => setupDOM());
-
-  test('extractKeywords filters stop words and short words', () => {
-    const text = "The software engineer is building a distributed system with Java and AWS.";
-    const keywords = extractKeywords(text);
-    expect(keywords).toContain('software');
-    expect(keywords).toContain('engineer');
-    expect(keywords).not.toContain('the');
-    expect(keywords).not.toContain('is');
+  beforeEach(() => {
+    setupDOM();
+    jest.clearAllMocks();
   });
 
-  test('calculateScore produces valid integer', () => {
-    const score = calculateScore(['java'], ['aws'], [{section:'experience', found:true}], 300);
-    expect(score).toBeGreaterThan(0);
-    expect(score).toBeLessThanOrEqual(100);
+  describe('Logic', () => {
+    test('extractKeywords handles empty/invalid input', () => {
+      expect(extractKeywords('')).toEqual([]);
+      expect(extractKeywords(null)).toEqual([]);
+    });
+
+    test('getScoreClass ranges', () => {
+      expect(getScoreClass(90)).toBe('excellent');
+      expect(getScoreClass(70)).toBe('good');
+      expect(getScoreClass(50)).toBe('fair');
+      expect(getScoreClass(10)).toBe('poor');
+    });
+
+    test('calculateScore weightings', () => {
+      // keywordScore (50) + sectionScore (30) + lengthScore (20)
+      const sections = COMMON_SECTIONS.map(s => ({ section: s, found: true }));
+      const score = calculateScore(['a'], [], sections, 500);
+      expect(score).toBe(100);
+
+      const poorScore = calculateScore([], ['a'], [], 10);
+      expect(poorScore).toBeLessThan(20);
+    });
   });
 
-  test('analyzeResume updates DOM when fields are filled', () => {
-    document.getElementById('resume-text').value = "Experience with Java and AWS in softare engineering.";
-    document.getElementById('job-desc').value = "Looking for a software engineer with Java and AWS skills.";
-    analyzeResume();
-    expect(document.getElementById('results').classList.contains('hidden')).toBe(false);
-    expect(document.getElementById('score-value').textContent).not.toBe('');
-  });
+  describe('UI & Lifecycle', () => {
+    test('analyzeResume early return on empty fields', () => {
+      analyzeResume();
+      expect(document.getElementById('results').className).toContain('hidden');
+    });
 
-  test('generateTips provides relevant advice', () => {
-    const tips = generateTips(['java'], ['aws'], [{section:'education', found:false}], 50);
-    expect(tips.join(' ')).toContain('education');
-    expect(tips.join(' ')).toContain('too short');
-  });
+    test('renderResults populates all sections', () => {
+      const sections = [{ section: 'experience', found: true }, { section: 'skills', found: false }];
+      renderResults(85, ['java'], ['aws'], sections, 400);
+      
+      expect(document.getElementById('results').className).not.toContain('hidden');
+      expect(document.getElementById('score-value').textContent).toBe('85');
+      expect(document.getElementById('stats-row').innerHTML).toContain('Keywords Matched');
+      expect(document.getElementById('keyword-matches').innerHTML).toContain('java');
+      expect(document.getElementById('keyword-missing').innerHTML).toContain('aws');
+      expect(document.getElementById('tips-list').innerHTML).toContain('<li>');
+    });
 
-  test('checkSections identifies common headers', () => {
-    const sections = checkSections("EXPERIENCE: worked at Google. EDUCATION: MIT.");
-    expect(sections.find(s => s.section === 'experience').found).toBe(true);
-    expect(sections.find(s => s.section === 'education').found).toBe(true);
-    expect(sections.find(s => s.section === 'projects').found).toBe(false);
+    test('generateTips edge cases', () => {
+      const sections = COMMON_SECTIONS.map(s => ({ section: s, found: true }));
+      
+      const longTips = generateTips([], [], sections, 1500);
+      expect(longTips).toContain('Your resume may be too long. Try to keep it concise (300-800 words).');
+
+      const missingSectionTips = generateTips([], [], [{section:'experience', found:false}], 400);
+      expect(missingSectionTips[0]).toContain('missing sections: experience');
+    });
   });
 });

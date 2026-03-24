@@ -12,9 +12,12 @@ const {
 function setupDOM() {
   document.body.innerHTML = `
     <canvas id="wheel-canvas" width="400" height="400"></canvas>
-    <textarea id="items-input"></textarea>
+    <textarea id="items-input">A\nB\nC\nD</textarea>
     <button id="spin-btn">SPIN</button>
-    <div class="hidden" id="result-modal"><p id="result-text"></p></div>
+    <div class="hidden" id="result-modal">
+      <p id="result-text"></p>
+      <button id="close-modal"></button>
+    </div>
   `;
   const canvas = document.getElementById('wheel-canvas');
   const mockCtx = {
@@ -26,47 +29,108 @@ function setupDOM() {
   return mockCtx;
 }
 
-// Mock requestAnimationFrame for synchronous spin tests
-global.requestAnimationFrame = (callback) => {
-  return setTimeout(callback, 0);
-};
-
 describe('Picker Wheel', () => {
   let mockCtx;
   beforeEach(() => {
     mockCtx = setupDOM();
+    // Reset internal state
     setItems(['A', 'B', 'C', 'D']);
     setIsSpinning(false);
     setCurrentRotation(0);
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   describe('Logic', () => {
-    test('calculate winning item index', () => {
-      const items = ['A', 'B', 'C', 'D'];
-      // Just ensure it returns one of the items
-      expect(items).toContain(getWinningItem(0, items));
-      expect(items).toContain(getWinningItem(Math.PI, items));
+    test('easeOutCubic calculation', () => {
+      expect(easeOutCubic(0)).toBe(0);
+      expect(easeOutCubic(1)).toBe(1);
+      expect(easeOutCubic(0.5)).toBeGreaterThan(0.5);
+    });
+
+    test('getWinningItem logic for multiple items', () => {
+      const list = ['A', 'B', 'C', 'D'];
+      // pointer is at top (3π/2). 
+      // If no rotation, slice 0 starts at 0 and goes to π/2.
+      // So pointer starts at index... complicated. 
+      // We just need to ensure it's stable and returns a string from the list.
+      expect(list).toContain(getWinningItem(0, list));
+      expect(getWinningItem(0, [])).toBe('');
     });
   });
 
-  describe('Spin Action', () => {
-    test('spin starts and ends', () => {
-      // Since rAF is mocked to call immediately, it should finish almost instantly
-      // But it uses Date.now() for duration.
-      // Let's mock Date.now() too if needed, or just test the state.
-      spinWheel();
-      // After spinWheel() call, since rAF is synchronous in our mock, it might have finished if the duration was 0.
-      // But it's 4-6 seconds. 
-      // Let's just mock the isSpinning transition.
+  describe('UI & State', () => {
+    test('drawWheel handles empty list', () => {
+      drawWheel([], 0);
+      expect(mockCtx.fillText).toHaveBeenCalledWith(expect.stringContaining('Add items'), expect.any(Number), expect.any(Number));
     });
-  });
 
-  describe('UI Updates', () => {
-    test('updateWheel syncs textarea to state', () => {
+    test('drawWheel draws slices for items', () => {
+      drawWheel(['A', 'B'], 0);
+      // expect at least 2 arcs (slices) + 1 for center circle + 1 for empty? 
+      // For 2 items, it should call arc twice for slices, once for center.
+      expect(mockCtx.arc).toHaveBeenCalledTimes(3); 
+    });
+
+    test('updateWheel syncs with textarea', () => {
       const input = document.getElementById('items-input');
-      input.value = 'One\nTwo\nThree';
+      input.value = 'Item 1\n\nItem 2 ';
       updateWheel();
-      expect(getItems()).toEqual(['One', 'Two', 'Three']);
+      expect(getItems()).toEqual(['Item 1', 'Item 2']);
+    });
+
+    test('clearItems resets state', () => {
+      clearItems();
+      expect(getItems()).toEqual([]);
+      expect(document.getElementById('items-input').value).toBe('');
+    });
+
+    test('loadPreset sets items', () => {
+      loadPreset('yesno');
+      expect(getItems()).toEqual(['Yes', 'No']);
+      expect(document.getElementById('items-input').value).toBe('Yes\nNo');
+    });
+
+    test('showResult and closeModal visibility', () => {
+      showResult('Winner!');
+      expect(document.getElementById('result-modal').className).not.toContain('hidden');
+      expect(document.getElementById('result-text').textContent).toBe('Winner!');
+      closeModal();
+      expect(document.getElementById('result-modal').className).toContain('hidden');
+    });
+  });
+
+  describe('Spin Animation', () => {
+    test('spinWheel flow', () => {
+      // Setup rAF mock
+      global.requestAnimationFrame = jest.fn((cb) => setTimeout(cb, 16));
+      
+      const canvas = document.getElementById('wheel-canvas');
+      const btn = document.getElementById('spin-btn');
+      
+      spinWheel();
+      expect(getIsSpinning()).toBe(true);
+      expect(canvas.className).toContain('spinning');
+      expect(btn.disabled).toBe(true);
+
+      // Fast-forward time to end of animation (duration is 4000-6000ms)
+      jest.advanceTimersByTime(7000);
+      
+      expect(getIsSpinning()).toBe(false);
+      expect(canvas.className).not.toContain('spinning');
+      expect(btn.disabled).toBe(false);
+      expect(document.getElementById('result-modal').className).not.toContain('hidden');
+    });
+
+    test('spinWheel prevents multiple spins', () => {
+      setIsSpinning(true);
+      spinWheel(); // should return immediately
+      // If it didn't return, it would have called getElementById for canvas
+      // We can check if it attempts to add 'spinning' again or similar, 
+      // but isSpinning check is first.
     });
   });
 });

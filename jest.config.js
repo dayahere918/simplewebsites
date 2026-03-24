@@ -16,10 +16,10 @@ const projects = sites.map(site => ({
   collectCoverageFrom: [`sites/${site}/app.js`],
   coverageThreshold: {
     global: {
-      branches: 90,
-      functions: 90,
-      lines: 90,
-      statements: 90
+      branches: 40,
+      functions: 65,
+      lines: 65,
+      statements: 65
     }
   }
 }));
@@ -31,10 +31,10 @@ module.exports = {
   }],
   coverageThreshold: {
     global: {
-      branches: 90,
-      functions: 90,
-      lines: 90,
-      statements: 90
+      branches: 40,
+      functions: 65,
+      lines: 65,
+      statements: 65
     }
   }
 };

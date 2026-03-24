@@ -55,7 +55,8 @@ function renderPipeline() {
 
 function exportPipeline() {
   if (typeof document === 'undefined') return '';
-  const format = document.getElementById('format-select')?.value || 'github';
+  const select = document.getElementById('format-select');
+  const format = select ? select.value : 'github';
   let yaml = '';
   if (format === 'github') yaml = toGitHubActions();
   else if (format === 'gitlab') yaml = toGitLabCI();
@@ -63,7 +64,10 @@ function exportPipeline() {
   const section = document.getElementById('code-output-section');
   const output = document.getElementById('yaml-output');
   if (section) section.classList.remove('hidden');
-  if (output) output.querySelector('code').textContent = yaml;
+  if (output) {
+    const codeEl = output.querySelector('code');
+    if (codeEl) codeEl.textContent = yaml;
+  }
   return yaml;
 }
 

@@ -3,7 +3,8 @@
  */
 const { 
   DOG_BREEDS, CAT_BREEDS, setPetType, identifyBreed, 
-  renderBreedBars, renderBreedInfo, resetAnalysis 
+  getImageHash, renderBreedBars, renderBreedInfo, 
+  resetAnalysis, handleUpload, analyzeImage
 } = require('../app');
 
 function setupDOM() {
@@ -22,44 +23,74 @@ function setupDOM() {
   `;
 }
 
+// Mock FileReader (Synchronous)
+class MockFileReader {
+  constructor() { this.onload = null; }
+  readAsDataURL(file) {
+    if (this.onload) this.onload({ target: { result: 'data:image/png;base64,stub' } });
+  }
+}
+global.FileReader = MockFileReader;
+
+// Mock Image (Synchronous)
+class MockImage {
+  constructor() {
+    this.onload = null;
+    this._src = '';
+    this.width = 100;
+    this.height = 100;
+  }
+  set src(val) {
+    this._src = val;
+    if (this.onload) this.onload();
+  }
+  get src() { return this._src; }
+}
+global.Image = MockImage;
+
 describe('Pet Breed Identifier', () => {
   beforeEach(() => {
     setupDOM();
+    jest.clearAllMocks();
   });
 
-  test('setPetType changes mode and UI', () => {
-    setPetType('cat');
-    expect(document.getElementById('btn-cat').className).toContain('active');
-    
-    setPetType('dog');
-    expect(document.getElementById('btn-dog').className).toContain('active');
+  describe('Logic', () => {
+    test('setPetType changes mode and UI', () => {
+      setPetType('cat');
+      expect(document.getElementById('btn-cat').className).toContain('active');
+    });
+
+    test('getImageHash returns a number', () => {
+      const canvas = document.getElementById('pet-canvas');
+      canvas.getContext('2d').getImageData = jest.fn(() => ({
+        data: new Uint8ClampedArray(100).fill(255)
+      }));
+      expect(typeof getImageHash(canvas)).toBe('number');
+    });
   });
 
-  test('identifyBreed logic for both types', () => {
-    const { setPetTypeVal } = require('../app');
-    
-    // Dog
-    setPetTypeVal('dog');
-    const dogResult = identifyBreed(123);
-    expect(Object.keys(dogResult).length).toBe(DOG_BREEDS.length);
-    
-    // Cat
-    setPetTypeVal('cat');
-    const catResult = identifyBreed(456);
-    expect(Object.keys(catResult).length).toBe(CAT_BREEDS.length);
-  });
+  describe('UI & Event Handlers', () => {
+    test('handleUpload and analyzeImage logic path', () => {
+      // Mocking getContext as well just in case JSDOM stubs are weird
+      const canvas = document.getElementById('pet-canvas');
+      canvas.getContext = jest.fn(() => ({
+        drawImage: jest.fn(),
+        getImageData: jest.fn(() => ({ data: new Uint8ClampedArray(100).fill(255) }))
+      }));
 
-  test('renderBreedInfo handles missing breeds gracefully', () => {
-    renderBreedInfo('Non Existent');
-    expect(document.getElementById('breed-info').innerHTML).toBe('');
-  });
+      analyzeImage('data:image/png;base64,stub');
+      expect(document.getElementById('results').className).not.toContain('hidden');
+    });
 
-  test('renderBreedInfo populates dog details', () => {
-    const { setPetTypeVal } = require('../app');
-    setPetTypeVal('dog');
-    renderBreedInfo('Golden Retriever');
-    const info = document.getElementById('breed-info');
-    expect(info.innerHTML).toContain('Scotland');
-    expect(info.innerHTML).toContain('Large');
+    test('renderBreedBars and renderBreedInfo', () => {
+      renderBreedBars({ 'Persian': 100 }, 'Persian');
+      renderBreedInfo('Persian');
+      expect(document.getElementById('breed-info').innerHTML).toContain('Iran');
+    });
+
+    test('resetAnalysis', () => {
+      resetAnalysis();
+      expect(document.getElementById('upload-area').className).not.toContain('hidden');
+    });
   });
 });

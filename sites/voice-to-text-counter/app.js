@@ -122,6 +122,13 @@ function clearTranscript() {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { FILLER_WORDS, countWords, countFillers, totalFillers, calculateWPM, formatDuration, highlightFillers, clearTranscript, renderFillerGrid,
-    getTranscript: () => transcript, setTranscript: t => { transcript = t; } };
+  module.exports = { 
+    FILLER_WORDS, countWords, countFillers, totalFillers, calculateWPM, formatDuration, 
+    highlightFillers, clearTranscript, renderFillerGrid, updateTimer, updateDisplay,
+    toggleRecording, startRecording, stopRecording,
+    getTranscript: () => transcript, 
+    setTranscript: t => { transcript = t; },
+    getIsRecording: () => isRecording,
+    resetState: () => { transcript = ''; isRecording = false; startTime = null; if (timerInterval) clearInterval(timerInterval); }
+  };
 }

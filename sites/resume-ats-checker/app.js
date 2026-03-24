@@ -28,7 +28,7 @@ function countWords(text) { if (!text) return 0; return text.trim().split(/\s+/)
 
 function calculateScore(matched, missing, sections, wordCount) {
   const keywordScore = missing.length + matched.length > 0 ? (matched.length / (matched.length + missing.length)) * 50 : 0;
-  const sectionScore = (sections.filter(s => s.found).length / sections.length) * 30;
+  const sectionScore = (sections && sections.length > 0) ? (sections.filter(s => s.found).length / sections.length) * 30 : 0;
   const lengthScore = wordCount >= 300 && wordCount <= 800 ? 20 : wordCount >= 200 ? 15 : wordCount >= 100 ? 10 : 5;
   return Math.min(100, Math.round(keywordScore + sectionScore + lengthScore));
 }
@@ -57,8 +57,12 @@ function generateTips(matched, missing, sections, wordCount) {
 
 function analyzeResume() {
   if (typeof document === 'undefined') return;
-  const resumeText = document.getElementById('resume-text')?.value || '';
-  const jobDesc = document.getElementById('job-desc')?.value || '';
+  const resumeEl = document.getElementById('resume-text');
+  const jobEl = document.getElementById('job-desc');
+  if (!resumeEl || !jobEl) return;
+  
+  const resumeText = resumeEl.value || '';
+  const jobDesc = jobEl.value || '';
   if (!resumeText.trim() || !jobDesc.trim()) return;
 
   const resumeKeywords = extractKeywords(resumeText);

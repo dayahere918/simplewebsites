@@ -2,48 +2,69 @@
  * @jest-environment jsdom
  */
 const { 
-  RESOURCES, updateResources, updateParams, generateSnippet 
+  RESOURCES, updateResources, updateParams, generateSnippet, copyCode
 } = require('../app');
 
 function setupDOM() {
   document.body.innerHTML = `
-    <select id="provider"><option value="aws">AWS</option><option value="gcp">GCP</option></select>
+    <select id="provider">
+      <option value="aws">AWS</option>
+      <option value="gcp">GCP</option>
+      <option value="azure">Azure</option>
+    </select>
     <select id="resource-type"></select>
     <div id="params-area"></div>
     <div id="code-output"><code></code></div>
   `;
 }
 
-describe('Terraform Snippet Generator', () => {
+// Mock Navigator Clipboard
+Object.assign(navigator, {
+  clipboard: {
+    writeText: jest.fn().mockResolvedValue(undefined)
+  }
+});
+
+describe('Terraform Snippet Generator - Exhaustive', () => {
   beforeEach(() => {
     setupDOM();
     updateResources();
+    jest.clearAllMocks();
   });
 
-  test('updateResources populates resource selector', () => {
-    const sel = document.getElementById('resource-type');
-    expect(sel.children.length).toBeGreaterThan(0);
-    expect(sel.value).toBe('EC2 Instance');
+  test('All resource templates for all providers', () => {
+    const providerDropdown = document.getElementById('provider');
+    const resourceDropdown = document.getElementById('resource-type');
+
+    Object.keys(RESOURCES).forEach(provider => {
+      providerDropdown.value = provider;
+      updateResources();
+
+      Object.keys(RESOURCES[provider]).forEach(resource => {
+        resourceDropdown.value = resource;
+        updateParams();
+        
+        // Test with default values
+        const code = generateSnippet();
+        expect(code).toContain('resource "');
+        expect(code).toContain('provider "');
+
+        // Test with custom values for specific edge cases (like S3 versioning)
+        if (resource === 'S3 Bucket') {
+          const versioningInput = document.getElementById('param-versioning');
+          if (versioningInput) {
+            versioningInput.value = 'false';
+            const disabledCode = generateSnippet();
+            expect(disabledCode).toContain('status = "Disabled"');
+          }
+        }
+      });
+    });
   });
 
-  test('updateParams creates input fields', () => {
-    updateParams();
-    const area = document.getElementById('params-area');
-    expect(area.children.length).toBeGreaterThan(0);
-    // Resource 'EC2 Instance' params include 'name', 'ami', etc.
-    expect(document.getElementById('param-name')).not.toBeNull();
-  });
-
-  test('generateSnippet produces valid HCL block', () => {
-    const code = generateSnippet();
-    expect(code).toContain('resource "aws_instance"');
-    expect(code).toContain('provider "aws"');
-  });
-
-  test('switching provider updates resources', () => {
-    document.getElementById('provider').value = 'gcp';
-    updateResources();
-    const sel = document.getElementById('resource-type');
-    expect(sel.value).toBe('Compute Instance');
+  test('copyCode uses clipboard', () => {
+    generateSnippet();
+    copyCode();
+    expect(navigator.clipboard.writeText).toHaveBeenCalled();
   });
 });

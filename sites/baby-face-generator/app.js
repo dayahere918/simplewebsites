@@ -104,6 +104,10 @@ function resetAll() {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { TRAITS, blendImages, generateTraits, generateBaby, downloadResult, resetAll,
-    getState: () => ({ parent1Loaded, parent2Loaded }), setParent1: v => { parent1Loaded = v; }, setParent2: v => { parent2Loaded = v; } };
+  module.exports = { 
+    TRAITS, blendImages, generateTraits, generateBaby, downloadResult, resetAll, loadParent,
+    getState: () => ({ parent1Loaded, parent2Loaded }), 
+    setParent1: v => { parent1Loaded = v; }, 
+    setParent2: v => { parent2Loaded = v; } 
+  };
 }

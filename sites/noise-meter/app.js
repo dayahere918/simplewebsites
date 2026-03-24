@@ -111,6 +111,13 @@ function resetReadings() {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { dbFromFloat, getLevel, getLevelLabel, getAverage, updateDisplay, resetReadings, toggleMeter,
-    getState: () => ({ isRunning, readings, peakDb, minDb }), setReadings: r => { readings = r; }, setPeak: p => { peakDb = p; }, setMin: m => { minDb = m; } };
+  module.exports = { 
+    dbFromFloat, getLevel, getLevelLabel, getAverage, updateDisplay, resetReadings, toggleMeter, updateMeter, stopMeter,
+    getState: () => ({ isRunning, readings, peakDb, minDb }), 
+    setReadings: r => { readings = r; }, 
+    setPeak: p => { peakDb = p; }, 
+    setMin: m => { minDb = m; },
+    setIsRunning: r => { isRunning = r; },
+    setAnalyser: a => { analyser = a; }
+  };
 }
