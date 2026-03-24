@@ -26,19 +26,26 @@ jobs:
           # All sites list for fallback
           ALL_SITES='["picker-wheel","festival-countdown","bill-splitter","emoji-translator","sleep-calculator","startup-idea-generator","loan-visualizer","height-comparison","color-palette-extractor","typing-speed-race","noise-meter","voice-to-text-counter","mood-board-generator","aws-cost-estimator","terraform-snippet-generator","cicd-visualizer","cloud-service-comparison","resume-ats-checker","face-shape-detector","baby-face-generator","pet-breed-identifier"]'
           
+          # Expand detection to include core infrastructure and workflows
+          CORE_PATTERN='^(shared/|scripts/|package|jest.config.js|\.github/workflows/|terraform/|\.dockerignore|Dockerfile|docker-compose.yml)'
+          
           if [ "${{ github.event_name }}" = "push" ]; then
             CHANGED=$(git diff --name-only HEAD~1 HEAD | grep '^sites/' | cut -d'/' -f2 | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            SHARED_COUNT=$(git diff --name-only HEAD~1 HEAD | grep -E '^(shared/|package|jest.config.js)' -c || true)
+            SHARED_COUNT=$(git diff --name-only HEAD~1 HEAD | grep -E "$CORE_PATTERN" -c || true)
           else
             CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }} HEAD | grep '^sites/' | cut -d'/' -f2 | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            SHARED_COUNT=$(git diff --name-only ${{ github.event.pull_request.base.sha }} HEAD | grep -E '^(shared/|package|jest.config.js)' -c || true)
+            SHARED_COUNT=$(git diff --name-only ${{ github.event.pull_request.base.sha }} HEAD | grep -E "$CORE_PATTERN" -c || true)
           fi
           
           if [ "$SHARED_COUNT" -gt 0 ]; then
-            echo "sites=$ALL_SITES" >> $GITHUB_OUTPUT
+            echo "sites<<EOF" >> $GITHUB_OUTPUT
+            echo "$ALL_SITES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
             echo "shared=1" >> $GITHUB_OUTPUT
           else
-            echo "sites=${CHANGED:-[]}" >> $GITHUB_OUTPUT
+            echo "sites<<EOF" >> $GITHUB_OUTPUT
+            echo "${CHANGED:-[]}" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
             echo "shared=0" >> $GITHUB_OUTPUT
           fi
 
