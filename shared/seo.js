@@ -27,6 +27,10 @@ function generateMetaTags(config) {
 
   const tags = [];
 
+  if (config.title) {
+    tags.push(`<title>${escapeHtml(config.title)}</title>`);
+  }
+
   // Basic meta
   if (config.description) {
     tags.push(`<meta name="description" content="${escapeHtml(config.description)}">`);

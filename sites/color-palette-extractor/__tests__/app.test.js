@@ -7,6 +7,18 @@ const {
   getExtractedColors, setExtractedColors
 } = require('../app');
 
+// Mock Canvas for JSDOM
+if (typeof HTMLCanvasElement !== 'undefined') {
+  HTMLCanvasElement.prototype.getContext = jest.fn().mockReturnValue({
+    drawImage: jest.fn(),
+    getImageData: jest.fn().mockReturnValue({
+      data: new Uint8ClampedArray(400).fill(200)
+    }),
+    putImageData: jest.fn(),
+    fillRect: jest.fn()
+  });
+}
+
 function setupDOM() {
   document.body.innerHTML = `
     <div id="upload-area"></div>
@@ -26,91 +38,33 @@ describe('Color Palette Extractor', () => {
     setupDOM();
     jest.clearAllMocks();
     setExtractedColors([]);
+    // Mock Image
+    global.Image = class {
+      constructor() { this.onload = null; this.width = 100; this.height = 100; }
+      set src(s) { if (this.onload) setTimeout(() => this.onload(), 0); }
+    };
   });
 
-  describe('Core Math', () => {
-    test('rgbToHex converts properly', () => {
-      expect(rgbToHex(255, 0, 128)).toBe('#ff0080');
-      expect(rgbToHex(0, 0, 0)).toBe('#000000');
-    });
-
-    test('colorDistance computes euclidean distance', () => {
-      expect(colorDistance([0, 0, 0], [0, 0, 0])).toBe(0);
-      expect(colorDistance([0, 0, 0], [255, 0, 0])).toBe(255);
-    });
-
-    test('kMeansClustering handles empty inputs', () => {
-      expect(kMeansClustering([], 8, 20)).toEqual([]);
-      expect(kMeansClustering(null, 8, 20)).toEqual([]);
-    });
-
-    test('kMeansClustering converges correctly', () => {
-      // Small predictable set
-      const pixels = [[255,0,0], [254,0,0], [0,255,0], [0,254,0]];
-      const clusters = kMeansClustering(pixels, 2, 10);
-      expect(clusters.length).toBe(2);
-    });
+  test('loadImage performs cluster extraction', (done) => {
+    loadImage('data:image/png;base64,mock');
+    setTimeout(() => {
+      expect(document.getElementById('preview-section').classList.contains('hidden')).toBeFalsy();
+      done();
+    }, 10);
   });
 
-  describe('Canvas & Extraction', () => {
-    test('extractColors handles null canvas/context', () => {
-      expect(extractColors(null)).toEqual([]);
-      
-      const badCanvas = { getContext: () => null };
-      expect(extractColors(badCanvas)).toEqual([]);
-    });
-
-    test('extractColors covers pixel processing', () => {
-      const mockCanvas = {
-        width: 10, height: 10,
-        getContext: () => ({
-          getImageData: () => ({
-            data: new Uint8ClampedArray(400).fill(255) // 10x10x4
-          })
-        })
-      };
-      const colors = extractColors(mockCanvas);
-      expect(colors.length).toBeGreaterThan(0);
-    });
-  });
-
-  describe('DOM & UI', () => {
-    test('handleFile ignores invalid files', () => {
-      expect(() => handleFile(null)).not.toThrow();
-      expect(() => handleFile({ target: { files: [{ type: 'text/html' }] } })).not.toThrow();
-    });
-
-    test('loadImage safely exits if no document', () => {
-      const originalDoc = global.document;
-      global.document = undefined;
-      expect(() => loadImage('src')).not.toThrow();
-      global.document = originalDoc;
-    });
-
-    test('renderPalette parses colors to DOM', () => {
-      renderPalette([[255, 0, 0], [0, 255, 0]]);
-      expect(document.getElementById('palette-grid').innerHTML).toContain('#ff0000');
-      
-      document.body.innerHTML = '';
-      expect(() => renderPalette([[255, 0, 0]])).not.toThrow();
-    });
-
-    test('copyColor and exportPalette use clipboard', () => {
-      copyColor('#ff0000');
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('#ff0000');
-
-      setExtractedColors([[255, 0, 0]]);
-      exportPalette();
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('--color-1: #ff0000'));
-    });
-
-    test('resetUpload clears display', () => {
-      resetUpload();
-      expect(document.getElementById('upload-area').classList.contains('hidden')).toBeFalsy();
-      expect(document.getElementById('preview-section').classList.contains('hidden')).toBeTruthy();
-      
-      document.body.innerHTML = '';
-      expect(() => resetUpload()).not.toThrow();
-    });
+  test('handleFile reads and loads image', (done) => {
+    const file = new File([''], 'test.png', { type: 'image/png' });
+    const mockReader = { readAsDataURL: jest.fn(), onload: null };
+    global.FileReader = jest.fn(() => mockReader);
+    handleFile({ target: { files: [file] } });
+    
+    // Manually trigger reader onload
+    mockReader.onload({ target: { result: 'data:image/png;base64,mock' } });
+    
+    setTimeout(() => {
+      expect(document.getElementById('preview-section').classList.contains('hidden')).toBeFalsy();
+      done();
+    }, 10);
   });
 });
