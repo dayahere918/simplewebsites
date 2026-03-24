@@ -23,15 +23,24 @@ jobs:
       - name: Detect changed sites
         id: changes
         run: |
+          # All sites list for fallback
+          ALL_SITES='["picker-wheel","festival-countdown","bill-splitter","emoji-translator","sleep-calculator","startup-idea-generator","loan-visualizer","height-comparison","color-palette-extractor","typing-speed-race","noise-meter","voice-to-text-counter","mood-board-generator","aws-cost-estimator","terraform-snippet-generator","cicd-visualizer","cloud-service-comparison","resume-ats-checker","face-shape-detector","baby-face-generator","pet-breed-identifier"]'
+          
           if [ "${{ github.event_name }}" = "push" ]; then
             CHANGED=$(git diff --name-only HEAD~1 HEAD | grep '^sites/' | cut -d'/' -f2 | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            SHARED=$(git diff --name-only HEAD~1 HEAD | grep -c '^shared/' || true)
+            SHARED_COUNT=$(git diff --name-only HEAD~1 HEAD | grep -E '^(shared/|package|jest.config.js)' -c || true)
           else
             CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }} HEAD | grep '^sites/' | cut -d'/' -f2 | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            SHARED=$(git diff --name-only ${{ github.event.pull_request.base.sha }} HEAD | grep -c '^shared/' || true)
+            SHARED_COUNT=$(git diff --name-only ${{ github.event.pull_request.base.sha }} HEAD | grep -E '^(shared/|package|jest.config.js)' -c || true)
           fi
-          echo "sites=${CHANGED:-[]}" >> $GITHUB_OUTPUT
-          echo "shared=${SHARED}" >> $GITHUB_OUTPUT
+          
+          if [ "$SHARED_COUNT" -gt 0 ]; then
+            echo "sites=$ALL_SITES" >> $GITHUB_OUTPUT
+            echo "shared=1" >> $GITHUB_OUTPUT
+          else
+            echo "sites=${CHANGED:-[]}" >> $GITHUB_OUTPUT
+            echo "shared=0" >> $GITHUB_OUTPUT
+          fi
 
   test:
     needs: detect-changes
@@ -136,11 +145,12 @@ jobs:
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy:
-    needs: [build, terraform]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [build, terraform, detect-changes]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.detect-changes.outputs.sites != '[]'
     strategy:
+      fail-fast: false
       matrix:
-        site: [picker-wheel, festival-countdown, bill-splitter, emoji-translator, sleep-calculator, startup-idea-generator, loan-visualizer, height-comparison, color-palette-extractor, typing-speed-race, noise-meter, voice-to-text-counter, mood-board-generator, aws-cost-estimator, terraform-snippet-generator, cicd-visualizer, cloud-service-comparison, resume-ats-checker, face-shape-detector, baby-face-generator, pet-breed-identifier]
+        site: ${{ fromJson(needs.detect-changes.outputs.sites) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -156,4 +166,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy ${{ matrix.site }} --project-name=${{ matrix.site }}
+          command: pages deploy dist/${{ matrix.site }} --project-name=${{ matrix.site }}
