@@ -1,7 +1,4 @@
-output "site_urls" {
-  description = "Cloudflare Pages deployment URLs for each site"
-  value = {
-    for name, project in cloudflare_pages_project.sites :
-    name => "https://${project.subdomain}"
-  }
+output "site_url" {
+  description = "The root URL of the monolithic tools deployment"
+  value       = "https://${cloudflare_pages_project.stacky.subdomain}"
 }
