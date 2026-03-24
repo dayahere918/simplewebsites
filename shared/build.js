@@ -106,9 +106,17 @@ function buildAll() {
 
   console.log(`Building ${sites.length} sites into ${GLOBAL_DIST}...`);
   
-  // Copy shared assets to global dist root if needed (e.g. for a hub page)
+  // Copy shared assets to global dist root
   copyFileSync(path.join(SHARED_DIR, 'styles.css'), path.join(GLOBAL_DIST, 'shared-styles.css'));
   copyFileSync(path.join(SHARED_DIR, 'theme-toggle.js'), path.join(GLOBAL_DIST, 'shared-theme-toggle.js'));
+
+  // Copy monetization & legal assets if they exist
+  ['ads.txt', 'privacy.html', 'terms.html'].forEach(file => {
+    const src = path.join(SHARED_DIR, file);
+    if (fs.existsSync(src)) {
+      copyFileSync(src, path.join(GLOBAL_DIST, file));
+    }
+  });
 
   sites.forEach(buildSite);
 
