@@ -11,7 +11,7 @@ variable "cloudflare_account_id" {
   sensitive   = true
 }
 
-variable "sites" {
+variable "site_names" {
   description = "List of site project names for Cloudflare Pages"
   type        = list(string)
   default = [
