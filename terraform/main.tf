@@ -1,11 +1,12 @@
-resource "cloudflare_pages_project" "stacky" {
+resource "cloudflare_pages_project" "sites" {
+  for_each          = toset(var.sites)
   account_id        = var.cloudflare_account_id
-  name              = "stacky-tools"
+  name              = each.value
   production_branch = "main"
 
   build_config {
     build_command   = "npm run build"
-    destination_dir = "dist"
+    destination_dir = "sites/${each.value}/dist"
   }
 
   deployment_configs {
