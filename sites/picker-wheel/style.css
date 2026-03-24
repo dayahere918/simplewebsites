@@ -1,4 +1,5 @@
 /* Picker Wheel — Site-Specific Styles */
+.hidden { display: none !important; }
 
 .app-layout {
   display: grid;
