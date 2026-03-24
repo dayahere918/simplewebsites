@@ -125,6 +125,9 @@ jobs:
   deploy:
     needs: [build, terraform]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    strategy:
+      matrix:
+        site: [picker-wheel, festival-countdown, bill-splitter, emoji-translator, sleep-calculator, startup-idea-generator, loan-visualizer, height-comparison, color-palette-extractor, typing-speed-race, noise-meter, voice-to-text-counter, mood-board-generator, aws-cost-estimator, terraform-snippet-generator, cicd-visualizer, cloud-service-comparison, resume-ats-checker, face-shape-detector, baby-face-generator, pet-breed-identifier]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -140,4 +143,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=stacky-tools
+          command: pages deploy dist/${{ matrix.site }} --project-name=${{ matrix.site }}
