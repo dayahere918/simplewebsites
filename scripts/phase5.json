@@ -1,0 +1,87 @@
+[
+    {
+        "category": "Self-Hosting OS",
+        "icon": "🏠",
+        "description": "Naked metal homelab supervisors and smart home servers.",
+        "tools": [
+            { "name": "Umbrel", "url": "https://umbrel.com/", "desc": "Home server OS for self-hosting apps and personal nodes." },
+            { "name": "CasaOS", "url": "https://casaos.io/", "desc": "Simple, elegant personal cloud dashboard built for Docker." },
+            { "name": "TrueNAS CORE", "url": "https://www.truenas.com/truenas-core/", "desc": "The World's #1 Open Source Storage OS (ZFS)." },
+            { "name": "Proxmox VE", "url": "https://www.proxmox.com/", "desc": "Enterprise-class virtualization platform (VMs & LXC)." },
+            { "name": "OpenMediaVault", "url": "https://www.openmediavault.org/", "desc": "The next generation network attached storage (NAS) solution." },
+            { "name": "XCP-ng", "url": "https://xcp-ng.org/", "desc": "High performance enterprise-level virtualization platform without limits." },
+            { "name": "Yunohost", "url": "https://yunohost.org/", "desc": "Server OS aiming to make self-hosting accessible to everyone." },
+            { "name": "DietPi", "url": "https://dietpi.com/", "desc": "Ligthweight justice for your single-board computers (Raspberry Pi)." },
+            { "name": "Sandstorm", "url": "https://sandstorm.io/", "desc": "Open source platform for personal servers with radical app confinement." },
+            { "name": "FreedomBox", "url": "https://freedombox.org/", "desc": "A private web server for non-experts." }
+        ]
+    },
+    {
+        "category": "Project & Task",
+        "icon": "📊",
+        "description": "Agile kanbans, timesheets, and collaborative boards.",
+        "tools": [
+            { "name": "Taiga", "url": "https://taiga.io/", "desc": "Project management platform for agile developers & designers." },
+            { "name": "Focalboard", "url": "https://www.focalboard.com/", "desc": "Self-hosted project management (Open source Notion alt)." },
+            { "name": "Plane", "url": "https://plane.so/", "desc": "The open-source software development tool to manage issues." },
+            { "name": "Planka", "url": "https://planka.app/", "desc": "Elegant open source project tracking for agile teams (Trello alt)." },
+            { "name": "Wekan", "url": "https://wekan.github.io/", "desc": "The open-source kanban (built with Meteor)." },
+            { "name": "Vikunja", "url": "https://vikunja.io/", "desc": "The open-source, self-hostable to-do app to organize your life." },
+            { "name": "Super Productivity", "url": "https://super-productivity.com/", "desc": "To do list & time tracker for programmers and designers." },
+            { "name": "Taskwarrior", "url": "https://taskwarrior.org/", "desc": "Free and Open Source command-line task management." },
+            { "name": "Leantime", "url": "https://leantime.io/", "desc": "Strategic project management for non-project managers." },
+            { "name": "OpenProject", "url": "https://www.openproject.org/", "desc": "The leading open source project management software." }
+        ]
+    },
+    {
+        "category": "Team Chat",
+        "icon": "🗨️",
+        "description": "Encrypted communications and workplace collaboration hubs.",
+        "tools": [
+            { "name": "Element", "url": "https://element.io/", "desc": "Secure, decentralized communication utilizing the Matrix protocol." },
+            { "name": "Zulip", "url": "https://zulip.com/", "desc": "Open-source team chat that helps avoid inbox overload with threading." },
+            { "name": "Mattermost", "url": "https://mattermost.com/", "desc": "Secure collaboration hub for technical and operational teams." },
+            { "name": "Rocket.Chat", "url": "https://rocket.chat/", "desc": "Fully customizable open source communications platform." },
+            { "name": "Revolt", "url": "https://revolt.chat/", "desc": "Open source, privacy-first Discord alternative." },
+            { "name": "Signal", "url": "https://signal.org/", "desc": "The standard metric for encrypted messaging worldwide." },
+            { "name": "Session", "url": "https://getsession.org/", "desc": "End-to-end encrypted messenger that removes sensitive metadata." },
+            { "name": "Tox", "url": "https://tox.chat/", "desc": "A New Kind of Instant Messaging. Secure and distributed." },
+            { "name": "Jami", "url": "https://jami.net/", "desc": "Free and universal GNU communication software respecting user freedom." },
+            { "name": "Delta Chat", "url": "https://delta.chat/", "desc": "Chat app that works like Telegram but runs over the traditional email network." }
+        ]
+    },
+    {
+        "category": "Health & Wellbeing",
+        "icon": "🧘",
+        "description": "Ergonomics, blue light reduction, and habit building.",
+        "tools": [
+            { "name": "f.lux", "url": "https://justgetflux.com/", "desc": "Adapts your computer's display color tone to the time of day." },
+            { "name": "Stretchly", "url": "https://hovancik.net/stretchly/", "desc": "The break time reminder app that prevents RSI." },
+            { "name": "SafeEyes", "url": "https://slgobinath.github.io/SafeEyes/", "desc": "Protect your eyes from asthenopia by strictly resting them." },
+            { "name": "Workrave", "url": "https://workrave.org/", "desc": "Assists in the recovery and prevention of Repetitive Strain Injury." },
+            { "name": "Habitica", "url": "https://habitica.com/", "desc": "Gamify your life with this open source habit building app." },
+            { "name": "Loop Habit Tracker", "url": "https://loophabits.org/", "desc": "Track your habits completely offline with open source Android app." },
+            { "name": "ActivityWatch", "url": "https://activitywatch.net/", "desc": "Open-source, privacy-first automated time tracker." },
+            { "name": "Redshift", "url": "http://jonls.dk/redshift/", "desc": "Adjusts the color temperature of your screen locally on Linux." },
+            { "name": "LightBulb", "url": "https://github.com/Tyrrrz/LightBulb", "desc": "Reduces eye strain by modifying display gamma based on sun position (Windows)." },
+            { "name": "Pomotroid", "url": "https://github.com/Splode/pomotroid", "desc": "Simple & highly customizable Pomodoro timer with aesthetics." }
+        ]
+    },
+    {
+        "category": "Game Development",
+        "icon": "🎮",
+        "description": "Cross-platform visual and scripted game engines.",
+        "tools": [
+            { "name": "Godot", "url": "https://godotengine.org/", "desc": "Advanced, feature-packed, multi-platform open source game engine." },
+            { "name": "Defold", "url": "https://defold.com/", "desc": "Free and open game engine used for cross-platform games." },
+            { "name": "GDevelop", "url": "https://gdevelop.io/", "desc": "Open-source, cross-platform game engine designed for everyone (No code)." },
+            { "name": "UPBGE", "url": "https://upbge.org/", "desc": "Open-source 3D game engine branched from the old Blender Game Engine." },
+            { "name": "Ren'Py", "url": "https://www.renpy.org/", "desc": "The world's most famous visual novel engine." },
+            { "name": "Twine", "url": "https://twinery.org/", "desc": "Open-source tool for telling interactive, nonlinear stories." },
+            { "name": "LÖVE", "url": "https://love2d.org/", "desc": "Awesome 2D Game Framework built dynamically in Lua." },
+            { "name": "Raylib", "url": "https://www.raylib.com/", "desc": "A simple and easy-to-use C library to enjoy videogames programming." },
+            { "name": "Phaser", "url": "https://phaser.io/", "desc": "A fast, free, and fun open source HTML5 game framework." },
+            { "name": "Stencyl", "url": "https://www.stencyl.com/", "desc": "Create Flash, iOS, Android and PC games without code (Free tier)." }
+        ]
+    }
+]

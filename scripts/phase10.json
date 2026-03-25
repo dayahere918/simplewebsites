@@ -1,0 +1,87 @@
+[
+    {
+        "category": "API Testing",
+        "icon": "🔗",
+        "description": "REST payload mockers, runners, and GraphQL evaluators.",
+        "tools": [
+            { "name": "SoapUI", "url": "https://www.soapui.org/", "desc": "The world's most widely-used automated testing tool for SOAP and REST APIs." },
+            { "name": "Thunder Client", "url": "https://www.thunderclient.com/", "desc": "Lightweight REST API Client Extension strictly natively inside VS Code." },
+            { "name": "REST Client", "url": "https://marketplace.visualstudio.com/items?itemName=humao.rest-client", "desc": "Superb VS Code extension allowing directly sending text-based HTTP requests." },
+            { "name": "TestMace", "url": "https://testmace.com/", "desc": "Modern powerful IDE heavily focusing specifically on APIs (Free tier)." },
+            { "name": "HttpMaster", "url": "https://www.httpmaster.net/", "desc": "Reliable testing functionality seamlessly verifying API responses natively." },
+            { "name": "Karate", "url": "https://github.com/karatelabs/karate", "desc": "Open-source framework directly integrating API test automation, mocks, and performance." },
+            { "name": "Yaak", "url": "https://yaak.app/", "desc": "The desktop API client beautifully organizing REST and GraphQL completely locally." },
+            { "name": "Apidog", "url": "https://apidog.com/", "desc": "All-in-one platform integrating testing, mocking, and design (Free)." },
+            { "name": "Milkman", "url": "https://github.com/warmuuh/milkman", "desc": "Highly extensible open-source desktop workspace crafting rapid HTTP/REST tests." },
+            { "name": "Restyled", "url": "https://github.com/mulesoft/restyled", "desc": "Free interactive platform providing solid visual REST execution engines." }
+        ]
+    },
+    {
+        "category": "Automation (CI)",
+        "icon": "⚙️",
+        "description": "Continuous integration, declarative delivery, and devops lifecycles.",
+        "tools": [
+            { "name": "Jenkins", "url": "https://www.jenkins.io/", "desc": "The legendary leading open source automation server spanning massive plugins." },
+            { "name": "Gitea Actions", "url": "https://docs.gitea.com/usage/actions/overview", "desc": "Natively integrated CI/CD directly mirroring GitHub Actions syntax locally." },
+            { "name": "GitLab CI", "url": "https://docs.gitlab.com/ee/ci/", "desc": "Incredible tightly integrated DevOps platform completely free for local runners." },
+            { "name": "Buildbot", "url": "https://buildbot.net/", "desc": "Python-based continuous integration globally scheduling complex dynamic pipelines." },
+            { "name": "Drone", "url": "https://www.drone.io/", "desc": "Container-native CI orchestrating smoothly atop Docker infrastructures." },
+            { "name": "Concourse", "url": "https://concourse-ci.org/", "desc": "Pipeline-based continuous integration strictly executing tasks blindly and safely." },
+            { "name": "Woodpecker", "url": "https://woodpecker-ci.org/", "desc": "Simple CI engine closely branching directly off earlier Drone models." },
+            { "name": "ArgoCD", "url": "https://argo-cd.readthedocs.io/", "desc": "Declarative, massively resilient GitOps continuous delivery tool purely for Kubernetes." },
+            { "name": "Flux", "url": "https://fluxcd.io/", "desc": "Open and extensible continuous delivery exclusively keeping Kubernetes clustered safely." },
+            { "name": "Tekton", "url": "https://tekton.dev/", "desc": "Powerful cloud-native framework actively building CI/CD tightly alongside Kubernetes." }
+        ]
+    },
+    {
+        "category": "VPN & Proxy",
+        "icon": "🛡️",
+        "description": "Encrypted tunnels, overlay switching fabrics, and mesh networks.",
+        "tools": [
+            { "name": "WireGuard", "url": "https://www.wireguard.com/", "desc": "Extremely simple, incredibly fast, strictly modern secure VPN architecture natively." },
+            { "name": "OpenVPN", "url": "https://openvpn.net/community/", "desc": "The most widely deployed open source SSL VPN historically reliable completely." },
+            { "name": "Tailscale", "url": "https://tailscale.com/", "desc": "Zero-config VPN securely spanning universally across all user devices (Free)." },
+            { "name": "ZeroTier", "url": "https://www.zerotier.com/", "desc": "P2P virtual networking simply abstracting complex LAN configurations tightly (Free)." },
+            { "name": "Headscale", "url": "https://github.com/juanfont/headscale", "desc": "Open source, self-hosted implementation entirely replacing Tailscale control servers." },
+            { "name": "Shadowsocks", "url": "https://shadowsocks.org/", "desc": "A secure, immensely robust socks5 proxy carefully masking internet protocol." },
+            { "name": "V2Ray", "url": "https://www.v2fly.org/", "desc": "Extremely versatile proxy platform actively bypassing strict network environments globally." },
+            { "name": "SoftEther", "url": "https://www.softether.org/", "desc": "Free cross-platform multi-protocol VPN massively outperforming classic IPsec perfectly." },
+            { "name": "Netmaker", "url": "https://www.netmaker.io/", "desc": "Automated WireGuard virtual infrastructure tightly securing microservices cleanly." },
+            { "name": "Outline", "url": "https://getoutline.org/", "desc": "Make it safely easy sharing incredibly robust VPN access completely built open." }
+        ]
+    },
+    {
+        "category": "AI & ML",
+        "icon": "🦾",
+        "description": "Local large language inferencing and image synthesis.",
+        "tools": [
+            { "name": "Ollama", "url": "https://ollama.com/", "desc": "Get up and running locally immediately launching incredibly large language models." },
+            { "name": "LM Studio", "url": "https://lmstudio.ai/", "desc": "Discover, download, and seamlessly spin completely offline huggingface models globally." },
+            { "name": "GPT4All", "url": "https://gpt4all.io/", "desc": "Free-to-use natively operating ecosystem closely inferencing massive edge models." },
+            { "name": "InvokeAI", "url": "https://invoke-ai.github.io/InvokeAI/", "desc": "Beautiful creative engine seamlessly providing incredibly stable diffusion styling." },
+            { "name": "Automatic1111", "url": "https://github.com/AUTOMATIC1111/stable-diffusion-webui", "desc": "The most feature-rich web ui perfectly accelerating local diffusion workflows." },
+            { "name": "ComfyUI", "url": "https://github.com/comfyanonymous/ComfyUI", "desc": "Node-based graphical deeply powerful interface flawlessly driving stable diffusion." },
+            { "name": "Jan", "url": "https://jan.ai/", "desc": "Open source ChatGPT-equivalent seamlessly executing heavily locally across devices." },
+            { "name": "LocalAI", "url": "https://localai.io/", "desc": "Drop-in heavily optimized strict replacement exactly mirroring OpenAI API natively." },
+            { "name": "HuggingFace Chat", "url": "https://huggingface.co/chat/", "desc": "The open alternative completely securely interacting tightly with top massive models." },
+            { "name": "AnythingLLM", "url": "https://useanything.com/", "desc": "The strictly private brilliantly scalable application precisely managing RAG flawlessly." }
+        ]
+    },
+    {
+        "category": "OSINT & Security",
+        "icon": "🕵️",
+        "description": "Threat harvesting, packet injection, and ethical penetration suites.",
+        "tools": [
+            { "name": "Maltego (CE)", "url": "https://www.maltego.com/", "desc": "Incredible graphical link analysis natively mapping incredibly complex intelligence accurately." },
+            { "name": "Recon-ng", "url": "https://github.com/lanmaster53/recon-ng", "desc": "Full-featured web reconnaissance seamlessly acting absolutely globally identically completely." },
+            { "name": "SpiderFoot", "url": "https://www.spiderfoot.net/", "desc": "Automate completely Open Source Intelligence practically targeting IPs perfectly cleanly." },
+            { "name": "Shodan", "url": "https://www.shodan.io/", "desc": "The legendary search engine explicitly spanning internet-connected insecure endpoints strictly." },
+            { "name": "Metasploit", "url": "https://www.metasploit.com/", "desc": "The world's absolute most widely used native penetration testing framework securely." },
+            { "name": "Burp Suite CE", "url": "https://portswigger.net/burp/communitydownload", "desc": "The essential native manual toolkit seamlessly intercepting incredibly deep proxy requests." },
+            { "name": "OWASP ZAP", "url": "https://www.zaproxy.org/", "desc": "The world's perfectly widely used free automated native web app scanner securely." },
+            { "name": "Sherlock", "url": "https://github.com/sherlock-project/sherlock", "desc": "Hunt down securely incredibly deep social media locally completely identically accurately." },
+            { "name": "The Harvester", "url": "https://github.com/laramies/theHarvester", "desc": "Gather brilliantly structured native emails precisely analyzing tightly completely incredibly." },
+            { "name": "OSINT Framework", "url": "https://osintframework.com/", "desc": "The absolute massive comprehensive tightly gathered completely deeply structured intelligence directory." }
+        ]
+    }
+]

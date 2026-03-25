@@ -1,0 +1,87 @@
+[
+    {
+        "category": "Networking & Monitoring",
+        "icon": "📡",
+        "description": "Packet sniffers, node explorers, and connection interceptors.",
+        "tools": [
+            { "name": "Wireshark", "url": "https://www.wireshark.org/", "desc": "The world's most widely-used network protocol analyzer." },
+            { "name": "Nmap", "url": "https://nmap.org/", "desc": "Free utility for network discovery and security auditing." },
+            { "name": "Angry IP", "url": "https://angryip.org/", "desc": "Fast and friendly network scanner for Windows, Mac and Linux." },
+            { "name": "Proxyman", "url": "https://proxyman.io/", "desc": "Modern Web Debugging Proxy for macOS, iOS, and Android (Free Tier)." },
+            { "name": "Fiddler Classic", "url": "https://www.telerik.com/fiddler/fiddler-classic", "desc": "The original free web debugging proxy for Windows." },
+            { "name": "Netron", "url": "https://netron.app/", "desc": "Visualizer for neural network topology and deep learning models." },
+            { "name": "TCPView", "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/tcpview", "desc": "Windows program that shows detailed listings of all TCP/UDP endpoints." },
+            { "name": "GlassWire", "url": "https://www.glasswire.com/", "desc": "Visual network monitor & firewall to catch unexpected threats (Free tier)." },
+            { "name": "SlothInspect", "url": "https://github.com/aress31/slothinspect", "desc": "Network traffic analyzer designed for simplicity." },
+            { "name": "Zenmap", "url": "https://nmap.org/zenmap/", "desc": "Official Nmap Security Scanner GUI." }
+        ]
+    },
+    {
+        "category": "PDF Utilities",
+        "icon": "📄",
+        "description": "Merge, sign, annotate, and self-hosted document toolkits.",
+        "tools": [
+            { "name": "Stirling-PDF", "url": "https://github.com/Stirling-Tools/Stirling-PDF", "desc": "Robust, locally hosted web-based PDF manipulation tool." },
+            { "name": "PDF24", "url": "https://tools.pdf24.org/", "desc": "Free online and desktop tools targeting all PDF needs." },
+            { "name": "Sumatra PDF", "url": "https://www.sumatrapdfreader.org/", "desc": "Incredibly fast, minimalist PDF, eBook, and comic reader." },
+            { "name": "Okular", "url": "https://okular.kde.org/", "desc": "Universal and highly equipped document viewer by KDE." },
+            { "name": "Sioyek", "url": "https://sioyek.info/", "desc": "PDF viewer designed specifically for reading research papers." },
+            { "name": "Xournal++", "url": "https://xournalpp.github.io/", "desc": "Handwriting notetaking software with PDF annotation." },
+            { "name": "PDFsam Basic", "url": "https://pdfsam.org/download-pdfsam-basic/", "desc": "Free, open source, multi-platform software to split, merge, and extract pages." },
+            { "name": "ILovePDF", "url": "https://www.ilovepdf.com/", "desc": "Every tool you need to work with PDFs in one place (Free tier)." },
+            { "name": "MuPDF", "url": "https://mupdf.com/", "desc": "Lightweight PDF, XPS, and E-book viewer." },
+            { "name": "Pdftk", "url": "https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/", "desc": "A simple command-line tool for doing everyday things with PDF documents." }
+        ]
+    },
+    {
+        "category": "Automation",
+        "icon": "🤖",
+        "description": "Macro scripts, fair-code web hooks, and system power-ups.",
+        "tools": [
+            { "name": "n8n", "url": "https://n8n.io/", "desc": "Free and open fair-code workflow automation tool (Zapier alternative)." },
+            { "name": "AutoHotkey", "url": "https://www.autohotkey.com/", "desc": "Ultimate scripting language for Windows desktop automation." },
+            { "name": "PowerToys", "url": "https://learn.microsoft.com/en-us/windows/powertoys/", "desc": "Collection of system utilities for Windows power users." },
+            { "name": "Espanso", "url": "https://espanso.org/", "desc": "Cross-platform Text Expander written in Rust." },
+            { "name": "AutoIt", "url": "https://www.autoitscript.com/", "desc": "BASIC-like scripting language designed for automating Windows GUI." },
+            { "name": "Tasker", "url": "https://tasker.joaoapps.com/", "desc": "Total automation for Android devices (Not free, but standard)." },
+            { "name": "Automate", "url": "https://llamalab.com/automate/", "desc": "Create flowcharts to automate various tasks on your Android device." },
+            { "name": "Hammerspoon", "url": "https://www.hammerspoon.org/", "desc": "Powerful automation tool for macOS using Lua scripting." },
+            { "name": "Huginn", "url": "https://github.com/huginn/huginn", "desc": "Create agents that monitor and act on your behalf on the web." },
+            { "name": "Node-RED", "url": "https://nodered.org/", "desc": "Low-code programming for event-driven applications." }
+        ]
+    },
+    {
+        "category": "File Management",
+        "icon": "📁",
+        "description": "FTP clients, deduplicators, dual-pane viewers, and archivers.",
+        "tools": [
+            { "name": "7-Zip", "url": "https://www.7-zip.org/", "desc": "The legendary open-source file archiver with max compression." },
+            { "name": "WinDirStat", "url": "https://windirstat.net/", "desc": "Disk usage statistics viewer and tree-map cleanup tool." },
+            { "name": "PeaZip", "url": "https://peazip.github.io/", "desc": "Free Zip / Unzip software and Rar file extractor." },
+            { "name": "Double Commander", "url": "https://doublecmd.sourceforge.io/", "desc": "Cross platform open source solid state dual pane file manager." },
+            { "name": "FreeFileSync", "url": "https://freefilesync.org/", "desc": "Folder comparison and synchronization software." },
+            { "name": "SyncTrayzor", "url": "https://github.com/canton7/SyncTrayzor", "desc": "Windows tray utility for Syncthing's continuous file sync." },
+            { "name": "FileZilla", "url": "https://filezilla-project.org/", "desc": "The free FTP solution for client and server deployment." },
+            { "name": "Cyberduck", "url": "https://cyberduck.io/", "desc": "Libre FTP, SFTP, WebDAV, Amazon S3, and OpenStack Swift browser." },
+            { "name": "WinSCP", "url": "https://winscp.net/", "desc": "Popular free SFTP and FTP client for Windows." },
+            { "name": "Explorer++", "url": "https://explorerplusplus.com/", "desc": "Free multi-tabbed file manager for Windows." }
+        ]
+    },
+    {
+        "category": "Science & Exploration",
+        "icon": "🔭",
+        "description": "Planetariums, compute-folding grinds, and global GIS tools.",
+        "tools": [
+            { "name": "Stellarium", "url": "https://stellarium.org/", "desc": "Awesome realistic 3D planetarium for your computer screen." },
+            { "name": "Geogebra", "url": "https://www.geogebra.org/", "desc": "Dynamic mathematics software for students bridging geometry & algebra." },
+            { "name": "Celestia", "url": "https://celestiaproject.space/", "desc": "Real-time 3D visualization of space spanning the known universe." },
+            { "name": "BOINC", "url": "https://boinc.berkeley.edu/", "desc": "Open-source software for volunteer distributed desktop grid computing." },
+            { "name": "Folding@Home", "url": "https://foldingathome.org/", "desc": "Donate idle PC power to help find cures for diseases." },
+            { "name": "JOSM", "url": "https://josm.openstreetmap.de/", "desc": "Extensible editor for OpenStreetMap written in Java." },
+            { "name": "QGIS", "url": "https://qgis.org/", "desc": "A Free and Open Source Geographic Information System." },
+            { "name": "Marble", "url": "https://marble.kde.org/", "desc": "Virtual globe and world atlas by KDE." },
+            { "name": "SpaceEngine", "url": "http://spaceengine.org/", "desc": "Realistic virtual universe you can explore (Older v0.980 is free)." },
+            { "name": "NASA Eyes", "url": "https://eyes.nasa.gov/", "desc": "Explore the Earth, Solar System, and universe in 3D." }
+        ]
+    }
+]

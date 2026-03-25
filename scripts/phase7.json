@@ -1,0 +1,87 @@
+[
+    {
+        "category": "Markdown Editors",
+        "icon": "🔖",
+        "description": "Distraction-free, offline WYSIWYG plain-text writing apps.",
+        "tools": [
+            { "name": "MarkText", "url": "https://www.marktext.cc/", "desc": "Simple and elegant open-source markdown editor with live preview." },
+            { "name": "Ghostwriter", "url": "https://ghostwriter.kde.org/", "desc": "Distraction-free markdown editor for Windows and Linux." },
+            { "name": "Abricotine", "url": "https://abricotine.brrd.fr/", "desc": "Open-source markdown editor built for desktop with inline rendering." },
+            { "name": "Zettlr", "url": "https://www.zettlr.com/", "desc": "Highly advanced editor focused on Zettelkasten and academic writing." },
+            { "name": "StackEdit", "url": "https://stackedit.io/", "desc": "In-browser markdown editor functioning fully offline." },
+            { "name": "MacDown", "url": "https://macdown.uranusjr.com/", "desc": "The premium open source Markdown editor for macOS." },
+            { "name": "Remarkable", "url": "https://remarkableapp.github.io/", "desc": "Linux Markdown Editor utilizing full GitHub styling." },
+            { "name": "KeenWrite", "url": "https://keenwrite.com/", "desc": "Free, open-source, cross-platform desktop text editor with string interpolation." },
+            { "name": "Apostrophe", "url": "https://gitlab.gnome.org/World/apostrophe", "desc": "A distraction free Markdown editor made with GTK+." },
+            { "name": "VNote", "url": "https://vnotex.github.io/vnote/", "desc": "A Vim-inspired note-taking application designed especially for programmers." }
+        ]
+    },
+    {
+        "category": "Static Site Gen",
+        "icon": "🏗️",
+        "description": "Zero-database blazing-fast blogging frameworks.",
+        "tools": [
+            { "name": "Hugo", "url": "https://gohugo.io/", "desc": "The world's fastest framework for building websites in Go." },
+            { "name": "Zola", "url": "https://www.getzola.org/", "desc": "Dead-simple, crazy-fast static site generator in Rust." },
+            { "name": "Jekyll", "url": "https://jekyllrb.com/", "desc": "Transform your plain text into static websites and blogs (Ruby)." },
+            { "name": "Eleventy (11ty)", "url": "https://www.11ty.dev/", "desc": "A simpler static site generator tailored for pure JS logic." },
+            { "name": "Astro", "url": "https://astro.build/", "desc": "The web framework for content-driven websites (zero JS by default)." },
+            { "name": "Docusaurus", "url": "https://docusaurus.io/", "desc": "Optimized project documentation tool built with React." },
+            { "name": "MkDocs", "url": "https://www.mkdocs.org/", "desc": "Fast, simple and gorgeous static site generator in Python." },
+            { "name": "Hexo", "url": "https://hexo.io/", "desc": "A fast, simple & powerful blog framework powered by Node.js." },
+            { "name": "Gatsby", "url": "https://www.gatsbyjs.com/", "desc": "A React-based open source framework with performance, scalability." },
+            { "name": "Pelican", "url": "https://getpelican.com/", "desc": "Static site generator written in Python minimizing dependencies." }
+        ]
+    },
+    {
+        "category": "Analytics",
+        "icon": "📉",
+        "description": "Self-hosted, cookieless, privacy-first data trackers.",
+        "tools": [
+            { "name": "Matomo", "url": "https://matomo.org/", "desc": "The leading Google Analytics alternative that protects your data." },
+            { "name": "Umami", "url": "https://umami.is/", "desc": "Simple, fast, privacy-focused open source web analytics." },
+            { "name": "Plausible", "url": "https://plausible.io/self-hosted", "desc": "Lightweight, privacy-friendly CE analytical software." },
+            { "name": "GoatCounter", "url": "https://www.goatcounter.com/", "desc": "Easy web analytics completely free for non-commercial use." },
+            { "name": "PostHog", "url": "https://posthog.com/", "desc": "The open source Product Operating System suite." },
+            { "name": "Shynet", "url": "https://github.com/milesmcc/shynet", "desc": "Modern, privacy-friendly, self-hosted web analytics." },
+            { "name": "Ackee", "url": "https://ackee.electerious.com/", "desc": "Self-hosted node.js based analytics tool for those who care about privacy." },
+            { "name": "Fathom Lite", "url": "https://github.com/usefathom/fathom", "desc": "The open source version of the popular Fathom Analytics." },
+            { "name": "Open Web Analytics", "url": "https://www.openwebanalytics.com/", "desc": "Open source alternative tracking software designed like GA." },
+            { "name": "Koko Analytics", "url": "https://www.kokoanalytics.com/", "desc": "Privacy-friendly, completely free local plugin for WordPress." }
+        ]
+    },
+    {
+        "category": "Monitoring Tools",
+        "icon": "🚨",
+        "description": "Status pages, time-series metrics, and alerting pipelines.",
+        "tools": [
+            { "name": "Prometheus", "url": "https://prometheus.io/", "desc": "Legendary time series database and systems monitoring." },
+            { "name": "Grafana", "url": "https://grafana.com/", "desc": "The open observability platform to visualize your Prometheus maps." },
+            { "name": "Uptime Kuma", "url": "https://uptime.kuma.pet/", "desc": "A fancy self-hosted monitoring tool (Alternative to Uptime Robot)." },
+            { "name": "Netdata", "url": "https://www.netdata.cloud/", "desc": "Real-time, high-resolution health monitoring for all containers." },
+            { "name": "Zabbix", "url": "https://www.zabbix.com/", "desc": "Enterprise-class open source distributed monitoring solution." },
+            { "name": "Nagios Core", "url": "https://www.nagios.org/projects/nagios-core/", "desc": "The industry standard IT infrastructure server monitoring." },
+            { "name": "Icinga", "url": "https://icinga.com/", "desc": "Stackable, fully automated monitoring system monitoring entire infrastructures." },
+            { "name": "Munin", "url": "http://munin-monitoring.org/", "desc": "Network resource monitoring tool that can help analyze trends." },
+            { "name": "Cacti", "url": "https://www.cacti.net/", "desc": "Complete network graphing solution harnessing RRDTool." },
+            { "name": "Statping-ng", "url": "https://github.com/statping-ng/statping-ng", "desc": "Lightweight status page system with completely native SQL support." }
+        ]
+    },
+    {
+        "category": "Email Clients",
+        "icon": "📧",
+        "description": "Desktop mail apps with unified inboxes and PGP integrations.",
+        "tools": [
+            { "name": "Thunderbird", "url": "https://www.thunderbird.net/", "desc": "The legendary free and highly configurable desktop email client." },
+            { "name": "Mailspring", "url": "https://getmailspring.com/", "desc": "A beautiful, fast, native Mac, Windows, and Linux email application (Free tier)." },
+            { "name": "Spark", "url": "https://sparkmailapp.com/", "desc": "The smart email client that prioritizes your inbox (Free personal tier)." },
+            { "name": "Betterbird", "url": "https://www.betterbird.eu/", "desc": "A fine-tuned fork of Thunderbird with hundreds of fixes and enhancements." },
+            { "name": "Sylpheed", "url": "https://sylpheed.sraoss.jp/en/", "desc": "Simple, lightweight but featureful, and easy-to-use e-mail client." },
+            { "name": "Evolution", "url": "https://wiki.gnome.org/Apps/Evolution", "desc": "Personal information management application for GNOME." },
+            { "name": "Geary", "url": "https://wiki.gnome.org/Apps/Geary", "desc": "An email application built around conversations for the Linux desktop." },
+            { "name": "KMail", "url": "https://apps.kde.org/kmail2/", "desc": "The standard KDE email component of Kontact." },
+            { "name": "Mutt", "url": "http://www.mutt.org/", "desc": "Small but very powerful text-based mail client for Unix." },
+            { "name": "NeoMutt", "url": "https://neomutt.org/", "desc": "The command-line mail reader (A modernized Mutt fork)." }
+        ]
+    }
+]

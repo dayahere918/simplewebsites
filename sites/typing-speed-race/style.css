@@ -7,11 +7,11 @@
 .race-settings { padding: var(--space-4) !important; }
 
 .typing-area { position: relative; }
-.text-display { font-size: var(--text-lg); line-height: 2; margin-bottom: var(--space-4); min-height: 100px; font-family: var(--font-mono); letter-spacing: 0.02em; }
+.text-display { font-size: var(--text-lg); line-height: 2; margin-bottom: var(--space-4); min-height: 100px; font-family: var(--font-mono); letter-spacing: 0.02em; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; }
 .text-display .correct { color: var(--color-success); }
-.text-display .incorrect { color: var(--color-error); text-decoration: underline; background: rgba(225,112,85,0.15); border-radius: 2px; }
+.text-display .incorrect { color: #ff3333; text-decoration: underline; background: rgba(225,112,85,0.25); border-radius: 2px; font-weight: bold; }
 .text-display .current { background: var(--color-primary-glow); border-radius: 2px; padding: 1px 0; animation: pulse 1s infinite; }
-.text-display .pending { color: var(--color-text-muted); }
+.text-display .pending { color: var(--color-text-muted); opacity: 0.8; }
 
 .typing-input { font-family: var(--font-mono); font-size: var(--text-lg); }
 .typing-input:disabled { opacity: 0.5; }

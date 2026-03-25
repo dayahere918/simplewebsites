@@ -1,0 +1,87 @@
+[
+    {
+        "category": "Password Management",
+        "icon": "🔑",
+        "description": "Offline vaults, self-hosted syncs, and stateless generators.",
+        "tools": [
+            { "name": "AuthPass", "url": "https://authpass.app/", "desc": "Keepass compatible, Flutter-based password manager for all platforms." },
+            { "name": "Vaultwarden", "url": "https://github.com/dani-garcia/vaultwarden", "desc": "Unofficial Bitwarden compatible server written in Rust." },
+            { "name": "Password Safe", "url": "https://pwsafe.org/", "desc": "Classic, highly reliable password database manager." },
+            { "name": "Padloc", "url": "https://padloc.app/", "desc": "Open source password manager with a modern minimalist interface." },
+            { "name": "Pass", "url": "https://www.passwordstore.org/", "desc": "The standard Unix password manager (Git and GPG integration)." },
+            { "name": "LessPass", "url": "https://lesspass.com/", "desc": "Stateless password manager (computes them instead of storing them)." },
+            { "name": "Spectre", "url": "https://spectre.app/", "desc": "A mathematically pure password generator avoiding dark sync chains." },
+            { "name": "Buttercup", "url": "https://buttercup.pw/", "desc": "Beautiful, encrypted, open-source password manager." },
+            { "name": "MacPass", "url": "https://macpassapp.org/", "desc": "Native macOS KeePass client (open-source)." },
+            { "name": "KeeWeb", "url": "https://keeweb.info/", "desc": "Free cross-platform password manager compatible with KeePass." }
+        ]
+    },
+    {
+        "category": "Download Managers",
+        "icon": "📥",
+        "description": "High-thread concurrent downloaders and video scrapers.",
+        "tools": [
+            { "name": "yt-dlp", "url": "https://github.com/yt-dlp/yt-dlp", "desc": "Feature-rich command-line video/audio downloader." },
+            { "name": "JDownloader 2", "url": "https://jdownloader.org/", "desc": "Platform independent, totally free download management tool." },
+            { "name": "FDM", "url": "https://www.freedownloadmanager.org/", "desc": "Fast and safe torrent client and download accelerator." },
+            { "name": "Aria2", "url": "https://aria2.github.io/", "desc": "Ultra lightweight multi-protocol & multi-source CLI download utility." },
+            { "name": "Motrix", "url": "https://motrix.app/", "desc": "Full-featured download manager supporting HTTP, FTP, BitTorrent." },
+            { "name": "XDM", "url": "https://xtremedownloadmanager.com/", "desc": "Free tool that increases download speeds up to 500%." },
+            { "name": "uGet", "url": "https://ugetdm.com/", "desc": "Lightweight, powerful, open-source download manager." },
+            { "name": "Persepolis", "url": "https://persepolisdm.github.io/", "desc": "A graphical wrapper for aria2 downloader." },
+            { "name": "qBittorrent", "url": "https://www.qbittorrent.org/", "desc": "Leading open-source software alternative to µTorrent." },
+            { "name": "Transmission", "url": "https://transmissionbt.com/", "desc": "Fast, easy, and completely free BitTorrent client." }
+        ]
+    },
+    {
+        "category": "Containers & Ops",
+        "icon": "🐳",
+        "description": "Docker alternatives, orchestration UIs, and homelab dashboards.",
+        "tools": [
+            { "name": "Podman", "url": "https://podman.io/", "desc": "Daemonless, open source, Linux native tool designed to find and run containers." },
+            { "name": "Lazydocker", "url": "https://github.com/jesseduffield/lazydocker", "desc": "Simple graphical terminal UI for docker and docker-compose." },
+            { "name": "Portainer", "url": "https://www.portainer.io/", "desc": "Beautiful GUI for managing Docker, Swarm, Kubernetes and ACI." },
+            { "name": "Dockge", "url": "https://github.com/louislam/dockge", "desc": "Reactive, self-hosted docker-compose.yaml management tool." },
+            { "name": "Coolify", "url": "https://coolify.io/", "desc": "Open-source, self-hostable Heroku / Netlify alternative." },
+            { "name": "Cosmos Server", "url": "https://cosmos-cloud.io/", "desc": "Secure, self-hosted reverse proxy, container manager, and identity provider." },
+            { "name": "CapRover", "url": "https://caprover.com/", "desc": "Scalable PaaS in 5 minutes, built on Docker Swarm." },
+            { "name": "Dokku", "url": "https://dokku.com/", "desc": "The smallest PaaS implementation you've ever seen." },
+            { "name": "Minikube", "url": "https://minikube.sigs.k8s.io/", "desc": "Run Kubernetes locally natively and quickly." },
+            { "name": "LXD", "url": "https://ubuntu.com/lxd", "desc": "Next-generation system container manager." }
+        ]
+    },
+    {
+        "category": "Terminal Emulators",
+        "icon": "⌨️",
+        "description": "GPU-accelerated, native memory-safe, and highly customizable terminals.",
+        "tools": [
+            { "name": "Alacritty", "url": "https://alacritty.org/", "desc": "Cross-platform, extreme-performance OpenGL terminal emulator." },
+            { "name": "WezTerm", "url": "https://wezfurlong.org/wezterm/", "desc": "GPU-accelerated cross-platform terminal emulator and multiplexer (LUA config)." },
+            { "name": "Kitty", "url": "https://sw.kovidgoyal.net/kitty/", "desc": "The fast, featureful, GPU based terminal emulator." },
+            { "name": "Ghostty", "url": "https://mitchellh.com/ghostty", "desc": "A fast, native, feature-rich terminal emulator purpose-built from scratch." },
+            { "name": "Windows Terminal", "url": "https://github.com/microsoft/terminal", "desc": "Modern, fast, efficient application for command-line users." },
+            { "name": "Warp", "url": "https://www.warp.dev/", "desc": "The terminal for the 21st century (Free for individuals)." },
+            { "name": "iTerm2", "url": "https://iterm2.com/", "desc": "macOS terminal replacement that does what it should." },
+            { "name": "Hyper", "url": "https://hyper.is/", "desc": "A terminal built on web technologies for extreme styling." },
+            { "name": "Tabby", "url": "https://tabby.sh/", "desc": "Highly configurable terminal emulator for Windows, macOS and Linux." },
+            { "name": "Contour", "url": "https://github.com/contour-terminal/contour", "desc": "Modern, fast, vi-like terminal emulator." }
+        ]
+    },
+    {
+        "category": "Shell & Prompt",
+        "icon": "🐚",
+        "description": "Command-line expansions, modern tooling, and smart rust replacements.",
+        "tools": [
+            { "name": "Starship", "url": "https://starship.rs/", "desc": "The minimal, blazing-fast, and infinitely customizable prompt for any shell." },
+            { "name": "Oh My Zsh", "url": "https://ohmyz.sh/", "desc": "A delightful community-driven framework for managing your zsh configuration." },
+            { "name": "Fish Shell", "url": "https://fishshell.com/", "desc": "The smart and user-friendly command line shell." },
+            { "name": "Nushell", "url": "https://www.nushell.sh/", "desc": "A new type of shell, written in Rust, dealing in typed data." },
+            { "name": "Zoxide", "url": "https://github.com/ajeetdsouza/zoxide", "desc": "A smarter cd command. Remembers which directories you use most frequently." },
+            { "name": "Fzf", "url": "https://github.com/junegunn/fzf", "desc": "A general-purpose command-line fuzzy finder." },
+            { "name": "Bat", "url": "https://github.com/sharkdp/bat", "desc": "A cat(1) clone with syntax highlighting and Git integration." },
+            { "name": "Eza", "url": "https://github.com/eza-community/eza", "desc": "Modern, maintained replacement for 'ls'." },
+            { "name": "Ripgrep", "url": "https://github.com/BurntSushi/ripgrep", "desc": "Line-oriented search tool that recursively searches the current directory for a regex pattern." },
+            { "name": "Fd", "url": "https://github.com/sharkdp/fd", "desc": "A simple, fast and user-friendly alternative to 'find'." }
+        ]
+    }
+]

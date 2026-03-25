@@ -6,7 +6,11 @@ const STOP_WORDS = new Set(['the','a','an','is','are','was','were','be','been','
 
 function extractKeywords(text) {
   if (!text || typeof text !== 'string') return [];
-  const words = text.toLowerCase().replace(/[^a-z0-9\s\-\+\#\.]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !STOP_WORDS.has(w));
+  const words = text.toLowerCase()
+    .replace(/[^a-z0-9\s\-\+\#\.]/g, ' ')
+    .split(/\s+/)
+    .map(w => w.replace(/^[^a-z0-9]+|[^a-z0-9\+\#]+$/g, '').trim())
+    .filter(w => w.length > 2 && !STOP_WORDS.has(w));
   const freq = {};
   words.forEach(w => { freq[w] = (freq[w] || 0) + 1; });
   return Object.entries(freq).sort((a,b) => b[1] - a[1]).map(([word]) => word);

@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 const { 
-  TRAITS, generateTraits, generateBaby, resetAll, 
+  TRAITS, generateTraits, generateBaby, resetAll, downloadResult,
   getState, setParent1, setParent2, loadParent, blendImages 
 } = require('../app');
 
@@ -109,6 +109,41 @@ describe('Baby Face Generator', () => {
     expect(document.getElementById('drop-zone2').className).not.toContain('hidden');
     
     // Result section should be hidden
+    expect(document.getElementById('result-section').className).toContain('hidden');
+  });
+
+  test('downloadResult creates a download link', () => {
+    setupDOM();
+    downloadResult();
+    expect(HTMLCanvasElement.prototype.toDataURL).toHaveBeenCalled();
+  });
+
+  test('loadParent rejects non-image file', () => {
+    const event = { target: { files: [{ type: 'text/plain' }] } };
+    loadParent(event, 1);
+    expect(getState().parent1Loaded).toBe(false);
+  });
+
+  test('loadParent with null event does nothing', () => {
+    loadParent(null, 1);
+    expect(getState().parent1Loaded).toBe(false);
+  });
+
+  test('loadParent for parent 2', () => {
+    const event = { target: { files: [{ type: 'image/jpeg' }] } };
+    loadParent(event, 2);
+    expect(getState().parent2Loaded).toBe(true);
+  });
+
+  test('blendImages handles null inputs gracefully', () => {
+    expect(() => blendImages(null, null, null)).not.toThrow();
+  });
+
+  test('generateBaby requires both parents', () => {
+    setParent1(true);
+    setParent2(false);
+    generateBaby();
+    // result section should remain hidden
     expect(document.getElementById('result-section').className).toContain('hidden');
   });
 });

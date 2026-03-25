@@ -1,0 +1,87 @@
+[
+    {
+        "category": "Database GUI",
+        "icon": "🗄️",
+        "description": "SQL visualizers, query runners, and local schema designers.",
+        "tools": [
+            { "name": "DBeaver", "url": "https://dbeaver.io/", "desc": "Universal database multi-tool designed for developers and analysts." },
+            { "name": "HeidiSQL", "url": "https://www.heidisql.com/", "desc": "Powerful, fast, lightweight SQL graphical interface globally loved." },
+            { "name": "TablePlus", "url": "https://tableplus.com/", "desc": "Modern, native, and friendly GUI tool for relational databases (Free Tier)." },
+            { "name": "pgAdmin", "url": "https://www.pgadmin.org/", "desc": "The most feature-rich open source administration platform strictly for PostgreSQL." },
+            { "name": "SQuirreL SQL", "url": "http://squirrel-sql.sourceforge.net/", "desc": "Java-based JDBC compliant graphical interface." },
+            { "name": "Studio 3T Free", "url": "https://studio3t.com/free/", "desc": "Essential GUI, IDE, and client designed strictly for MongoDB." },
+            { "name": "SQLiteStudio", "url": "https://sqlitestudio.pl/", "desc": "Free, portable, intuitive interface solely for SQLite nodes." },
+            { "name": "RedisInsight", "url": "https://redis.com/redis-enterprise/redis-insight/", "desc": "The ideal GUI strictly for Redis visualizing databases and data streams." },
+            { "name": "Azure Data", "url": "https://learn.microsoft.com/en-us/azure-data-studio/download-azure-data-studio", "desc": "Modern data workbench providing native connection to SQL Server." },
+            { "name": "MongoDB Compass", "url": "https://www.mongodb.com/products/tools/compass", "desc": "The official GUI tightly exploring your MongoDB architecture." }
+        ]
+    },
+    {
+        "category": "Reverse Engineering",
+        "icon": "🔬",
+        "description": "Disassemblers, memory debuggers, and decompilation logic.",
+        "tools": [
+            { "name": "Ghidra", "url": "https://ghidra-sre.org/", "desc": "The legendary software reverse engineering suite developed by the NSA." },
+            { "name": "x64dbg", "url": "https://x64dbg.com/", "desc": "Open-source x64/x32 debugger intended largely for Windows." },
+            { "name": "Cutter", "url": "https://cutter.re/", "desc": "Free and open-source reverse engineering platform powered directly by Rizin." },
+            { "name": "Radare2", "url": "https://rada.re/", "desc": "Unix-like reverse engineering framework and intense command-line toolkit." },
+            { "name": "IDA Free", "url": "https://hex-rays.com/ida-free/", "desc": "World standard interactive disassembler offering its core engine totally free." },
+            { "name": "Cheat Engine", "url": "https://cheatengine.org/", "desc": "Open source memory scanner, debugger, and overall local hex editor." },
+            { "name": "OllyDbg", "url": "http://www.ollydbg.de/", "desc": "A classic 32-bit assembler level analyzing debugger widely known." },
+            { "name": "Binary Ninja", "url": "https://binary.ninja/free/", "desc": "Lightning fast reverse engineering platform heavily driven by its IR (Free Tier)." },
+            { "name": "dnSpy", "url": "https://github.com/dnSpy/dnSpy", "desc": "Incredible .NET debugger and assembly editor." },
+            { "name": "ILSpy", "url": "https://github.com/icsharpcode/ILSpy", "desc": "The open-source .NET assembly browser and active decompiler." }
+        ]
+    },
+    {
+        "category": "Logic Puzzles",
+        "icon": "🧩",
+        "description": "Offline brain teasers and classic tile matching variations.",
+        "tools": [
+            { "name": "Simon Tatham's", "url": "https://www.chiark.greenend.org.uk/~sgtatham/puzzles/", "desc": "Brilliant portable puzzle collection containing 40+ unique classic modules." },
+            { "name": "GNOME Sudoku", "url": "https://wiki.gnome.org/Apps/Sudoku", "desc": "Elegant logical puzzle utilizing number grids endlessly generating." },
+            { "name": "Enigma", "url": "https://www.nongnu.org/enigma/", "desc": "Open source puzzle game heavily inspired by Oxyd mimicking physics perfectly." },
+            { "name": "Pingus", "url": "https://pingus.seul.org/", "desc": "Free clone of the hugely popular Lemmings focusing on logic paths." },
+            { "name": "Hex-a-hop", "url": "http://hexahop.sourceforge.net/", "desc": "Hexagonal puzzle layout requiring destroying all green tiles smartly." },
+            { "name": "Kigo", "url": "https://apps.kde.org/kigo/", "desc": "An open-source implementation of the classic board game strictly Go." },
+            { "name": "KLines", "url": "https://apps.kde.org/klines/", "desc": "Tactical board game moving diverse colored balls avoiding full boards." },
+            { "name": "KMahjongg", "url": "https://apps.kde.org/kmahjongg/", "desc": "Highly polished tile matching logic variant built deeply for KDE." },
+            { "name": "KSudoku", "url": "https://apps.kde.org/ksudoku/", "desc": "Generating completely new 3D and 2D logic grids spanning standard lines." },
+            { "name": "Peg Solitaire", "url": "https://en.wikipedia.org/wiki/Peg_solitaire", "desc": "Mathematical board logic leaping over pieces rapidly removing them." }
+        ]
+    },
+    {
+        "category": "Encryption",
+        "icon": "🔐",
+        "description": "File obfuscation, symmetric ciphers, and hash pipelines.",
+        "tools": [
+            { "name": "GnuPG", "url": "https://gnupg.org/", "desc": "The absolute complete implementation of the reliable OpenPGP protocol." },
+            { "name": "Kleopatra", "url": "https://apps.kde.org/kleopatra/", "desc": "Certificate manager and unified GUI bridging smoothly into GnuPG." },
+            { "name": "Age", "url": "https://github.com/FiloSottile/age", "desc": "Extremely simple, modern and secure local file encryption tool." },
+            { "name": "SOPS", "url": "https://github.com/getsops/sops", "desc": "Simple and globally flexible tool managing heavily encrypted configuration arrays." },
+            { "name": "Hat.sh", "url": "https://hat.sh/", "desc": "Locally run, AES-256-GCM browser encryption strictly offline securely." },
+            { "name": "AES Crypt", "url": "https://www.aescrypt.com/", "desc": "Incredibly minimal advanced encryption standard perfectly integrated in explorer." },
+            { "name": "Steghide", "url": "http://steghide.sourceforge.net/", "desc": "Steganography program seamlessly hiding sensitive data in native images/audio." },
+            { "name": "Gpg4win", "url": "https://gpg4win.org/", "desc": "Secure emails and tightly guarded files seamlessly delivered for Windows." },
+            { "name": "Keybase", "url": "https://keybase.io/", "desc": "Secure messaging integrating closely with PGP identities freely." },
+            { "name": "Picocrypt", "url": "https://github.com/HACKERALERT/Picocrypt", "desc": "Very small, very simple, and very secure encryption leveraging XChaCha20." }
+        ]
+    },
+    {
+        "category": "Screen Capture",
+        "icon": "📸",
+        "description": "Annotated screenshots, GIF recorders, and region selectors.",
+        "tools": [
+            { "name": "ShareX", "url": "https://getsharex.com/", "desc": "Absolutely incredible ultimate screen capture and infinite file sharing capability (Windows)." },
+            { "name": "Flameshot", "url": "https://flameshot.org/", "desc": "Powerful yet brutally simple to use screenshot software spanning cross platform." },
+            { "name": "Greenshot", "url": "https://getgreenshot.org/", "desc": "Lightweight screenshot software precisely tailored closely for productivity." },
+            { "name": "Lightshot", "url": "https://app.prntscr.com/", "desc": "The fastest way universally taking a deeply customizable screenshot." },
+            { "name": "Ksnip", "url": "https://github.com/ksnip/ksnip", "desc": "Qt-based cross-platform screenshot tool providing highly structured annotation." },
+            { "name": "Spectacle", "url": "https://apps.kde.org/spectacle/", "desc": "A slick, heavily integrated widget taking screenshots gracefully in KDE." },
+            { "name": "Peek", "url": "https://github.com/phw/peek", "desc": "Simple heavily-styled animated GIF screen recorder locally." },
+            { "name": "ScreenToGif", "url": "https://www.screentogif.com/", "desc": "Screen, webcam and strictly sketchboard actively rendering native GIFs." },
+            { "name": "Kooha", "url": "https://github.com/SeaDve/Kooha", "desc": "Elegantly simple screen recorder smoothly functioning deeply within GNOME." },
+            { "name": "Captura", "url": "https://mathewsachin.github.io/Captura/", "desc": "Capture screen rapidly alongside audio inputs strictly on Windows." }
+        ]
+    }
+]

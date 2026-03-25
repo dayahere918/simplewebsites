@@ -77,17 +77,63 @@ function analyzeImage(src) {
     if (h > maxH) { w = w * maxH / h; h = maxH; }
     canvas.width = w; canvas.height = h;
     ctx.drawImage(img, 0, 0, w, h);
-    const hash = getImageHash(canvas);
-    const scores = identifyBreed(hash);
-    const topBreed = Object.keys(scores).sort((a, b) => scores[b] - scores[a])[0];
+    
     document.getElementById('upload-area')?.classList.add('hidden');
     document.getElementById('results')?.classList.remove('hidden');
-    document.getElementById('breed-badge').textContent = topBreed;
-    document.getElementById('confidence-text').textContent = `${scores[topBreed]}% confidence`;
-    renderBreedBars(scores, topBreed);
-    renderBreedInfo(topBreed);
+    const badge = document.getElementById('breed-badge');
+    if (badge) badge.textContent = "Analyzing ML Model...";
+
+    if (typeof window !== 'undefined' && window.ml5) {
+      const classifier = ml5.imageClassifier('MobileNet', () => {
+        classifier.classify(canvas, (err, results) => {
+          if (err || !results) return fallbackIdentify(canvas);
+          processMLResults(results);
+        });
+      });
+    } else {
+      fallbackIdentify(canvas);
+    }
   };
   img.src = src;
+}
+
+function fallbackIdentify(canvas) {
+    const hash = getImageHash(canvas);
+    const scores = identifyBreed(hash);
+    finalizeResults(scores);
+}
+
+function processMLResults(results) {
+  const breeds = petType === 'dog' ? DOG_BREEDS : CAT_BREEDS;
+  const scores = {};
+  breeds.forEach(b => scores[b.name] = Math.floor(Math.random() * 10) + 1);
+  
+  for (let res of results) {
+    let l = res.label.toLowerCase();
+    for (let b of breeds) {
+      if (l.includes(b.name.toLowerCase()) || b.name.toLowerCase().includes(l.split(',')[0])) {
+         scores[b.name] += Math.round(res.confidence * 80);
+      }
+    }
+  }
+  
+  let total = Object.values(scores).reduce((a,b)=>a+b,0);
+  Object.keys(scores).forEach(k => scores[k] = Math.round((scores[k]/total)*100));
+  
+  const diff = 100 - Object.values(scores).reduce((a, b) => a + b, 0);
+  const topBreed = Object.keys(scores).sort((a, b) => scores[b] - scores[a])[0];
+  scores[topBreed] += diff;
+  finalizeResults(scores);
+}
+
+function finalizeResults(scores) {
+  const topBreed = Object.keys(scores).sort((a, b) => scores[b] - scores[a])[0];
+  const badge = document.getElementById('breed-badge');
+  const conf = document.getElementById('confidence-text');
+  if (badge) badge.textContent = topBreed;
+  if (conf) conf.textContent = `${scores[topBreed]}% confidence`;
+  renderBreedBars(scores, topBreed);
+  renderBreedInfo(topBreed);
 }
 
 function renderBreedBars(scores, topBreed) {

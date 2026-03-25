@@ -1,0 +1,87 @@
+[
+    {
+        "category": "System Utilities",
+        "icon": "💻",
+        "description": "Essential core tools for system monitoring, cleaning, and booting.",
+        "tools": [
+            { "name": "Fastfetch", "url": "https://github.com/fastfetch-cli/fastfetch", "desc": "Ultra-fast, customizable system information tool written in C." },
+            { "name": "BleachBit", "url": "https://www.bleachbit.org/", "desc": "Thorough system cleaner and privacy tool (OSS alternative to CCleaner)." },
+            { "name": "WizTree", "url": "https://diskanalyzer.com/", "desc": "The fastest disk space analyzer for Windows (reads the MFT directly)." },
+            { "name": "Everything", "url": "https://www.voidtools.com/", "desc": "Locate files and folders instantly on Windows using NTFS indexing." },
+            { "name": "Rufus", "url": "https://rufus.ie/", "desc": "Create bootable USB drives the easy and fast way." },
+            { "name": "Ventoy", "url": "https://www.ventoy.net/", "desc": "Open-source tool to create bootable USB drives for ISO/WIM/IMG/VHD(x)." },
+            { "name": "Process Explorer", "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer", "desc": "Advanced task manager from Windows Sysinternals." },
+            { "name": "HWMonitor", "url": "https://www.cpuid.com/softwares/hwmonitor.html", "desc": "Read PC systems main health sensors: voltages, temperatures, fans speed." },
+            { "name": "CrystalDiskInfo", "url": "https://crystalmark.info/en/software/crystaldiskinfo/", "desc": "HDD/SSD utility supporting SMART reporting and temperature monitoring." },
+            { "name": "AutoRuns", "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/autoruns", "desc": "See exactly what programs are configured to startup directly during boot." }
+        ]
+    },
+    {
+        "category": "Privacy & Security",
+        "icon": "🛡️",
+        "description": "Protect your data, traffic, and personal identity globally.",
+        "tools": [
+            { "name": "Cryptomator", "url": "https://cryptomator.org/", "desc": "Transparent, client-side encryption for your cloud files." },
+            { "name": "OnionShare", "url": "https://onionshare.org/", "desc": "Securely and anonymously share files and chat over the Tor network." },
+            { "name": "VeraCrypt", "url": "https://www.veracrypt.fr/", "desc": "Free open-source disk encryption software for Windows, Mac OSX and Linux." },
+            { "name": "DNSCloak", "url": "https://github.com/s-s/dnscloak", "desc": "DNSCrypt and DNS wrapper for iOS, enhancing mobile privacy." },
+            { "name": "Portmaster", "url": "https://safing.io/", "desc": "Free and open-source application firewall that blocks mass surveillance." },
+            { "name": "Privacy Badger", "url": "https://privacybadger.org/", "desc": "Browser add-on that blocks invisible trackers automatically." },
+            { "name": "uBlock Origin", "url": "https://github.com/gorhill/uBlock", "desc": "Efficient wide-spectrum content blocker that is easy on CPU and memory." },
+            { "name": "LocalSend", "url": "https://localsend.org/", "desc": "FOSS, AirDrop alternative to share files to nearby devices over local Wi-Fi." },
+            { "name": "SimpleX Chat", "url": "https://simplex.chat/", "desc": "First encrypted messenger without user IDs of any kind." },
+            { "name": "KeePassXC", "url": "https://keepassxc.org/", "desc": "Cross-platform, offline, strictly local community-driven password manager." }
+        ]
+    },
+    {
+        "category": "Graphics & Painting",
+        "icon": "🎨",
+        "description": "Powerful open-source canvas manipulation and 2D drawing.",
+        "tools": [
+            { "name": "Krita", "url": "https://krita.org/", "desc": "Professional FREE and open source painting program." },
+            { "name": "GIMP", "url": "https://www.gimp.org/", "desc": "The ultimate open-source image manipulation program." },
+            { "name": "Paint.NET", "url": "https://www.getpaint.net/", "desc": "Highly capable, free image and photo editing software for Windows." },
+            { "name": "Photopea", "url": "https://www.photopea.com/", "desc": "Advanced web-based photo editor supporting PSD, XCF, and Sketch." },
+            { "name": "Inkscape", "url": "https://inkscape.org/", "desc": "Professional quality vector graphics software." },
+            { "name": "Darktable", "url": "https://www.darktable.org/", "desc": "Open source photography workflow application and RAW developer." },
+            { "name": "RawTherapee", "url": "https://rawtherapee.com/", "desc": "Cross-platform raw image processing program." },
+            { "name": "MagicaVoxel", "url": "https://ephtracy.github.io/", "desc": "Free, lightweight 8-bit voxel art editor and interactive path tracing renderer." },
+            { "name": "LibreSprite", "url": "https://libresprite.github.io/", "desc": "Free and open source program for creating and animating your sprites." },
+            { "name": "Pixelorama", "url": "https://orama-interactive.itch.io/pixelorama", "desc": "Free & open-source 2D sprite editor, made with the Godot Engine." }
+        ]
+    },
+    {
+        "category": "UI/UX Design",
+        "icon": "📐",
+        "description": "Prototyping, mockups, and collaborative vector interface design.",
+        "tools": [
+            { "name": "Penpot", "url": "https://penpot.app/", "desc": "The first open-source design and prototyping platform meant for cross-domain teams." },
+            { "name": "Lunacy", "url": "https://icons8.com/lunacy", "desc": "Free design software for UI, UX, and web by Icons8. Unlocked assets." },
+            { "name": "Akira", "url": "https://github.com/akiraux/Akira", "desc": "Native Linux Design application built in Vala and GTK." },
+            { "name": "Pencil Project", "url": "https://pencil.evolus.vn/", "desc": "Built-in stencils for diagramming and making UI mockups freely." },
+            { "name": "Excalidraw", "url": "https://excalidraw.com/", "desc": "Virtual whiteboard for sketching hand-drawn like diagrams." },
+            { "name": "Tldraw", "url": "https://tldraw.com/", "desc": "A tiny, very highly capable collaborative whiteboard." },
+            { "name": "Draw.io", "url": "https://app.diagrams.net/", "desc": "Free, high quality, and completely open diagram software." },
+            { "name": "Figma", "url": "https://www.figma.com/", "desc": "Industry standard collaborative interface design tool (Free tier)." },
+            { "name": "Uizard", "url": "https://uizard.io/", "desc": "Rapid, AI-powered UI design tool for wireframing (Free tier)." },
+            { "name": "Wireflow", "url": "https://wireflow.co/", "desc": "Free online user flow architecture tool." }
+        ]
+    },
+    {
+        "category": "Video Engineering",
+        "icon": "🎬",
+        "description": "Non-linear editors, transcoding, and stream encoders.",
+        "tools": [
+            { "name": "OBS Studio", "url": "https://obsproject.com/", "desc": "Free, open source software for live streaming and screen recording." },
+            { "name": "Shotcut", "url": "https://shotcut.org/", "desc": "A free, open source, cross-platform video editor." },
+            { "name": "Kdenlive", "url": "https://kdenlive.org/", "desc": "Libre video editor for advanced multi-track non-linear workflows." },
+            { "name": "DaVinci Resolve", "url": "https://www.blackmagicdesign.com/products/davinciresolve", "desc": "Hollywood-grade video editing, color correction, and VFX (Free version)." },
+            { "name": "OpenShot", "url": "https://www.openshot.org/", "desc": "Incredibly simple and powerful free video editor." },
+            { "name": "LosslessCut", "url": "https://mifi.no/losslesscut/", "desc": "The swiss army knife of lossless video/audio editing." },
+            { "name": "HandBrake", "url": "https://handbrake.fr/", "desc": "The open source video transcoder standard for almost any format." },
+            { "name": "Avidemux", "url": "http://avidemux.sourceforge.net/", "desc": "Free video editor designed for simple cutting, filtering and encoding tasks." },
+            { "name": "Natron", "url": "https://natrongithub.github.io/", "desc": "Open-source nodal compositing software, an alt to After Effects." },
+            { "name": "ShanaEncoder", "url": "https://shana.pe.kr/", "desc": "Super fast, lightweight, and powerful audio/video encoding program." }
+        ]
+    }
+]

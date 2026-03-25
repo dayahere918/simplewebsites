@@ -1,0 +1,87 @@
+[
+    {
+        "category": "Translation",
+        "icon": "🔤",
+        "description": "Offline language processing and international string hubs.",
+        "tools": [
+            { "name": "LanguageTool", "url": "https://languagetool.org/", "desc": "Professional open-source style and grammar checker." },
+            { "name": "DeepL", "url": "https://www.deepl.com/translator", "desc": "The world's most accurate neural machine translator (Free Web)." },
+            { "name": "Crowdin", "url": "https://crowdin.com/", "desc": "The leading localization platform strictly free for open source." },
+            { "name": "OmegaT", "url": "https://omegat.org/", "desc": "The free computer-assisted translation tool for professionals." },
+            { "name": "Apertium", "url": "https://www.apertium.org/", "desc": "A free/open-source rule-based machine translation platform." },
+            { "name": "Argos Translate", "url": "https://www.argos-opentech.com/", "desc": "Offline neural machine translation library based on OpenNMT." },
+            { "name": "LibreTranslate", "url": "https://libretranslate.com/", "desc": "Free and Open Source Machine Translation API without keys." },
+            { "name": "Weblate", "url": "https://weblate.org/", "desc": "Web-based continuous localization tool tightening versions." },
+            { "name": "Poedit", "url": "https://poedit.net/", "desc": "The best, simple translation editor for gettext and PO files." },
+            { "name": "Firefox Translations", "url": "https://addons.mozilla.org/en-US/firefox/addon/firefox-translations/", "desc": "Automated, totally offline translation of web pages right in browser." }
+        ]
+    },
+    {
+        "category": "Video Formatting",
+        "icon": "🎞️",
+        "description": "Command-line encoders, lossy transcoders, and filter graphs.",
+        "tools": [
+            { "name": "FFmpeg", "url": "https://ffmpeg.org/", "desc": "The ultimate cross-platform engine to record, convert video streams." },
+            { "name": "VidCoder", "url": "https://vidcoder.net/", "desc": "Open-source DVD/Blu-ray ripping and video transcoding app (HandBrake GUI)." },
+            { "name": "StaxRip", "url": "https://github.com/staxrip/staxrip", "desc": "Powerful video & audio encoding GUI for Windows." },
+            { "name": "MKVToolNix", "url": "https://mkvtoolnix.download/", "desc": "The ultimate set of tools to create, alter and inspect Matroska files." },
+            { "name": "AviSynth", "url": "http://avisynth.nl/", "desc": "A powerful frameserver providing non-linear video editing via scripting." },
+            { "name": "VapourSynth", "url": "https://www.vapoursynth.com/", "desc": "A video processing framework with simplicity via Python scripts." },
+            { "name": "MeGUI", "url": "https://sourceforge.net/projects/megui/", "desc": "The most comprehensive GUI based ISO MPEG-4 converter." },
+            { "name": "Hybrid", "url": "https://www.selur.de/", "desc": "Multi-platform frontend for x264/x265/Xvid heavily focused on quality." },
+            { "name": "Shutter Encoder", "url": "https://www.shutterencoder.com/", "desc": "A complete video/audio/image conversion UI created by editors." },
+            { "name": "File Converter", "url": "https://file-converter.org/", "desc": "Context menu tool that converts files effortlessly directly in Explorer." }
+        ]
+    },
+    {
+        "category": "Mind Mapping",
+        "icon": "🧠",
+        "description": "Thought visualization, organizational flowcharts, and diagrams.",
+        "tools": [
+            { "name": "FreeMind", "url": "http://freemind.sourceforge.net/", "desc": "Premier free mind-mapping software written globally in Java." },
+            { "name": "XMind", "url": "https://xmind.app/", "desc": "Modular and visual mind-mapping desktop tool (Free tier features)." },
+            { "name": "MindNode", "url": "https://mindnode.com/", "desc": "Visually stunning mind mapping application built natively for Mac." },
+            { "name": "Freeplane", "url": "https://www.freeplane.org/", "desc": "Powerful knowledge management and project planning fork of FreeMind." },
+            { "name": "Vym", "url": "https://software.opensuse.org/package/vym", "desc": "View Your Mind. Simple Linux diagram generator." },
+            { "name": "SimpleMind", "url": "https://simplemind.eu/", "desc": "Cross-platform mind mapping solution focusing on simplicity." },
+            { "name": "MindMup", "url": "https://www.mindmup.com/", "desc": "Frictionless free online mind mapping running straight from browser." },
+            { "name": "Wisemapping", "url": "https://www.wisemapping.com/", "desc": "Free and open source browser-based mind mapping workspace." },
+            { "name": "Coggle", "url": "https://coggle.it/", "desc": "Collaborative, free-flow mind map software designed online." },
+            { "name": "PlantUML", "url": "https://plantuml.com/", "desc": "Open-source tool to create UML diagrams programmatically via text." }
+        ]
+    },
+    {
+        "category": "Virtualization",
+        "icon": "🖥️",
+        "description": "Hardware emulators, virtual environments, and boot supervisors.",
+        "tools": [
+            { "name": "UTM", "url": "https://mac.getutm.app/", "desc": "Native QEMU wrapper running macOS and Windows guests perfectly on Apple Silicon." },
+            { "name": "VirtualBox", "url": "https://www.virtualbox.org/", "desc": "Massively popular cross-platform x86 and AMD64/Intel64 virtualization." },
+            { "name": "QEMU", "url": "https://www.qemu.org/", "desc": "Generic and open source machine emulator and bare-metal virtualizer." },
+            { "name": "VMware Workstation Player", "url": "https://www.vmware.com/products/workstation-player.html", "desc": "High-profile Windows hypervisor (Now officially free for personal use)." },
+            { "name": "Hyper-V", "url": "https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/", "desc": "Microsoft's native hardware virtualization product on Windows Pro/Enterprise." },
+            { "name": "Multipass", "url": "https://multipass.run/", "desc": "Spin up instant, low-resource Ubuntu VMs directly on developers' machines." },
+            { "name": "GNOME Boxes", "url": "https://wiki.gnome.org/Apps/Boxes", "desc": "Simple Linux app designed for creating simple remote or local virtual spaces." },
+            { "name": "Lima", "url": "https://github.com/lima-vm/lima", "desc": "Linux virtual machines running native Docker setups securely on macOS." },
+            { "name": "Docker Desktop", "url": "https://www.docker.com/products/docker-desktop/", "desc": "Seamless engine running localized native Linux containers immediately on OS." },
+            { "name": "Vagrant", "url": "https://www.vagrantup.com/", "desc": "Tool for building and distributing development environments (HashiCorp)." }
+        ]
+    },
+    {
+        "category": "IDE",
+        "icon": "📝",
+        "description": "Full-featured integrated development suites and AI code planners.",
+        "tools": [
+            { "name": "Eclipse", "url": "https://www.eclipse.org/ide/", "desc": "Extensible, highly equipped open source IDE heavily tailored for Java teams." },
+            { "name": "IntelliJ IDEA CE", "url": "https://www.jetbrains.com/idea/download/", "desc": "The Community Edition of JetBrains' incredible Java IDE." },
+            { "name": "PyCharm CE", "url": "https://www.jetbrains.com/pycharm/download/", "desc": "Community Edition IDE providing all strict Python tools needed entirely free." },
+            { "name": "Visual Studio Community", "url": "https://visualstudio.microsoft.com/vs/community/", "desc": "Full-stack development environment entirely free for standard individuals." },
+            { "name": "Neovim", "url": "https://neovim.io/", "desc": "Hyperextensible Vim-based text editor built exclusively for modern developers." },
+            { "name": "Emacs", "url": "https://www.gnu.org/software/emacs/", "desc": "The endlessly customizable, self-documenting, extensible text editor system." },
+            { "name": "VSCodium", "url": "https://vscodium.com/", "desc": "Free/Libre Open Source Software Binaries of VS Code without MS telemetry." },
+            { "name": "Pulsar", "url": "https://pulsar-edit.dev/", "desc": "The community-led successor directly reviving the Atom editor." },
+            { "name": "Cursor", "url": "https://cursor.com/", "desc": "The AI-first code editor designed closely around GPT infrastructure (Free tier)." },
+            { "name": "Windsurf", "url": "https://codeium.com/windsurf", "desc": "Incredibly fast native AI-based editor focusing purely on dev flows (Free limit)." }
+        ]
+    }
+]

@@ -11,6 +11,19 @@ const TRAITS = {
 
 let parent1Loaded = false, parent2Loaded = false;
 
+const MODEL_URL = 'https://vladmandic.github.io/face-api/model/';
+async function initFaceAPI() {
+  if (typeof window === 'undefined' || !window.faceapi) return;
+  try {
+    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+  } catch (e) {
+    console.error("Failed to load FaceAPI models:", e);
+  }
+}
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', initFaceAPI);
+}
+
 function loadParent(event, num) {
   const file = event?.target?.files?.[0];
   if (!file || !file.type.startsWith('image/')) return;
@@ -18,7 +31,7 @@ function loadParent(event, num) {
   reader.onload = e => {
     if (typeof document === 'undefined') return;
     const img = new Image();
-    img.onload = () => {
+    img.onload = async () => {
       const canvas = document.getElementById(`parent${num}-canvas`);
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
@@ -26,6 +39,18 @@ function loadParent(event, num) {
       const scale = Math.max(200 / img.width, 200 / img.height);
       const w = img.width * scale, h = img.height * scale;
       ctx.drawImage(img, (200 - w) / 2, (200 - h) / 2, w, h);
+      
+      if (window.faceapi && faceapi.nets.tinyFaceDetector.isLoaded) {
+          const detections = await faceapi.detectAllFaces(canvas, new faceapi.TinyFaceDetectorOptions());
+          if (detections.length === 0) {
+              alert('No human face detected! Please upload a clear photo of a human face.');
+              ctx.clearRect(0,0,200,200);
+              const input = document.getElementById(`parent${num}-input`);
+              if(input) input.value = '';
+              return;
+          }
+      }
+
       canvas.classList.remove('hidden');
       const slot = canvas.closest('.upload-slot');
       const dz = slot ? slot.querySelector('.drop-zone') : null;

@@ -1,0 +1,87 @@
+[
+    {
+        "category": "Personal Finance",
+        "icon": "💰",
+        "description": "Double-entry bookkeeping and wealth portfolios.",
+        "tools": [
+            { "name": "GnuCash", "url": "https://gnucash.org/", "desc": "Free accounting software for personal and small business." },
+            { "name": "Firefly III", "url": "https://www.firefly-iii.org/", "desc": "Self-hosted, highly secure personal finance manager." },
+            { "name": "Actual Budget", "url": "https://actualbudget.com/", "desc": "Super-fast, privacy-focused open source budget app." },
+            { "name": "MoneyManager Ex", "url": "https://moneymanagerex.org/", "desc": "Easy-to-use personal finance software for Windows, Mac & Linux." },
+            { "name": "KMyMoney", "url": "https://kmymoney.org/", "desc": "Personal finance manager by KDE, operating similarly to MS Money." },
+            { "name": "HomeBank", "url": "http://homebank.free.fr/", "desc": "Free software that will assist you to manage your personal accounting." },
+            { "name": "Skrooge", "url": "https://skrooge.org/", "desc": "Powerful personal finances manager powered by KDE." },
+            { "name": "Portfolio Performance", "url": "https://www.portfolio-performance.info/", "desc": "Calculate the true performance of your global investment portfolios." },
+            { "name": "Ghostfolio", "url": "https://ghostfol.io/", "desc": "Open source wealth management software for self-hosters." },
+            { "name": "Buckets", "url": "https://www.budgetwithbuckets.com/", "desc": "Local-first budgeting app with an unbounded free trial." }
+        ]
+    },
+    {
+        "category": "Genealogy",
+        "icon": "🌳",
+        "description": "Family tree tracing and ancestral timeline hosting.",
+        "tools": [
+            { "name": "Gramps", "url": "https://gramps-project.org/", "desc": "Free, professional genealogy research software." },
+            { "name": "Ancestris", "url": "https://www.ancestris.org/", "desc": "Free genealogy software strictly respecting the GEDCOM standard." },
+            { "name": "Webtrees", "url": "https://webtrees.net/", "desc": "The web's leading self-hosted, collaborative genealogy application." },
+            { "name": "HuMo-genealogy", "url": "https://humo-gen.com/", "desc": "Open source server-side family tree building system." },
+            { "name": "GeneWeb", "url": "https://github.com/geneweb/geneweb", "desc": "Genealogy software program with web interface created at INRIA." },
+            { "name": "LifeLines", "url": "https://github.com/lifelines/lifelines", "desc": "Powerful, scripting-based open-source genealogy software." },
+            { "name": "GEDkeeper", "url": "https://gedkeeper.github.io/", "desc": "Windows and Linux desktop tool for managing personal family databases." },
+            { "name": "GenealogyJ", "url": "http://genj.sourceforge.net/", "desc": "A viewer and editor for pedagogic genealogic data in Java." },
+            { "name": "Ahnenblatt", "url": "https://www.ahnenblatt.com/", "desc": "Easy to use genealogy software (Classic v2.99 is strictly free)." },
+            { "name": "Legacy Family Tree", "url": "https://legacyfamilytree.com/", "desc": "Comprehensive standard edition is offered completely natively free." }
+        ]
+    },
+    {
+        "category": "Text Processing",
+        "icon": "🔠",
+        "description": "Regex pipelines, parsers, and multi-cursor text editors.",
+        "tools": [
+            { "name": "Pandoc", "url": "https://pandoc.org/", "desc": "The universal document converter (Markdown to PDF/Docx/HTML)." },
+            { "name": "Ripgrep", "url": "https://github.com/BurntSushi/ripgrep", "desc": "Line-oriented search tool that stays fast recursively." },
+            { "name": "jq", "url": "https://jqlang.github.io/jq/", "desc": "A lightweight and extremely flexible command-line JSON processor." },
+            { "name": "yq", "url": "https://github.com/mikefarah/yq", "desc": "Portable command-line YAML, JSON, XML, and CSV processor." },
+            { "name": "Notepad++", "url": "https://notepad-plus-plus.org/", "desc": "The free standard text editor and source code replacement." },
+            { "name": "Kate", "url": "https://kate-editor.org/", "desc": "Advanced multi-document editor by KDE." },
+            { "name": "Geany", "url": "https://www.geany.org/", "desc": "A fast and lightweight IDE and text editor." },
+            { "name": "Micro", "url": "https://micro-editor.github.io/", "desc": "A modern and intuitive terminal-based text editor (nano alt)." },
+            { "name": "GNU awk", "url": "https://www.gnu.org/software/gawk/", "desc": "Incredibly powerful pattern scanning and processing language." },
+            { "name": "GNU sed", "url": "https://www.gnu.org/software/sed/", "desc": "Non-interactive command-line text stream editor." }
+        ]
+    },
+    {
+        "category": "Mathematics",
+        "icon": "🧮",
+        "description": "Symbolic computation, graphing, and statistical engines.",
+        "tools": [
+            { "name": "SageMath", "url": "https://www.sagemath.org/", "desc": "Open-source mathematics software system integrating Python." },
+            { "name": "Octave", "url": "https://octave.org/", "desc": "Scientific programming language designed as MATLAB alternative." },
+            { "name": "Maxima", "url": "https://maxima.sourceforge.io/", "desc": "Computer algebra system for the manipulation of symbolic equations." },
+            { "name": "RStudio", "url": "https://posit.co/download/rstudio-desktop/", "desc": "IDE specifically for R, tailored for statistical computing." },
+            { "name": "Scilab", "url": "https://www.scilab.org/", "desc": "Free and open source software for numerical computation." },
+            { "name": "Jupyter", "url": "https://jupyter.org/", "desc": "Interactive computational environment replacing traditional notebooks." },
+            { "name": "SymPy", "url": "https://www.sympy.org/", "desc": "Python library for robust, free symbolic mathematics." },
+            { "name": "Gnuplot", "url": "http://www.gnuplot.info/", "desc": "Portable command-line driven graphing utility." },
+            { "name": "Euler Math Toolbox", "url": "https://euler.rene-grothmann.de/", "desc": "Powerful numerical and symbolic mathematical software." },
+            { "name": "R", "url": "https://www.r-project.org/", "desc": "The worldwide standard free software environment for statistical computing." }
+        ]
+    },
+    {
+        "category": "Cloud Storage",
+        "icon": "☁️",
+        "description": "End-to-end encrypted backup and self-hosted drives.",
+        "tools": [
+            { "name": "Nextcloud", "url": "https://nextcloud.com/", "desc": "The most popular self-hosted, sovereign content collaboration platform." },
+            { "name": "Syncthing", "url": "https://syncthing.net/", "desc": "Continuous decentralised P2P file synchronization program." },
+            { "name": "OwnCloud", "url": "https://owncloud.com/", "desc": "Open-source enterprise file sync and share." },
+            { "name": "Seafile", "url": "https://www.seafile.com/", "desc": "High performance file syncing and sharing built with C." },
+            { "name": "Resilio Sync", "url": "https://www.resilio.com/individuals/", "desc": "Fast, reliable P2P file syncing without the cloud (Free tier)." },
+            { "name": "Kopia", "url": "https://kopia.io/", "desc": "Fast and secure open-source backup/restore tool." },
+            { "name": "Rclone", "url": "https://rclone.org/", "desc": "The Swiss army knife of cloud storage file synchronization." },
+            { "name": "MEGA", "url": "https://mega.io/", "desc": "End-to-end encrypted cloud storage provider with 20GB free tier." },
+            { "name": "Proton Drive", "url": "https://proton.me/drive", "desc": "Swiss-based highly secure encrypted cloud storage (Free tier)." },
+            { "name": "Pydio", "url": "https://pydio.com/", "desc": "Modern self-hosted file sharing platform tailored for massive datasets." }
+        ]
+    }
+]

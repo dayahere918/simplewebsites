@@ -1,9 +1,4 @@
-/**
- * Awesome Free Tools - 50 Categories of Hidden Gems
- * A curated directory of high-value, free, and open-source software.
- */
-
-const TOOLS_DATA = [
+[
     {
         "category": "System Utilities",
         "icon": "💻",
@@ -2854,63 +2849,4 @@ const TOOLS_DATA = [
             }
         ]
     }
-];
-
-// Re-map to 50 unique categories if there are overlaps
-const uniqueCategories = Array.from(new Set(TOOLS_DATA.map(d => d.category)));
-
-function init() {
-    const grid = document.getElementById('category-grid');
-    const search = document.getElementById('search-input');
-    
-    function render(filter = '') {
-        grid.innerHTML = '';
-        const filtered = TOOLS_DATA.filter(d => 
-            d.category.toLowerCase().includes(filter.toLowerCase()) || 
-            d.tools.some(t => t.name.toLowerCase().includes(filter.toLowerCase()))
-        );
-        
-        filtered.forEach(cat => {
-            const card = document.createElement('div');
-            card.className = 'glass-card category-card';
-            card.innerHTML = `
-                <div class="category-header">
-                    <span class="category-icon">${cat.icon}</span>
-                    <h3 class="category-title">${escapeHtml(cat.category)}</h3>
-                </div>
-                <p class="category-desc">${escapeHtml(cat.description)}</p>
-                <div class="tool-list">
-                    ${cat.tools.map(t => `
-                        <a href="${t.url}" target="_blank" class="tool-item" title="${escapeHtml(t.desc)}">
-                            <span class="tool-name">${escapeHtml(t.name)}</span>
-                            <span class="tool-arrow">↗</span>
-                        </a>
-                    `).join('')}
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-        
-        if (filtered.length === 0) {
-            grid.innerHTML = '<div class="no-results">No hidden gems found for that search. Try another category!</div>';
-        }
-    }
-    
-    search.addEventListener('input', (e) => render(e.target.value));
-    render();
-}
-
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
-
-if (typeof document !== 'undefined') {
-    document.addEventListener('DOMContentLoaded', init);
-}
-
-// Export for SEO booster
-if (typeof module !== 'undefined') {
-    module.exports = { TOOLS_DATA };
-}
+]

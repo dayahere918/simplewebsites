@@ -1,0 +1,87 @@
+[
+    {
+        "category": "Audio Production",
+        "icon": "🎹",
+        "description": "Cross-platform DAWs, MIDI sequencers, and podcast editors.",
+        "tools": [
+            { "name": "Audacity", "url": "https://www.audacityteam.org/", "desc": "The easy-to-use, multi-track audio editor and recorder." },
+            { "name": "LMMS", "url": "https://lmms.io/", "desc": "Free, cross-platform music production software (FL Studio alt)." },
+            { "name": "MuseScore", "url": "https://musescore.org/", "desc": "Create, play and print beautiful sheet music effortlessly." },
+            { "name": "Ardour", "url": "https://ardour.org/", "desc": "Complete digital audio workstation for recording, editing, and mixing." },
+            { "name": "Cakewalk", "url": "https://www.bandlab.com/products/cakewalk", "desc": "Professional SONAR-based digital audio workstation (Free on Windows)." },
+            { "name": "Surge XT", "url": "https://surge-synthesizer.github.io/", "desc": "Incredibly powerful open-source hybrid synthesizer plugin." },
+            { "name": "Vital", "url": "https://vital.audio/", "desc": "Spectral warping wavetable synthesizer (Free Basic Version)." },
+            { "name": "VCV Rack", "url": "https://vcvrack.com/", "desc": "The open-source virtual Eurorack DAWs." },
+            { "name": "Tenacity", "url": "https://tenacityaudio.org/", "desc": "Privacy-focused, community-driven fork of Audacity." },
+            { "name": "Ocenaudio", "url": "https://www.ocenaudio.com/", "desc": "Easy, fast and powerful audio editor (Vamp/VST support)." }
+        ]
+    },
+    {
+        "category": "3D & CAD",
+        "icon": "🧊",
+        "description": "VFX, parametric modeling, and architectural drafting.",
+        "tools": [
+            { "name": "Blender", "url": "https://www.blender.org/", "desc": "Complete open source 3D creation suite and render engine." },
+            { "name": "FreeCAD", "url": "https://www.freecad.org/", "desc": "Scriptable 3D parametric modeler for mechanical engineering." },
+            { "name": "OpenSCAD", "url": "https://openscad.org/", "desc": "The programmers solid 3D CAD modeller." },
+            { "name": "LibreCAD", "url": "https://librecad.org/", "desc": "High quality 2D-CAD application available worldwide." },
+            { "name": "Sweet Home 3D", "url": "https://www.sweethome3d.com/", "desc": "Free interior design application to draw floor plans." },
+            { "name": "BRL-CAD", "url": "https://brlcad.org/", "desc": "Powerful cross-platform solid modeling system from the US Military." },
+            { "name": "SolveSpace", "url": "https://solvespace.com/", "desc": "Parametric 3D CAD tool for engineering design." },
+            { "name": "Dust3D", "url": "https://dust3d.org/", "desc": "Cross-platform open-source 3D modeling software for quick base meshes." },
+            { "name": "Blockbench", "url": "https://www.blockbench.net/", "desc": "Free, modern box modeling app for voxel and low-poly art." },
+            { "name": "ArmorPaint", "url": "https://armorpaint.org/", "desc": "Open-source 3D PBR texture painting software." }
+        ]
+    },
+    {
+        "category": "Browser & Web",
+        "icon": "🌐",
+        "description": "Privacy-focused forks, speed optimizations, and development containers.",
+        "tools": [
+            { "name": "LibreWolf", "url": "https://librewolf.net/", "desc": "A fork of Firefox focused entirely on privacy, security, and freedom." },
+            { "name": "Brave", "url": "https://brave.com/", "desc": "Extra-fast browser with a strict built-in ad and tracker blocker." },
+            { "name": "Vivaldi", "url": "https://vivaldi.com/", "desc": "Power-user browser with extreme customization for power users." },
+            { "name": "Floorp", "url": "https://floorp.app/", "desc": "Lightning fast and highly customizable Firefox derivative from Japan." },
+            { "name": "Zen Browser", "url": "https://zen-browser.app/", "desc": "Modern, clean, and extremely fast web browser utilizing Firefox engine." },
+            { "name": "Thorium", "url": "https://thorium.rocks/", "desc": "The fastest browser on Earth. Compiler-optimized Chromium fork." },
+            { "name": "Mullvad Browser", "url": "https://mullvad.net/en/browser", "desc": "Privacy-focused browser created in collaboration with Tor Project." },
+            { "name": "Tor Browser", "url": "https://www.torproject.org/", "desc": "Defend against tracking and surveillance perfectly." },
+            { "name": "Firefox Developer", "url": "https://www.mozilla.org/en-US/firefox/developer/", "desc": "The browser built specifically for people who build the web." },
+            { "name": "Arc", "url": "https://arc.net/", "desc": "The Chrome replacement built for how you actually use the internet (Free)." }
+        ]
+    },
+    {
+        "category": "Note Taking",
+        "icon": "📝",
+        "description": "Local-first knowledge managers and outliners.",
+        "tools": [
+            { "name": "Obsidian", "url": "https://obsidian.md/", "desc": "The ultimate local-first knowledge base on top of plain text (Free personal)." },
+            { "name": "Logseq", "url": "https://logseq.com/", "desc": "Privacy-first, open-source knowledge management outliner." },
+            { "name": "Joplin", "url": "https://joplinapp.org/", "desc": "Excellent secure note-taking and to-do app with cross-sync." },
+            { "name": "Appflowy", "url": "https://appflowy.io/", "desc": "Open-source Notion alternative with complete control of data." },
+            { "name": "Anytype", "url": "https://anytype.io/", "desc": "Local-first, encrypted, open-web Notion alternative." },
+            { "name": "Outline", "url": "https://www.getoutline.com/", "desc": "Fast, collaborative, open-source knowledge base for teams." },
+            { "name": "SilverBullet", "url": "https://silverbullet.md/", "desc": "Hacker-friendly, highly extensible personal knowledge platform." },
+            { "name": "QOwnNotes", "url": "https://www.qownnotes.org/", "desc": "Plain-text file markdown note pad with Nextcloud integration." },
+            { "name": "Zettlr", "url": "https://www.zettlr.com/", "desc": "A Markdown editor for academic and researcher workflows." },
+            { "name": "Standard Notes", "url": "https://standardnotes.com/", "desc": "Strictly encrypted, long-term survival note-taking app." }
+        ]
+    },
+    {
+        "category": "Development Tools",
+        "icon": "🛠️",
+        "description": "Native code editors, API development ecosystems, and SQL clients.",
+        "tools": [
+            { "name": "Zed", "url": "https://zed.dev/", "desc": "Insanely fast code editor built in Rust by the creators of Atom." },
+            { "name": "Hoppscotch", "url": "https://hoppscotch.io/", "desc": "Open-source API development ecosystem (Postman OSS replacement)." },
+            { "name": "Lazygit", "url": "https://github.com/jesseduffield/lazygit", "desc": "Simple terminal UI for safely navigating git commands." },
+            { "name": "Bruno", "url": "https://www.usebruno.com/", "desc": "Git-friendly, offline-first open-source API client." },
+            { "name": "Insomnia", "url": "https://insomnia.rest/", "desc": "The open-source design-first API development platform." },
+            { "name": "DBeaver CE", "url": "https://dbeaver.io/", "desc": "Universal database tool for developers and administrators." },
+            { "name": "Beekeeper Studio", "url": "https://www.beekeeperstudio.io/", "desc": "Modern and open source SQL editor and database manager." },
+            { "name": "DB Gate", "url": "https://dbgate.org/", "desc": "Open Source cross platform database manager." },
+            { "name": "DB Browser", "url": "https://sqlitebrowser.org/", "desc": "High quality visual, open source tool to create and edit SQLite." },
+            { "name": "HTTPie", "url": "https://httpie.io/", "desc": "Modern user-friendly command-line HTTP client and web interface." }
+        ]
+    }
+]
