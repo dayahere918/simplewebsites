@@ -24,7 +24,7 @@ jobs:
         id: changes
         run: |
           # All sites list for fallback
-          ALL_SITES='["picker-wheel","festival-countdown","bill-splitter","emoji-translator","sleep-calculator","startup-idea-generator","loan-visualizer","height-comparison","color-palette-extractor","typing-speed-race","noise-meter","voice-to-text-counter","mood-board-generator","aws-cost-estimator","cicd-visualizer","cloud-service-comparison","resume-ats-checker","face-shape-detector","baby-face-generator","pet-breed-identifier","awesome-free-tools"]'
+          ALL_SITES='["picker-wheel","festival-countdown","bill-splitter","emoji-translator","sleep-calculator","startup-idea-generator","loan-visualizer","height-comparison","color-palette-extractor","typing-speed-race","noise-meter","voice-to-text-counter","mood-board-generator","aws-cost-estimator","terraform-snippet-generator","cicd-visualizer","cloud-service-comparison","resume-ats-checker","face-shape-detector","baby-face-generator","pet-breed-identifier","awesome-free-tools"]'
           
           # Expand detection to include core infrastructure and workflows
           CORE_PATTERN='^(shared/|scripts/|package|jest.config.js|\.github/workflows/|terraform/|\.dockerignore|Dockerfile|docker-compose.yml)'
@@ -125,20 +125,13 @@ jobs:
       - name: Terraform Import (Automated Migration)
         continue-on-error: true
         run: |
-          for site in picker-wheel festival-countdown bill-splitter emoji-translator sleep-calculator startup-idea-generator loan-visualizer height-comparison color-palette-extractor typing-speed-race noise-meter voice-to-text-counter mood-board-generator aws-cost-estimator cicd-visualizer cloud-service-comparison resume-ats-checker face-shape-detector baby-face-generator pet-breed-identifier awesome-free-tools; do
+          for site in picker-wheel festival-countdown bill-splitter emoji-translator sleep-calculator startup-idea-generator loan-visualizer height-comparison color-palette-extractor typing-speed-race noise-meter voice-to-text-counter mood-board-generator aws-cost-estimator terraform-snippet-generator cicd-visualizer cloud-service-comparison resume-ats-checker face-shape-detector baby-face-generator pet-breed-identifier awesome-free-tools; do
             terraform import "cloudflare_pages_project.sites[\"$site\"]" "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/$site" || echo "Project $site not found or already in state"
           done
         env:
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Fix State Drift (Remove Retired Project from State)
-        continue-on-error: true
-        run: |
-          terraform state rm "cloudflare_pages_project.sites[\"terraform-snippet-generator\"]" || echo "Already removed from state"
-        env:
-          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Terraform Plan
         id: plan
@@ -165,21 +158,9 @@ jobs:
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-  cleanup-retired-projects:
-    needs: [terraform]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Delete retired Cloudflare Pages projects
-        continue-on-error: true
-        run: |
-          npx wrangler@3 pages project delete terraform-snippet-generator --yes || echo "Project already deleted or not found"
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy:
-    needs: [build, cleanup-retired-projects, detect-changes]
+    needs: [build, terraform, detect-changes]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.detect-changes.outputs.sites != '[]'
     strategy:
       fail-fast: false

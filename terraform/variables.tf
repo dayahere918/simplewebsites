@@ -53,6 +53,7 @@ variable "site_names" {
     "voice-to-text-counter",
     "mood-board-generator",
     "aws-cost-estimator",
+    "terraform-snippet-generator",
     "cicd-visualizer",
     "cloud-service-comparison",
     "resume-ats-checker",

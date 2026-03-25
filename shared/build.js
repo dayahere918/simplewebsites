@@ -17,7 +17,7 @@ const GLOBAL_DIST = path.join(ROOT, 'dist');
 function getAllSites() {
   if (!fs.existsSync(SITES_DIR)) return [];
   return fs.readdirSync(SITES_DIR).filter(f =>
-    fs.statSync(path.join(SITES_DIR, f)).isDirectory() && f !== 'terraform-snippet-generator'
+    fs.statSync(path.join(SITES_DIR, f)).isDirectory()
   );
 }
 
