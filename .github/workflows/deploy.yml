@@ -116,6 +116,12 @@ jobs:
         env:
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
+      - name: Terraform Refresh (Detect State Drift)
+        run: terraform refresh
+        env:
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
       - name: Terraform Import (Automated Migration)
         continue-on-error: true
         run: |
