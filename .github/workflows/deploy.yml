@@ -132,13 +132,6 @@ jobs:
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Fix State Drift (Remove Missing Project from State)
-        continue-on-error: true
-        run: |
-          terraform state rm "cloudflare_pages_project.sites[\"terraform-snippet-generator\"]" || echo "Not in state"
-        env:
-          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
 
       - name: Terraform Plan
