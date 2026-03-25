@@ -12,6 +12,7 @@ coverage/
 coverage_report/
 coverage_report_final/
 jest_output.json
+jest_output.txt
 test_output.txt
 test_output_utf8.txt
 
