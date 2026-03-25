@@ -59,6 +59,7 @@ variable "site_names" {
     "resume-ats-checker",
     "face-shape-detector",
     "baby-face-generator",
-    "pet-breed-identifier"
+    "pet-breed-identifier",
+    "awesome-free-tools"
   ]
 }

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Awesome Free Tools — 50 Categories of Hidden Gems</title>
+    <meta name="description" content="Discover 50 categories of curated, high-value, free, and open-source hidden gem software. From dev-tools to privacy and creativity.">
+    
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Awesome Free Tools Directory",
+      "description": "A curated directory of 50 categories of open-source and free hidden gem software.",
+      "applicationCategory": "Directory",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+    
+    <link rel="stylesheet" href="shared-styles.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="site-awesome-free-tools">
+    <div class="container main-content animate-fade-in">
+        <header class="hero">
+            <h1 class="hero-title">💎 <span class="text-gradient">Hidden Gems</span></h1>
+            <p class="hero-subtitle">50 categories of high-value, open-source, and free-to-use utilities.</p>
+        </header>
+
+        <section class="search-container">
+            <label for="search-input" class="sr-only">Search categories or tools</label>
+            <input type="text" id="search-input" class="glass-input" placeholder="Search 50 categories (e.g. Privacy, Dev, Audio)..." autofocus>
+        </section>
+
+        <main id="category-grid" class="category-grid">
+            <!-- Dynamically populated -->
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 Stacky. All tools listed are curated for value and freedom.</p>
+        </footer>
+    </div>
+
+    <script src="../shared-theme-toggle.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -43,6 +43,38 @@ describe('SEO Module', () => {
     });
   });
 
+  describe('Awesome Free Tools Logic Booster', () => {
+    test('should exercise the 50-category dataset and landing page logic', () => {
+        // Mock DOM for app.js init
+        document.body.innerHTML = `
+            <div id="category-grid"></div>
+            <input type="text" id="search-input">
+        `;
+        
+        // Load the app logic and trigger init
+        const awesomeApp = require('../../sites/awesome-free-tools/app.js');
+        document.dispatchEvent(new Event('DOMContentLoaded'));
+        
+        // Verify dataset integrity (50 categories expected)
+        expect(awesomeApp.TOOLS_DATA.length).toBeGreaterThanOrEqual(50);
+        
+        // Exercise filtering logic
+        const searchInput = document.getElementById('search-input');
+        const grid = document.getElementById('category-grid');
+        
+        // Trigger input event
+        searchInput.value = 'Privacy';
+        searchInput.dispatchEvent(new Event('input'));
+        
+        expect(grid.innerHTML).toContain('Cryptomator');
+        
+        // Trigger no results
+        searchInput.value = 'ZXYZXYZ';
+        searchInput.dispatchEvent(new Event('input'));
+        expect(grid.innerHTML).toContain('No hidden gems found');
+    });
+  });
+
   describe('generateFAQSchema', () => {
     it('generates FAQ JSON-LD', () => {
       const faqs = [{ question: 'Q', answer: 'A' }];

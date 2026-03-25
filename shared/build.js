@@ -197,7 +197,7 @@ function buildAll() {
 <html lang="en" data-theme="dark">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stacky — Free Online Tools Collection</title>
-<meta name="description" content="21+ free premium online tools: picker wheel, baby face generator, noise meter, and more. Fast, open source, and free.">
+<meta name="description" content="22+ free premium online tools: picker wheel, baby face generator, noise meter, awesome free tools and more. Fast, open source, and free.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="shared-styles.css">
@@ -209,7 +209,7 @@ function buildAll() {
 </head>
 <body>
   <div class="container">
-    <section class="hero"><h1>📚 <span class="text-gradient">Stacky</span></h1><p>21+ Premium small tools. Open source, fast, and free.</p></section>
+    <section class="hero"><h1>📚 <span class="text-gradient">Stacky</span></h1><p>22+ Premium small tools. Open source, fast, and free.</p></section>
     <div class="hub-grid">
       ${sites.map(s => `<a href="${s}/" class="hub-card"><h4>${formatSiteName(s)}</h4></a>`).join('\n      ')}
     </div>
