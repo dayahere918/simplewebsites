@@ -25,6 +25,8 @@ const CAT_BREEDS = [
 ];
 
 let petType = 'dog';
+let ml5Classifier = null;
+let ml5Loaded = false;
 
 function setPetType(type) {
   petType = type;
@@ -84,12 +86,22 @@ function analyzeImage(src) {
     if (badge) badge.textContent = "Analyzing ML Model...";
 
     if (typeof window !== 'undefined' && window.ml5) {
-      const classifier = ml5.imageClassifier('MobileNet', () => {
-        classifier.classify(canvas, (err, results) => {
+      if (!ml5Classifier) {
+        ml5Classifier = ml5.imageClassifier('MobileNet', () => {
+          ml5Loaded = true;
+          ml5Classifier.classify(canvas, (err, results) => {
+            if (err || !results) return fallbackIdentify(canvas);
+            processMLResults(results);
+          });
+        });
+      } else if (ml5Loaded) {
+        ml5Classifier.classify(canvas, (err, results) => {
           if (err || !results) return fallbackIdentify(canvas);
           processMLResults(results);
         });
-      });
+      } else {
+        fallbackIdentify(canvas);
+      }
     } else {
       fallbackIdentify(canvas);
     }

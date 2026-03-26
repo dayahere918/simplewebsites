@@ -56,4 +56,23 @@ describe('Pet Breed Identifier', () => {
       } catch (e) { done(e); }
     }, 50);
   });
+
+  test('resetAnalysis functionality', () => {
+    document.getElementById('upload-area').classList.add('hidden');
+    document.getElementById('results').classList.remove('hidden');
+    resetAnalysis();
+    expect(document.getElementById('upload-area').classList.contains('hidden')).toBeFalsy();
+    expect(document.getElementById('results').classList.contains('hidden')).toBeTruthy();
+  });
+
+  test('setPetType toggles correctly', () => {
+    document.body.innerHTML += `
+      <button class="pet-btn btn-secondary" id="btn-cat"></button>
+      <button class="pet-btn btn-primary active" id="btn-dog"></button>
+    `;
+    const { setPetType } = require('../app');
+    setPetType('cat');
+    expect(document.getElementById('btn-cat').classList.contains('active')).toBeTruthy();
+    expect(document.getElementById('btn-dog').classList.contains('active')).toBeFalsy();
+  });
 });

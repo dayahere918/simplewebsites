@@ -72,13 +72,28 @@ function blendImages(canvas1, canvas2, outputCanvas) {
   const d1 = canvas1.getContext('2d').getImageData(0, 0, 200, 200);
   const d2 = canvas2.getContext('2d').getImageData(0, 0, 200, 200);
   const out = ctx.createImageData(200, 200);
-  const blend = 0.5 + (Math.random() * 0.2 - 0.1); // ~50% blend with slight randomness
-  for (let i = 0; i < d1.data.length; i += 4) {
-    out.data[i] = Math.round(d1.data[i] * blend + d2.data[i] * (1 - blend));
-    out.data[i+1] = Math.round(d1.data[i+1] * blend + d2.data[i+1] * (1 - blend));
-    out.data[i+2] = Math.round(d1.data[i+2] * blend + d2.data[i+2] * (1 - blend));
-    out.data[i+3] = 255;
+  
+  const p1IsBase = Math.random() > 0.5;
+  
+  for (let y = 0; y < 200; y++) {
+    for (let x = 0; x < 200; x++) {
+      let i = (y * 200 + x) * 4;
+      let dist = Math.sqrt(Math.pow(x - 100, 2) + Math.pow(y - 100, 2));
+      
+      let innerFactor = 1;
+      if (dist > 80) innerFactor = 0;
+      else if (dist > 40) innerFactor = 1 - ((dist - 40) / 40);
+      
+      let f1 = p1IsBase ? (1 - innerFactor) : innerFactor;
+      let f2 = p1IsBase ? innerFactor : (1 - innerFactor);
+      
+      out.data[i] = Math.round(d1.data[i] * f1 + d2.data[i] * f2);
+      out.data[i+1] = Math.round(d1.data[i+1] * f1 + d2.data[i+1] * f2);
+      out.data[i+2] = Math.round(d1.data[i+2] * f1 + d2.data[i+2] * f2);
+      out.data[i+3] = 255;
+    }
   }
+  
   ctx.putImageData(out, 0, 0);
   // Apply slight softening
   ctx.filter = 'blur(1px) brightness(1.05)';

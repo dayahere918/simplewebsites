@@ -11,7 +11,7 @@
 .text-display .correct { color: var(--color-success); }
 .text-display .incorrect { color: #ff3333; text-decoration: underline; background: rgba(225,112,85,0.25); border-radius: 2px; font-weight: bold; }
 .text-display .current { background: var(--color-primary-glow); border-radius: 2px; padding: 1px 0; animation: pulse 1s infinite; }
-.text-display .pending { color: var(--color-text-muted); opacity: 0.8; }
+.text-display .pending { color: var(--color-text); opacity: 0.6; }
 
 .typing-input { font-family: var(--font-mono); font-size: var(--text-lg); }
 .typing-input:disabled { opacity: 0.5; }
