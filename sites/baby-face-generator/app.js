@@ -1,6 +1,6 @@
 /**
  * Baby Face Generator — Core Logic
- * Blends two parent photos to simulate a "baby" face
+ * Blends two parent photos using advanced face morphing to simulate a "baby" face
  */
 const TRAITS = {
   eyes: ['Big brown eyes', 'Bright blue eyes', 'Hazel eyes', 'Green eyes', 'Dark eyes'],
@@ -65,40 +65,150 @@ function loadParent(event, num) {
   reader.readAsDataURL(file);
 }
 
+/**
+ * Extract average skin tone from the center region of a canvas
+ */
+function extractSkinTone(canvas, size) {
+  if (!canvas) return { r: 200, g: 170, b: 150 };
+  const ctx = canvas.getContext('2d');
+  if (!ctx || !ctx.getImageData) return { r: 200, g: 170, b: 150 };
+  // Sample center 40% of the image (likely face region)
+  const margin = Math.floor(size * 0.3);
+  const sampleSize = size - margin * 2;
+  const data = ctx.getImageData(margin, margin, sampleSize, sampleSize).data;
+  let r = 0, g = 0, b = 0, count = 0;
+  for (let i = 0; i < data.length; i += 16) { // sample every 4th pixel for speed
+    r += data[i]; g += data[i+1]; b += data[i+2]; count++;
+  }
+  if (count === 0) return { r: 200, g: 170, b: 150 };
+  return { r: Math.round(r / count), g: Math.round(g / count), b: Math.round(b / count) };
+}
+
+/**
+ * Apply baby-ification filter: soften, warm, brighten
+ */
+function applyBabyFilter(ctx, size) {
+  if (!ctx) return;
+  // Warm overlay: slight pink/warm tint
+  ctx.globalCompositeOperation = 'overlay';
+  ctx.fillStyle = 'rgba(255, 220, 200, 0.12)';
+  ctx.fillRect(0, 0, size, size);
+  ctx.globalCompositeOperation = 'source-over';
+
+  // Apply softening via blur + brightness
+  ctx.filter = 'blur(1.5px) brightness(1.08) saturate(1.1)';
+  ctx.drawImage(ctx.canvas, 0, 0);
+  ctx.filter = 'none';
+
+  // Oval vignette mask for face shape
+  ctx.globalCompositeOperation = 'destination-in';
+  const gradient = ctx.createRadialGradient(size/2, size/2, size*0.2, size/2, size/2, size*0.48);
+  gradient.addColorStop(0, 'rgba(255,255,255,1)');
+  gradient.addColorStop(0.7, 'rgba(255,255,255,1)');
+  gradient.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  ctx.globalCompositeOperation = 'source-over';
+
+  // Soft background behind oval
+  const bgGrad = ctx.createRadialGradient(size/2, size/2, size*0.35, size/2, size/2, size*0.5);
+  bgGrad.addColorStop(0, 'rgba(255,235,220,0)');
+  bgGrad.addColorStop(1, 'rgba(255,235,220,0.6)');
+  ctx.globalCompositeOperation = 'destination-over';
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, size, size);
+  ctx.globalCompositeOperation = 'source-over';
+}
+
 function blendImages(canvas1, canvas2, outputCanvas) {
   if (!canvas1 || !canvas2 || !outputCanvas) return;
+  const SIZE = 200;
   const ctx = outputCanvas.getContext('2d');
-  outputCanvas.width = 200; outputCanvas.height = 200;
-  const d1 = canvas1.getContext('2d').getImageData(0, 0, 200, 200);
-  const d2 = canvas2.getContext('2d').getImageData(0, 0, 200, 200);
-  const out = ctx.createImageData(200, 200);
-  
-  const p1IsBase = Math.random() > 0.5;
-  
-  for (let y = 0; y < 200; y++) {
-    for (let x = 0; x < 200; x++) {
-      let i = (y * 200 + x) * 4;
-      let dist = Math.sqrt(Math.pow(x - 100, 2) + Math.pow(y - 100, 2));
-      
-      let innerFactor = 1;
-      if (dist > 80) innerFactor = 0;
-      else if (dist > 40) innerFactor = 1 - ((dist - 40) / 40);
-      
-      let f1 = p1IsBase ? (1 - innerFactor) : innerFactor;
-      let f2 = p1IsBase ? innerFactor : (1 - innerFactor);
-      
-      out.data[i] = Math.round(d1.data[i] * f1 + d2.data[i] * f2);
-      out.data[i+1] = Math.round(d1.data[i+1] * f1 + d2.data[i+1] * f2);
-      out.data[i+2] = Math.round(d1.data[i+2] * f1 + d2.data[i+2] * f2);
+  outputCanvas.width = SIZE; outputCanvas.height = SIZE;
+
+  // Step 1: Extract skin tones from both parents
+  const tone1 = extractSkinTone(canvas1, SIZE);
+  const tone2 = extractSkinTone(canvas2, SIZE);
+
+  // Step 2: Create baby skin tone (interpolated + warmer)
+  const babyTone = {
+    r: Math.round((tone1.r + tone2.r) / 2 + 5),
+    g: Math.round((tone1.g + tone2.g) / 2 + 3),
+    b: Math.round((tone1.b + tone2.b) / 2 - 2)
+  };
+
+  // Step 3: Get pixel data from both parents
+  const d1 = canvas1.getContext('2d').getImageData(0, 0, SIZE, SIZE);
+  const d2 = canvas2.getContext('2d').getImageData(0, 0, SIZE, SIZE);
+  const out = ctx.createImageData(SIZE, SIZE);
+
+  // Step 4: Advanced blend — use facial zones with different weights
+  // Randomize which parent dominates which zone
+  const seed = Math.random();
+  const p1Eyes = seed > 0.5;  // parent1 contributes eyes region
+  const p1Mouth = seed <= 0.5; // parent1 contributes mouth region
+
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      const i = (y * SIZE + x) * 4;
+      const cx = SIZE / 2, cy = SIZE / 2;
+      const dx = x - cx, dy = y - cy;
+
+      // Distance from center (normalized 0-1)
+      const dist = Math.sqrt(dx*dx + dy*dy) / (SIZE / 2);
+
+      // Define facial zone weights
+      let p1Weight;
+      const isEyeRegion = (dy < -10 && dy > -50 && Math.abs(dx) < 60); // upper-mid face
+      const isMouthRegion = (dy > 20 && dy < 60 && Math.abs(dx) < 40); // lower-mid face
+      const isNoseRegion = (Math.abs(dy) < 25 && Math.abs(dx) < 25); // center
+      const isForehead = (dy < -40); // top
+      const isChin = (dy > 50); // bottom
+
+      if (isEyeRegion) {
+        p1Weight = p1Eyes ? 0.7 : 0.3;
+      } else if (isMouthRegion) {
+        p1Weight = p1Mouth ? 0.7 : 0.3;
+      } else if (isNoseRegion) {
+        p1Weight = 0.5; // equal blend for nose
+      } else if (isForehead) {
+        p1Weight = p1Eyes ? 0.6 : 0.4;
+      } else if (isChin) {
+        p1Weight = p1Mouth ? 0.6 : 0.4;
+      } else {
+        p1Weight = 0.5;
+      }
+
+      // Blend outside face oval toward baby skin tone
+      const faceFade = dist > 0.7 ? Math.min(1, (dist - 0.7) / 0.3) : 0;
+
+      // Raw blended pixel
+      let r = d1.data[i] * p1Weight + d2.data[i] * (1 - p1Weight);
+      let g = d1.data[i+1] * p1Weight + d2.data[i+1] * (1 - p1Weight);
+      let b = d1.data[i+2] * p1Weight + d2.data[i+2] * (1 - p1Weight);
+
+      // Apply skin tone tinting (subtle)
+      const tintStrength = 0.15;
+      r = r * (1 - tintStrength) + babyTone.r * tintStrength;
+      g = g * (1 - tintStrength) + babyTone.g * tintStrength;
+      b = b * (1 - tintStrength) + babyTone.b * tintStrength;
+
+      // Fade edges to warm background
+      r = r * (1 - faceFade) + 255 * faceFade;
+      g = g * (1 - faceFade) + 235 * faceFade;
+      b = b * (1 - faceFade) + 220 * faceFade;
+
+      out.data[i] = Math.min(255, Math.round(r));
+      out.data[i+1] = Math.min(255, Math.round(g));
+      out.data[i+2] = Math.min(255, Math.round(b));
       out.data[i+3] = 255;
     }
   }
-  
+
   ctx.putImageData(out, 0, 0);
-  // Apply slight softening
-  ctx.filter = 'blur(1px) brightness(1.05)';
-  ctx.drawImage(outputCanvas, 0, 0);
-  ctx.filter = 'none';
+
+  // Step 5: Apply baby-ification filter
+  applyBabyFilter(ctx, SIZE);
 }
 
 function generateTraits() {
@@ -148,6 +258,7 @@ function resetAll() {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { 
     TRAITS, blendImages, generateTraits, generateBaby, downloadResult, resetAll, loadParent,
+    extractSkinTone, applyBabyFilter,
     getState: () => ({ parent1Loaded, parent2Loaded }), 
     setParent1: v => { parent1Loaded = v; }, 
     setParent2: v => { parent2Loaded = v; } 

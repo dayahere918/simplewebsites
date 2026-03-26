@@ -12,6 +12,8 @@ const SHARED_DIR = path.join(ROOT, 'shared');
 const BASE_URL = process.env.BASE_URL || 'https://stacky.pages.dev';
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || '';
 const ADSENSE_PUB_ID = process.env.ADSENSE_PUB_ID || '';
+const GA_MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID || '';
+const CF_ANALYTICS_TOKEN = process.env.CF_ANALYTICS_TOKEN || '';
 const GLOBAL_DIST = path.join(ROOT, 'dist');
 
 function getAllSites() {
@@ -59,7 +61,7 @@ function generateNavBar(siteName) {
   return `<nav class="site-nav" aria-label="Site navigation">
   <a href="/" aria-label="Back to all tools">← All Tools</a>
   <span class="nav-title">${formatSiteName(siteName)}</span>
-  <span></span>
+  <button onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';localStorage.setItem('theme',document.documentElement.dataset.theme)" style="background:none;border:1px solid var(--color-border);border-radius:var(--radius-full);padding:4px 10px;cursor:pointer;font-size:1rem;color:var(--color-text)" aria-label="Toggle theme" title="Toggle dark/light mode">🌙</button>
 </nav>`;
 }
 
@@ -76,21 +78,46 @@ function processHtml(html, siteName) {
     processed = processed.replace(/<head>/i, `<head>\n    ${preconnect}`);
   }
 
-  // Inject nav bar after <body> tag (skip ad-container if present)
-  const navHtml = generateNavBar(siteName);
-  processed = processed.replace(/<body([^>]*)>/i, `<body$1>\n${navHtml}`);
+  // Inject emoji favicon
+  const emojiMap = { 'picker-wheel': '🎡', 'festival-countdown': '🎆', 'bill-splitter': '💰', 'emoji-translator': '😀', 'sleep-calculator': '😴', 'startup-idea-generator': '💡', 'loan-visualizer': '🏦', 'height-comparison': '📏', 'color-palette-extractor': '🎨', 'typing-speed-race': '⌨️', 'noise-meter': '🔊', 'voice-to-text-counter': '🎙️', 'mood-board-generator': '🎭', 'aws-cost-estimator': '☁️', 'terraform-snippet-generator': '🔧', 'cicd-visualizer': '🔄', 'cloud-service-comparison': '⚡', 'resume-ats-checker': '📄', 'face-shape-detector': '👤', 'baby-face-generator': '👶', 'pet-breed-identifier': '🐾', 'awesome-free-tools': '💎' };
+  const emoji = emojiMap[siteName] || '🛠️';
+  if (!processed.includes('rel="icon"')) {
+    processed = processed.replace(/<\/head>/i, `    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>${emoji}</text></svg>">\n</head>`);
+  }
 
-  // Replace placeholder AdSense publisher IDs if configured
+  // Inject AdSense script if configured
   const currentAdsense = process.env.ADSENSE_PUB_ID || ADSENSE_PUB_ID;
   if (currentAdsense) {
     processed = processed.replace(/ca-pub-XXXXXXXXXXXXXXXX/g, currentAdsense);
+    if (!processed.includes('pagead2.googlesyndication.com')) {
+      processed = processed.replace(/<\/head>/i, `    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${currentAdsense}" crossorigin="anonymous"><\/script>\n</head>`);
+    }
   }
 
-  // Add contact email to footer if configured
+  // Inject GA4 if configured
+  const gaId = process.env.GA_MEASUREMENT_ID || GA_MEASUREMENT_ID;
+  if (gaId && !processed.includes('gtag')) {
+    const ga4Script = `<script async src="https://www.googletagmanager.com/gtag/js?id=${gaId}"><\/script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');<\/script>`;
+    processed = processed.replace(/<\/head>/i, `    ${ga4Script}\n</head>`);
+  }
+
+  // Inject Cloudflare Web Analytics if configured
+  const cfToken = process.env.CF_ANALYTICS_TOKEN || CF_ANALYTICS_TOKEN;
+  if (cfToken && !processed.includes('cloudflareinsights')) {
+    processed = processed.replace(/<\/body>/i, `<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "${cfToken}"}'><\/script>\n</body>`);
+  }
+
+  // Inject nav bar after <body> tag
+  const navHtml = generateNavBar(siteName);
+  processed = processed.replace(/<body([^>]*)>/i, `<body$1>\n${navHtml}`);
+
+  // Add contact email and privacy/terms links to footer if configured
   const currentEmail = process.env.CONTACT_EMAIL || CONTACT_EMAIL;
-  if (currentEmail && processed.includes('<footer')) {
-    const contactHtml = `<br><a href="mailto:${currentEmail}">📧 Contact Us</a>`;
-    processed = processed.replace(/<\/footer>/i, `${contactHtml}\n</footer>`);
+  if (processed.includes('<footer')) {
+    let footerLinks = '';
+    if (currentEmail) footerLinks += `<a href="mailto:${currentEmail}">📧 Contact Us</a> · `;
+    footerLinks += `<a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a>`;
+    processed = processed.replace(/<\/footer>/i, `<br>${footerLinks}\n</footer>`);
   }
 
   return processed;

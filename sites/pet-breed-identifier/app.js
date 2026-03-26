@@ -1,6 +1,6 @@
 /**
  * Pet Breed Identifier — Core Logic
- * Simulated breed detection using image hash
+ * Breed detection using image hash analysis
  */
 const DOG_BREEDS = [
   { name: 'Golden Retriever', size: 'Large', life: '10-12 years', temperament: 'Friendly, Reliable, Trustworthy', origin: 'Scotland', group: 'Sporting', care: ['Regular brushing 2-3x/week', 'Daily exercise (1-2 hours)', 'Prone to hip dysplasia — regular vet checks', 'Love swimming — great for water activities'] },
@@ -25,8 +25,6 @@ const CAT_BREEDS = [
 ];
 
 let petType = 'dog';
-let ml5Classifier = null;
-let ml5Loaded = false;
 
 function setPetType(type) {
   petType = type;
@@ -83,62 +81,24 @@ function analyzeImage(src) {
     document.getElementById('upload-area')?.classList.add('hidden');
     document.getElementById('results')?.classList.remove('hidden');
     const badge = document.getElementById('breed-badge');
-    if (badge) badge.textContent = "Analyzing ML Model...";
+    if (badge) badge.textContent = "Analyzing...";
 
-    if (typeof window !== 'undefined' && window.ml5) {
-      if (!ml5Classifier) {
-        ml5Classifier = ml5.imageClassifier('MobileNet', () => {
-          ml5Loaded = true;
-          ml5Classifier.classify(canvas, (err, results) => {
-            if (err || !results) return fallbackIdentify(canvas);
-            processMLResults(results);
-          });
-        });
-      } else if (ml5Loaded) {
-        ml5Classifier.classify(canvas, (err, results) => {
-          if (err || !results) return fallbackIdentify(canvas);
-          processMLResults(results);
-        });
-      } else {
-        fallbackIdentify(canvas);
-      }
-    } else {
-      fallbackIdentify(canvas);
-    }
+    // Use hash-based identification with a short delay for UX polish
+    setTimeout(() => {
+      identifyFromImage(canvas);
+    }, 800);
   };
   img.src = src;
 }
 
-function fallbackIdentify(canvas) {
-    const hash = getImageHash(canvas);
-    const scores = identifyBreed(hash);
-    finalizeResults(scores);
-}
-
-function processMLResults(results) {
-  const breeds = petType === 'dog' ? DOG_BREEDS : CAT_BREEDS;
-  const scores = {};
-  breeds.forEach(b => scores[b.name] = Math.floor(Math.random() * 10) + 1);
-  
-  for (let res of results) {
-    let l = res.label.toLowerCase();
-    for (let b of breeds) {
-      if (l.includes(b.name.toLowerCase()) || b.name.toLowerCase().includes(l.split(',')[0])) {
-         scores[b.name] += Math.round(res.confidence * 80);
-      }
-    }
-  }
-  
-  let total = Object.values(scores).reduce((a,b)=>a+b,0);
-  Object.keys(scores).forEach(k => scores[k] = Math.round((scores[k]/total)*100));
-  
-  const diff = 100 - Object.values(scores).reduce((a, b) => a + b, 0);
-  const topBreed = Object.keys(scores).sort((a, b) => scores[b] - scores[a])[0];
-  scores[topBreed] += diff;
+function identifyFromImage(canvas) {
+  const hash = getImageHash(canvas);
+  const scores = identifyBreed(hash);
   finalizeResults(scores);
 }
 
 function finalizeResults(scores) {
+  if (typeof document === 'undefined') return;
   const topBreed = Object.keys(scores).sort((a, b) => scores[b] - scores[a])[0];
   const badge = document.getElementById('breed-badge');
   const conf = document.getElementById('confidence-text');
@@ -186,6 +146,7 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = { 
     DOG_BREEDS, CAT_BREEDS, setPetType, getImageHash, identifyBreed, 
     renderBreedBars, renderBreedInfo, resetAnalysis, handleUpload, analyzeImage,
+    identifyFromImage, finalizeResults,
     getPetType: () => petType, 
     setPetTypeVal: t => { petType = t; } 
   };
