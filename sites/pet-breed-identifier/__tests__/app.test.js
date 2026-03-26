@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 const { 
-  DOG_BREEDS, CAT_BREEDS, setPetType, getImageHash, identifyBreed,
+  DOG_BREEDS, CAT_BREEDS, setPetType, getImageHash, identifyBreed, analyzeImageFeatures,
   renderBreedBars, renderBreedInfo, resetAnalysis, handleUpload, analyzeImage,
   identifyFromImage, finalizeResults, getPetType, setPetTypeVal
 } = require('../app');
@@ -77,7 +77,8 @@ describe('Pet Breed Identifier', () => {
   });
 
   test('identifyBreed returns scores totaling 100', () => {
-    const scores = identifyBreed(12345);
+    const features = { brightness: 128, warmth: 0, contrast: 50 };
+    const scores = identifyBreed(12345, features);
     const total = Object.values(scores).reduce((a, b) => a + b, 0);
     expect(total).toBe(100);
     expect(Object.keys(scores).length).toBe(8);
@@ -85,10 +86,43 @@ describe('Pet Breed Identifier', () => {
 
   test('identifyBreed for cats', () => {
     setPetTypeVal('cat');
-    const scores = identifyBreed(54321);
+    const features = { brightness: 128, warmth: 0, contrast: 50 };
+    const scores = identifyBreed(54321, features);
     const total = Object.values(scores).reduce((a, b) => a + b, 0);
     expect(total).toBe(100);
     expect(Object.keys(scores).length).toBe(8);
+  });
+
+  test('identifyBreed favors cool+high-contrast breeds for cool images', () => {
+    setPetTypeVal('dog');
+    const features = { brightness: 170, warmth: -30, contrast: 180 };
+    const scores = identifyBreed(99999, features);
+    // Siberian Husky has cool warmth + high contrast — should score well
+    expect(scores['Siberian Husky']).toBeGreaterThan(scores['Beagle']);
+  });
+
+  test('identifyBreed favors warm breeds for warm images', () => {
+    setPetTypeVal('dog');
+    const features = { brightness: 180, warmth: 40, contrast: 40 };
+    const scores = identifyBreed(11111, features);
+    // Golden Retriever has high brightness + warm + low contrast
+    expect(scores['Golden Retriever']).toBeGreaterThan(scores['Siberian Husky']);
+  });
+
+  test('analyzeImageFeatures returns valid object', () => {
+    const canvas = document.getElementById('pet-canvas');
+    const features = analyzeImageFeatures(canvas);
+    expect(features).toHaveProperty('brightness');
+    expect(features).toHaveProperty('warmth');
+    expect(features).toHaveProperty('contrast');
+    expect(typeof features.brightness).toBe('number');
+  });
+
+  test('analyzeImageFeatures returns defaults for null canvas', () => {
+    const features = analyzeImageFeatures(null);
+    expect(features.brightness).toBe(128);
+    expect(features.warmth).toBe(0);
+    expect(features.contrast).toBe(50);
   });
 
   test('identifyFromImage calls finalizeResults', () => {

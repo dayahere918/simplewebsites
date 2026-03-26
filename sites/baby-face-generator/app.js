@@ -72,12 +72,11 @@ function extractSkinTone(canvas, size) {
   if (!canvas) return { r: 200, g: 170, b: 150 };
   const ctx = canvas.getContext('2d');
   if (!ctx || !ctx.getImageData) return { r: 200, g: 170, b: 150 };
-  // Sample center 40% of the image (likely face region)
   const margin = Math.floor(size * 0.3);
   const sampleSize = size - margin * 2;
   const data = ctx.getImageData(margin, margin, sampleSize, sampleSize).data;
   let r = 0, g = 0, b = 0, count = 0;
-  for (let i = 0; i < data.length; i += 16) { // sample every 4th pixel for speed
+  for (let i = 0; i < data.length; i += 16) {
     r += data[i]; g += data[i+1]; b += data[i+2]; count++;
   }
   if (count === 0) return { r: 200, g: 170, b: 150 };
@@ -85,35 +84,35 @@ function extractSkinTone(canvas, size) {
 }
 
 /**
- * Apply baby-ification filter: soften, warm, brighten
+ * Apply baby-ification filter: strong softening, warmth, round face
  */
 function applyBabyFilter(ctx, size) {
   if (!ctx) return;
-  // Warm overlay: slight pink/warm tint
+  // Warm overlay
   ctx.globalCompositeOperation = 'overlay';
   ctx.fillStyle = 'rgba(255, 220, 200, 0.12)';
   ctx.fillRect(0, 0, size, size);
   ctx.globalCompositeOperation = 'source-over';
 
-  // Apply softening via blur + brightness
-  ctx.filter = 'blur(1.5px) brightness(1.08) saturate(1.1)';
+  // Strong softening — babies have very soft features
+  ctx.filter = 'blur(2.5px) brightness(1.1) saturate(1.15)';
   ctx.drawImage(ctx.canvas, 0, 0);
   ctx.filter = 'none';
 
-  // Oval vignette mask for face shape
+  // Oval vignette for face shape
   ctx.globalCompositeOperation = 'destination-in';
-  const gradient = ctx.createRadialGradient(size/2, size/2, size*0.2, size/2, size/2, size*0.48);
+  const gradient = ctx.createRadialGradient(size/2, size/2, size*0.15, size/2, size/2, size*0.45);
   gradient.addColorStop(0, 'rgba(255,255,255,1)');
-  gradient.addColorStop(0.7, 'rgba(255,255,255,1)');
+  gradient.addColorStop(0.6, 'rgba(255,255,255,1)');
   gradient.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, size, size);
   ctx.globalCompositeOperation = 'source-over';
 
-  // Soft background behind oval
-  const bgGrad = ctx.createRadialGradient(size/2, size/2, size*0.35, size/2, size/2, size*0.5);
-  bgGrad.addColorStop(0, 'rgba(255,235,220,0)');
-  bgGrad.addColorStop(1, 'rgba(255,235,220,0.6)');
+  // Soft warm background behind oval
+  const bgGrad = ctx.createRadialGradient(size/2, size/2, size*0.3, size/2, size/2, size*0.5);
+  bgGrad.addColorStop(0, 'rgba(255,230,215,0)');
+  bgGrad.addColorStop(1, 'rgba(255,230,215,0.7)');
   ctx.globalCompositeOperation = 'destination-over';
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, size, size);
@@ -126,77 +125,92 @@ function blendImages(canvas1, canvas2, outputCanvas) {
   const ctx = outputCanvas.getContext('2d');
   outputCanvas.width = SIZE; outputCanvas.height = SIZE;
 
-  // Step 1: Extract skin tones from both parents
+  // Extract skin tones from both parents
   const tone1 = extractSkinTone(canvas1, SIZE);
   const tone2 = extractSkinTone(canvas2, SIZE);
 
-  // Step 2: Create baby skin tone (interpolated + warmer)
+  // Baby skin tone — average with warmth boost
   const babyTone = {
-    r: Math.round((tone1.r + tone2.r) / 2 + 5),
-    g: Math.round((tone1.g + tone2.g) / 2 + 3),
-    b: Math.round((tone1.b + tone2.b) / 2 - 2)
+    r: Math.min(255, Math.round((tone1.r + tone2.r) / 2 + 8)),
+    g: Math.min(255, Math.round((tone1.g + tone2.g) / 2 + 5)),
+    b: Math.min(255, Math.round((tone1.b + tone2.b) / 2))
   };
 
-  // Step 3: Get pixel data from both parents
-  const d1 = canvas1.getContext('2d').getImageData(0, 0, SIZE, SIZE);
-  const d2 = canvas2.getContext('2d').getImageData(0, 0, SIZE, SIZE);
+  // Get pixel data — scale parents slightly inward for "baby proportion" effect
+  // Draw parent at 85% scale centered (baby features are proportionally smaller on rounder head)
+  const tmpCanvas1 = (typeof document !== 'undefined') ? document.createElement('canvas') : null;
+  const tmpCanvas2 = (typeof document !== 'undefined') ? document.createElement('canvas') : null;
+
+  let d1, d2;
+  if (tmpCanvas1 && tmpCanvas2) {
+    tmpCanvas1.width = SIZE; tmpCanvas1.height = SIZE;
+    tmpCanvas2.width = SIZE; tmpCanvas2.height = SIZE;
+    const tc1 = tmpCanvas1.getContext('2d');
+    const tc2 = tmpCanvas2.getContext('2d');
+    // Scale features to ~85% and center (baby-sized)
+    const scale = 0.85;
+    const offset = SIZE * (1 - scale) / 2;
+    tc1.fillStyle = `rgb(${babyTone.r},${babyTone.g},${babyTone.b})`;
+    tc1.fillRect(0, 0, SIZE, SIZE);
+    tc1.drawImage(canvas1, offset, offset, SIZE * scale, SIZE * scale);
+    tc2.fillStyle = `rgb(${babyTone.r},${babyTone.g},${babyTone.b})`;
+    tc2.fillRect(0, 0, SIZE, SIZE);
+    tc2.drawImage(canvas2, offset, offset, SIZE * scale, SIZE * scale);
+    d1 = tc1.getImageData(0, 0, SIZE, SIZE);
+    d2 = tc2.getImageData(0, 0, SIZE, SIZE);
+  } else {
+    d1 = canvas1.getContext('2d').getImageData(0, 0, SIZE, SIZE);
+    d2 = canvas2.getContext('2d').getImageData(0, 0, SIZE, SIZE);
+  }
+
   const out = ctx.createImageData(SIZE, SIZE);
 
-  // Step 4: Advanced blend — use facial zones with different weights
-  // Randomize which parent dominates which zone
+  // Randomize which parent contributes to which zone
   const seed = Math.random();
-  const p1Eyes = seed > 0.5;  // parent1 contributes eyes region
-  const p1Mouth = seed <= 0.5; // parent1 contributes mouth region
+  const p1Eyes = seed > 0.5;
+  const p1Mouth = seed <= 0.5;
 
   for (let y = 0; y < SIZE; y++) {
     for (let x = 0; x < SIZE; x++) {
       const i = (y * SIZE + x) * 4;
       const cx = SIZE / 2, cy = SIZE / 2;
       const dx = x - cx, dy = y - cy;
-
-      // Distance from center (normalized 0-1)
       const dist = Math.sqrt(dx*dx + dy*dy) / (SIZE / 2);
 
-      // Define facial zone weights
+      // Facial zone weights — EVEN blend (closer to 50/50) makes it look less like either parent
       let p1Weight;
-      const isEyeRegion = (dy < -10 && dy > -50 && Math.abs(dx) < 60); // upper-mid face
-      const isMouthRegion = (dy > 20 && dy < 60 && Math.abs(dx) < 40); // lower-mid face
-      const isNoseRegion = (Math.abs(dy) < 25 && Math.abs(dx) < 25); // center
-      const isForehead = (dy < -40); // top
-      const isChin = (dy > 50); // bottom
+      const isEyeRegion = (dy < -5 && dy > -45 && Math.abs(dx) < 55);
+      const isMouthRegion = (dy > 15 && dy < 55 && Math.abs(dx) < 35);
+      const isNoseRegion = (Math.abs(dy) < 20 && Math.abs(dx) < 20);
 
       if (isEyeRegion) {
-        p1Weight = p1Eyes ? 0.7 : 0.3;
-      } else if (isMouthRegion) {
-        p1Weight = p1Mouth ? 0.7 : 0.3;
-      } else if (isNoseRegion) {
-        p1Weight = 0.5; // equal blend for nose
-      } else if (isForehead) {
         p1Weight = p1Eyes ? 0.6 : 0.4;
-      } else if (isChin) {
+      } else if (isMouthRegion) {
         p1Weight = p1Mouth ? 0.6 : 0.4;
+      } else if (isNoseRegion) {
+        p1Weight = 0.5;
       } else {
         p1Weight = 0.5;
       }
 
-      // Blend outside face oval toward baby skin tone
-      const faceFade = dist > 0.7 ? Math.min(1, (dist - 0.7) / 0.3) : 0;
+      // Face oval fade  
+      const faceFade = dist > 0.55 ? Math.min(1, (dist - 0.55) / 0.25) : 0;
 
-      // Raw blended pixel
+      // Blend the two parent images
       let r = d1.data[i] * p1Weight + d2.data[i] * (1 - p1Weight);
       let g = d1.data[i+1] * p1Weight + d2.data[i+1] * (1 - p1Weight);
       let b = d1.data[i+2] * p1Weight + d2.data[i+2] * (1 - p1Weight);
 
-      // Apply skin tone tinting (subtle)
-      const tintStrength = 0.15;
+      // STRONG skin tone tinting — this is the key to making it look different from parents
+      const tintStrength = 0.35;
       r = r * (1 - tintStrength) + babyTone.r * tintStrength;
       g = g * (1 - tintStrength) + babyTone.g * tintStrength;
       b = b * (1 - tintStrength) + babyTone.b * tintStrength;
 
       // Fade edges to warm background
-      r = r * (1 - faceFade) + 255 * faceFade;
-      g = g * (1 - faceFade) + 235 * faceFade;
-      b = b * (1 - faceFade) + 220 * faceFade;
+      r = r * (1 - faceFade) + babyTone.r * faceFade;
+      g = g * (1 - faceFade) + babyTone.g * faceFade;
+      b = b * (1 - faceFade) + babyTone.b * faceFade;
 
       out.data[i] = Math.min(255, Math.round(r));
       out.data[i+1] = Math.min(255, Math.round(g));
@@ -207,7 +221,7 @@ function blendImages(canvas1, canvas2, outputCanvas) {
 
   ctx.putImageData(out, 0, 0);
 
-  // Step 5: Apply baby-ification filter
+  // Apply baby-ification filters (heavy blur + warmth)
   applyBabyFilter(ctx, SIZE);
 }
 
