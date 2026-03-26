@@ -51,13 +51,24 @@ describe('Picker Wheel', () => {
       expect(easeOutCubic(0.5)).toBeGreaterThan(0.5);
     });
 
-    test('getWinningItem logic for multiple items', () => {
+    test('getWinningItem logic for 4 items', () => {
       const list = ['A', 'B', 'C', 'D'];
-      // pointer is at top (3π/2). 
-      // If no rotation, slice 0 starts at 0 and goes to π/2.
-      // So pointer starts at index... complicated. 
-      // We just need to ensure it's stable and returns a string from the list.
-      expect(list).toContain(getWinningItem(0, list));
+      const slice = Math.PI / 2; // 2π/4
+      
+      // Pointer at top (3π/2). No rotation.
+      // Slice 0: [0, π/2], Slice 1: [π/2, π], Slice 2: [π, 3π/2], Slice 3: [3π/2, 2π]
+      // 3π/2 is the start of Slice 3.
+      expect(getWinningItem(0, list)).toBe('D');
+      
+      // Rotate 90 degrees clockwise (π/2)
+      // π/2 rotation moves everything 90 deg right. 
+      // Slice 2 (9 to 12) moves to 12 to 3.
+      expect(getWinningItem(Math.PI / 2, list)).toBe('C');
+      
+      // Rotate 180 degrees (π)
+      // Slice 1 moves to 12 to 3.
+      expect(getWinningItem(Math.PI, list)).toBe('B');
+
       expect(getWinningItem(0, [])).toBe('');
     });
   });

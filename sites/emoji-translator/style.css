@@ -9,7 +9,8 @@
   word-break: break-word;
 }
 .char-count { font-size: var(--text-sm); color: var(--color-text-muted); }
-.output-pane { background: linear-gradient(145deg, rgba(26,26,46,0.9), rgba(10,10,15,0.95)); }
+.output-pane { border-color: var(--color-primary); box-shadow: var(--shadow-glow); }
+.emoji-output { border: 1px solid var(--color-border); background: var(--color-bg-secondary); }
 
 @media (max-width: 768px) {
   .translator-layout { flex-direction: column; }

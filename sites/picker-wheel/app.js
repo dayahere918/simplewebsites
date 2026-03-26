@@ -93,7 +93,7 @@ function drawWheel(itemList, rotation) {
     ctx.textAlign = 'right';
     ctx.fillStyle = '#ffffff';
 
-    const fontSize = Math.min(16, Math.max(10, 200 / itemList.length));
+    const fontSize = Math.min(24, Math.max(12, 300 / itemList.length));
     ctx.font = `600 ${fontSize}px Inter, sans-serif`;
 
     const maxTextWidth = radius * 0.65;
@@ -178,11 +178,10 @@ function getWinningItem(rotation, itemList) {
   if (!itemList || itemList.length === 0) return '';
 
   const sliceAngle = (Math.PI * 2) / itemList.length;
-  // Pointer is at top (3π/2 or -π/2). Normalize rotation.
-  const normalizedRotation = ((Math.PI * 2) - (rotation % (Math.PI * 2)) + (Math.PI * 2)) % (Math.PI * 2);
-  // Offset: pointer is at top, which is -90 degrees, i.e., 3π/2
-  const pointerAngle = (normalizedRotation + Math.PI / 2) % (Math.PI * 2);
-  const winIndex = Math.floor(pointerAngle / sliceAngle) % itemList.length;
+  // Canvas 0 is right (3 o'clock). Pointer is at top (12 o'clock = 3π/2).
+  // If wheel rotates R clockwise, the physical top corresponds to an angle of (3π/2 - R) in the unrotated wheel.
+  const topAngle = (3 * Math.PI / 2 - rotation % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+  const winIndex = Math.floor(topAngle / sliceAngle) % itemList.length;
 
   return itemList[winIndex];
 }

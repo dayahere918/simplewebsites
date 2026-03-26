@@ -3,7 +3,7 @@
  */
 const { 
   EMOJI_MAP, wordToEmoji, translateText, countChars, countWords,
-  translate, copyOutput, clearAll
+  runTranslation, copyOutput, clearAll
 } = require('../app');
 
 function setupDOM() {
@@ -51,9 +51,9 @@ describe('Emoji Translator', () => {
   });
 
   describe('DOM Interactions', () => {
-    test('translate updates UI', () => {
+    test('runTranslation updates UI', () => {
       document.getElementById('text-input').value = 'hot coffee';
-      translate();
+      runTranslation();
       
       expect(document.getElementById('emoji-output').textContent).toBe('🔥 ☕');
       expect(document.getElementById('char-count').textContent).toContain('10 characters');
@@ -61,12 +61,12 @@ describe('Emoji Translator', () => {
       
       // Empty input
       document.getElementById('text-input').value = ' ';
-      translate();
+      runTranslation();
       expect(document.getElementById('emoji-output').textContent).toContain('Start typing');
 
       // Missing DOM
       document.body.innerHTML = '';
-      expect(() => translate()).not.toThrow();
+      expect(() => runTranslation()).not.toThrow();
     });
 
     test('copyOutput uses clipboard', () => {

@@ -109,7 +109,7 @@ function countWords(text) {
 /**
  * Handle real-time translation
  */
-function translate() {
+function runTranslation() {
   if (typeof document === 'undefined') return;
   const input = document.getElementById('text-input');
   const output = document.getElementById('emoji-output');
@@ -158,6 +158,6 @@ function clearAll() {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     EMOJI_MAP, wordToEmoji, translateText, countChars, countWords,
-    translate, copyOutput, clearAll
+    runTranslation, copyOutput, clearAll
   };
 }
