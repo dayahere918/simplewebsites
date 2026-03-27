@@ -115,5 +115,5 @@ function downloadVideo() {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { handleUpload, setQuality, executeCompression };
+    module.exports = { handleUpload, setQuality, executeCompression, downloadVideo, resetFFmpeg: () => { ffmpeg = null; }, getFFmpeg: () => ffmpeg };
 }

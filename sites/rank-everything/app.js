@@ -58,7 +58,7 @@ async function loadCategory(cat) {
         
         renderList(items);
     } catch (e) {
-        console.error(e);
+        console.log('CATCHING ERROR:', e.message);
         errorEl.textContent = `❌ Error loading ${cat}: ${e.message}`;
         errorEl.classList.remove('hidden');
     } finally {
@@ -129,5 +129,5 @@ if (typeof document !== 'undefined') {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { saveApiKeys, fetchCrypto, fetchMovies, fetchGames };
+    module.exports = { saveApiKeys, fetchCrypto, fetchMovies, fetchGames, loadCategory, renderList, checkApiKeys };
 }

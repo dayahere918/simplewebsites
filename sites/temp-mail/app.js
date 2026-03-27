@@ -24,7 +24,8 @@ async function init() {
 async function generateNewEmail() {
     if (checkInterval) clearInterval(checkInterval);
     if (countdownInterval) clearInterval(countdownInterval);
-    document.getElementById('email-address').value = 'Generating...';
+    const el = document.getElementById('email-address');
+    if (el) el.value = 'Generating...';
     try {
         const res = await fetch(`${API_BASE}?action=genRandomMailbox&count=1`);
         const data = await res.json();
@@ -33,23 +34,27 @@ async function generateNewEmail() {
         setAndStart(newEmail);
     } catch (e) {
         console.error(e);
-        document.getElementById('email-address').value = 'Error generating email';
+        const el = document.getElementById('email-address');
+        if (el) el.value = 'Error generating email';
     }
 }
 
 function setAndStart(email) {
     currentEmail = email;
     const parts = email.split('@');
+    if (parts.length < 2) return;
     currentLogin = parts[0];
     currentDomain = parts[1];
-    document.getElementById('email-address').value = email;
+    
+    const el = document.getElementById('email-address');
+    if (el) el.value = email;
+    
     seenMessageIds.clear();
     allMessages = [];
     renderMessages();
     
-    fetchMessages(true); // immediate fetch
+    fetchMessages(true);
     
-    // Setup polling
     if (checkInterval) clearInterval(checkInterval);
     if (countdownInterval) clearInterval(countdownInterval);
     
@@ -59,106 +64,98 @@ function setAndStart(email) {
     countdownInterval = setInterval(() => {
         secondsLeft--;
         if (secondsLeft <= 0) {
-            fetchMessages(false);
             secondsLeft = 10;
+            fetchMessages();
         }
         updateCountdownText();
     }, 1000);
 }
 
 function updateCountdownText() {
-    const el = document.getElementById('countdown-text');
-    if(el) el.textContent = `Auto-refresh in ${secondsLeft}s`;
+    const status = document.getElementById('status-text');
+    if (status) status.textContent = `Auto-refresh in ${secondsLeft}s...`;
 }
 
-async function fetchMessages(manual = false) {
-    if (manual) secondsLeft = 10;
+async function fetchMessages(isSilent = false) {
+    if (!currentLogin || !currentDomain) return;
+    
+    const loader = document.getElementById('loading-spinner');
+    if (!isSilent && loader) loader.classList.remove('hidden');
+    
     try {
         const res = await fetch(`${API_BASE}?action=getMessages&login=${currentLogin}&domain=${currentDomain}`);
-        const data = await res.json();
+        if (!res.ok) throw new Error('API Error');
+        const messages = await res.json();
         
-        let newFound = false;
-        data.forEach(msg => {
-            if (!seenMessageIds.has(msg.id)) {
-                seenMessageIds.add(msg.id);
-                allMessages.unshift(msg);
-                newFound = true;
-            }
-        });
-        
-        if (newFound) renderMessages();
-        else if (manual && allMessages.length === 0) {
-            renderMessages(true);
+        const newMsgs = messages.filter(m => !seenMessageIds.has(m.id));
+        if (newMsgs.length > 0) {
+            newMsgs.forEach(m => seenMessageIds.add(m.id));
+            allMessages = [...newMsgs, ...allMessages];
+            renderMessages();
         }
     } catch (e) {
-        console.error("Fetch failed", e);
+        console.error(e);
+        const status = document.getElementById('status-text');
+        if (status) status.textContent = '❌ Offline - Check connection';
+    } finally {
+        if (loader) loader.classList.add('hidden');
     }
 }
 
-function renderMessages(flashEmpty = false) {
-    const list = document.getElementById('messages-list');
+function renderMessages(messages) {
+    const list = document.getElementById('inbox-list');
     if (!list) return;
-    if (allMessages.length === 0) {
-        list.innerHTML = `<div class="text-center text-muted p-4 ${flashEmpty ? 'animate-pulse' : ''}">Inbox is empty. Emails will appear here.</div>`;
+    
+    const msgs = messages || allMessages;
+    if (msgs.length === 0) {
+        list.innerHTML = `<div class="p-8 text-center text-muted">Empty Inbox - Waiting for mail...</div>`;
         return;
     }
     
-    list.innerHTML = allMessages.map(m => `
-        <div class="flex justify-between items-center p-4 cursor-pointer hover:bg-surface transition-colors" style="border:1px solid var(--color-border);border-radius:4px" onclick="readMessage(${m.id})">
-            <div class="truncate">
-                <span class="font-bold block">${m.from || 'Unknown'}</span>
-                <span class="text-sm truncate inline-block w-48">${m.subject || 'No Subject'}</span>
+    list.innerHTML = msgs.map(m => `
+        <div onclick="readMessage(${m.id})" class="inbox-card p-4 border-b border-border hover:bg-surface cursor-pointer transition-colors">
+            <div class="flex justify-between items-start mb-1">
+                <span class="font-bold text-accent">${escapeHTML(m.from)}</span>
+                <span class="text-xs text-muted">${m.date}</span>
             </div>
-            <span class="text-xs text-muted">${new Date(m.date).toLocaleTimeString()}</span>
+            <div class="text-sm font-medium truncate">${escapeHTML(m.subject)}</div>
         </div>
     `).join('');
 }
 
 async function readMessage(id) {
-    document.getElementById('messages-list').parentElement.classList.add('hidden');
     const view = document.getElementById('message-view');
+    if (!view) return;
+    
     view.classList.remove('hidden');
+    const bodyEl = document.getElementById('msg-body');
+    if (bodyEl) bodyEl.innerHTML = 'Loading...';
     
     try {
         const res = await fetch(`${API_BASE}?action=readMessage&login=${currentLogin}&domain=${currentDomain}&id=${id}`);
         const msg = await res.json();
         
-        document.getElementById('msg-subject').textContent = msg.subject || 'No Subject';
-        document.getElementById('msg-from').textContent = msg.from;
+        const sub = document.getElementById('msg-subject');
+        if (sub) sub.textContent = msg.subject || 'No Subject';
+        const from = document.getElementById('msg-from');
+        if (from) from.textContent = msg.from;
         
-        // Show HTML if present, else plain text
-        const safeHtml = msg.htmlBody ? DOMPurify(msg.htmlBody) : (msg.textBody ? escapeHTML(msg.textBody).replace(/\\n/g, '<br>') : 'Empty message');
-        document.getElementById('msg-body').innerHTML = safeHtml;
+        const safeHtml = msg.htmlBody ? DOMPurify(msg.htmlBody) : (msg.textBody ? escapeHTML(msg.textBody).replace(/\n/g, '<br>') : 'Empty message');
+        if (bodyEl) bodyEl.innerHTML = safeHtml;
     } catch (e) {
-        document.getElementById('msg-body').innerHTML = 'Error loading message body.';
+        if (bodyEl) bodyEl.innerHTML = 'Error loading message body.';
     }
 }
 
 function closeMessage() {
-    document.getElementById('message-view').classList.add('hidden');
-    document.getElementById('messages-list').parentElement.classList.remove('hidden');
+    const view = document.getElementById('message-view');
+    if (view) view.classList.add('hidden');
 }
 
-function copyEmail() {
-    const el = document.getElementById('email-address');
-    el.select();
-    document.execCommand('copy');
-    
-    const btn = event.target;
-    btn.textContent = '✅ Copied!';
-    setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
-}
-
-// Extremely basic html escaper for plain text
 function escapeHTML(str) {
-    return str.replace(/[&<>'"]/g, 
-        tag => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[tag])
-    );
+    return str.replace(/[&<>'"]/g, tag => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[tag]));
 }
 
-// Mock DOMPurify so we don't need a huge external dependency for a simple viewer.
-// WARNING: Real apps should use an actual DOMPurify script tag in index.html to prevent XSS.
-// For this standalone tool we do weak scrubbing.
 function DOMPurify(html) {
     return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
 }

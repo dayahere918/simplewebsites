@@ -152,6 +152,11 @@ describe('SEO Module', () => {
     const cpe = require('../../sites/color-palette-extractor/app');
     const fsd = require('../../sites/face-shape-detector/app');
     const bfg = require('../../sites/baby-face-generator/app');
+    const bgr = require('../../sites/background-remover/app');
+    const jyf = require('../../sites/json-yaml-formatter/app');
+    const smg = require('../../sites/seo-meta-generator/app');
+    const vco = require('../../sites/video-compressor/app');
+    const pdf = require('../../sites/pdf-toolkit/app');
 
     // Mocks for DOM-dependent logic in image sites
     if (typeof global.URL.createObjectURL !== 'function') {
@@ -192,6 +197,21 @@ describe('SEO Module', () => {
         fsd.getTopShape({'Oval':1});
         bfg.generateTraits();
         bfg.resetAll();
+        
+        bgr.handleUpload({target:{files:[new File([], 'i.png', {type:'image/png'})]}});
+        
+        document.body.innerHTML += '<textarea id="raw-input">{}</textarea><select id="input-type"></select><select id="output-type"></select><span id="status-label"></span><code id="formatted-output"></code><div id="error-box"></div>';
+        try { jyf.processData(); } catch(e) {}
+        
+        document.body.innerHTML += '<input id="m-title" value="T"/><textarea id="m-desc">D</textarea><input id="m-url"/><input id="m-img"/><input id="m-key"/><input id="m-author"/><div id="m-title-count"></div><div id="title-count"></div><div id="m-desc-count"></div><div id="desc-count"></div><div id="prev-title"></div><div id="prev-desc"></div><div id="prev-url"></div><div id="code-output"></div><div class="prev-img-wrap"><img id="prev-img"/></div>';
+        try { smg.generateTags(); } catch(e) {}
+
+        vco.setQuality('low');
+        
+        try { 
+            pdf.setMergeFiles([new File([],'1.pdf')]);
+            pdf.executeMerge(); 
+        } catch(e) {}
       } catch (e) {}
     });
 

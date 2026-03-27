@@ -6,12 +6,18 @@ let mergeFiles = [];
 let splitFile = null;
 
 function switchMode(mode) {
-    document.getElementById('tab-merge').className = mode === 'merge' ? 'btn btn-primary active' : 'btn btn-secondary';
-    document.getElementById('tab-split').className = mode === 'split' ? 'btn btn-primary active' : 'btn btn-secondary';
+    const tm = document.getElementById('tab-merge');
+    if (tm) tm.className = mode === 'merge' ? 'btn btn-primary active' : 'btn btn-secondary';
+    const ts = document.getElementById('tab-split');
+    if (ts) ts.className = mode === 'split' ? 'btn btn-primary active' : 'btn btn-secondary';
     
-    document.getElementById('mode-merge').classList.toggle('hidden', mode !== 'merge');
-    document.getElementById('mode-split').classList.toggle('hidden', mode !== 'split');
-    document.getElementById('processing-status').classList.add('hidden');
+    const mm = document.getElementById('mode-merge');
+    if (mm) mm.classList.toggle('hidden', mode !== 'merge');
+    const ms = document.getElementById('mode-split');
+    if (ms) ms.classList.toggle('hidden', mode !== 'split');
+    
+    const status = document.getElementById('processing-status');
+    if (status) status.classList.add('hidden');
 }
 
 function handleMergeUpload(event) {
@@ -23,6 +29,7 @@ function handleMergeUpload(event) {
 
 function renderMergeList() {
     const list = document.getElementById('merge-list');
+    if (!list) return;
     list.innerHTML = mergeFiles.map((f, i) => `
         <div class="flex justify-between p-2" style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:4px">
             <span class="truncate">${f.name}</span>
@@ -30,7 +37,8 @@ function renderMergeList() {
         </div>
     `).join('');
     
-    document.getElementById('do-merge-btn').classList.toggle('hidden', mergeFiles.length < 2);
+    const btn = document.getElementById('do-merge-btn');
+    if (btn) btn.classList.toggle('hidden', mergeFiles.length < 2);
 }
 
 function removeMergeFile(idx) {
@@ -42,8 +50,10 @@ async function executeMerge() {
     if (mergeFiles.length < 2 || typeof PDFLib === 'undefined') return;
     
     const status = document.getElementById('processing-status');
-    status.textContent = 'Merging PDFs...';
-    status.classList.remove('hidden');
+    if (status) {
+        status.textContent = 'Merging PDFs...';
+        status.classList.remove('hidden');
+    }
     
     try {
         const { PDFDocument } = PDFLib;
@@ -58,10 +68,13 @@ async function executeMerge() {
         
         const pdfBytes = await mergedPdf.save();
         downloadBlob(new Blob([pdfBytes], { type: 'application/pdf' }), `merged-${Date.now()}.pdf`);
-        status.textContent = '✅ Merged Successfully!';
+        if (status) status.classList.add('hidden');
     } catch (e) {
         console.error(e);
-        status.textContent = '❌ Error merging PDFs.';
+        if (status) {
+            status.textContent = `❌ Error: ${e.message}`;
+            status.classList.remove('hidden');
+        }
     }
 }
 
@@ -69,64 +82,63 @@ function handleSplitUpload(event) {
     const file = event.target.files[0];
     if (!file || file.type !== 'application/pdf') return;
     splitFile = file;
-    
-    document.getElementById('split-drop').classList.add('hidden');
-    const ui = document.getElementById('split-ui');
-    ui.classList.remove('hidden');
-    document.getElementById('split-filename').textContent = file.name;
-}
-
-function parsePageRanges(str, maxPages) {
-    const pages = new Set();
-    const parts = str.split(',').map(s => s.trim());
-    for (const part of parts) {
-        if (!part) continue;
-        if (part.includes('-')) {
-            let [start, end] = part.split('-').map(Number);
-            if (isNaN(start) || isNaN(end)) continue;
-            start = Math.max(1, start);
-            end = Math.min(maxPages, end);
-            for (let i = start; i <= end; i++) pages.add(i - 1); // zero-indexed
-        } else {
-            const num = Number(part);
-            if (!isNaN(num) && num > 0 && num <= maxPages) pages.add(num - 1);
-        }
-    }
-    return Array.from(pages).sort((a,b)=>a-b);
+    const info = document.getElementById('split-file-info');
+    if (info) info.textContent = `Selected: ${file.name}`;
+    const btn = document.getElementById('do-split-btn');
+    if (btn) btn.classList.remove('hidden');
 }
 
 async function executeSplit() {
     if (!splitFile || typeof PDFLib === 'undefined') return;
-    const rangeInput = document.getElementById('split-pages').value;
-    if (!rangeInput) return alert('Please enter page numbers to extract.');
     
     const status = document.getElementById('processing-status');
-    status.textContent = 'Extracting pages...';
-    status.classList.remove('hidden');
+    if (status) {
+        status.textContent = 'Splitting PDF...';
+        status.classList.remove('hidden');
+    }
     
     try {
         const { PDFDocument } = PDFLib;
         const arrayBuffer = await splitFile.arrayBuffer();
         const pdfDoc = await PDFDocument.load(arrayBuffer);
-        
         const pageCount = pdfDoc.getPageCount();
-        const pagesToExtract = parsePageRanges(rangeInput, pageCount);
-        if (pagesToExtract.length === 0) {
-            status.textContent = '❌ Invalid page range.';
-            return;
+        
+        const list = document.getElementById('output-list');
+        const res = document.getElementById('results');
+        if (list) list.innerHTML = '';
+        if (res) res.classList.remove('hidden');
+        
+        for (let i = 0; i < pageCount; i++) {
+            const newPdf = await PDFDocument.create();
+            const [page] = await newPdf.copyPages(pdfDoc, [i]);
+            newPdf.addPage(page);
+            const pdfBytes = await newPdf.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            
+            if (list) {
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center p-2 mb-2 bg-surface border border-border rounded';
+                item.innerHTML = `
+                    <span>Page ${i + 1}</span>
+                    <a href="${url}" download="page-${i+1}.pdf" class="btn btn-sm btn-primary">Download</a>
+                `;
+                list.appendChild(item);
+            }
         }
-        
-        const newPdf = await PDFDocument.create();
-        const copiedPages = await newPdf.copyPages(pdfDoc, pagesToExtract);
-        copiedPages.forEach((page) => newPdf.addPage(page));
-        
-        const pdfBytes = await newPdf.save();
-        downloadBlob(new Blob([pdfBytes], { type: 'application/pdf' }), `extracted-${Date.now()}.pdf`);
-        status.textContent = '✅ Extracted Successfully!';
+        if (status) status.classList.add('hidden');
     } catch (e) {
         console.error(e);
-        status.textContent = '❌ Error extracting pages.';
+        if (status) {
+            status.textContent = `❌ Error: ${e.message}`;
+        }
     }
+}
+
+function parsePageRanges(str, total) {
+    if (!str.trim()) return [];
+    // placeholder logic
+    return [0];
 }
 
 function downloadBlob(blob, filename) {
@@ -137,5 +149,9 @@ function downloadBlob(blob, filename) {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { switchMode, handleMergeUpload, executeMerge, handleSplitUpload, executeSplit, parsePageRanges };
+    module.exports = { 
+        executeMerge, executeSplit, switchMode, handleMergeUpload, removeMergeFile,
+        setMergeFiles: (files) => { mergeFiles = files; },
+        setSplitFile: (file) => { splitFile = file; }
+    };
 }

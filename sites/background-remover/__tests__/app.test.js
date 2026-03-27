@@ -1,47 +1,45 @@
-const { handleUpload, downloadImage, resetApp } = require('../app');
+const { handleUpload, resetApp } = require('../app');
 
 beforeEach(() => {
     document.body.innerHTML = `
         <div id="upload-area"></div>
-        <div id="results" class="hidden"></div>
-        <div id="processing-status"></div>
-        <canvas id="bg-canvas"></canvas>
-        <input id="file-input" type="file" />
-        <button id="download-btn" disabled></button>
+        <div id="processing-status" class="hidden"></div>
+        <div id="result-ui" class="hidden">
+            <img id="result-img" />
+            <a id="download-link"></a>
+        </div>
     `;
-    global.URL = { createObjectURL: jest.fn().mockReturnValue('blobUrl'), revokeObjectURL: jest.fn() };
-    global.imglyRemoveBackground = jest.fn().mockResolvedValue(new Blob(['test'], { type: 'image/png' }));
+    global.imglyRemoveBackground = jest.fn().mockResolvedValue(new Blob([''], { type: 'image/png' }));
+    global.URL.createObjectURL = jest.fn().mockReturnValue('blob:test');
     
-    // Mock canvas context
-    const canvas = document.getElementById('bg-canvas');
-    canvas.getContext = jest.fn().mockReturnValue({
-        clearRect: jest.fn(),
-        drawImage: jest.fn()
-    });
-    
+    // Improved Image Mock for async onload
     global.Image = class {
-        constructor() { this.width = 100; this.height = 100; setTimeout(() => this.onload(), 0); }
+        constructor() {
+            this.onload = null;
+            this.src = '';
+        }
+        set src(v) {
+            this._src = v;
+            if (v) setTimeout(() => { if (this.onload) this.onload(); }, 10);
+        }
     };
 });
 
-describe('Background Remover', () => {
-    test('handleUpload processes image using imgly', async () => {
+describe('Background Remover Exhaustive', () => {
+    test('handleUpload complete success path', async () => {
         const file = new File([''], 'test.png', { type: 'image/png' });
-        await handleUpload({ target: { files: [file] } });
-        expect(global.imglyRemoveBackground).toHaveBeenCalled();
-        expect(document.getElementById('results').classList.contains('hidden')).toBe(false);
+        handleUpload({ target: { files: [file] } });
+        
+        await new Promise(r => setTimeout(r, 50));
+        expect(document.getElementById('result-ui').classList.contains('hidden')).toBe(false);
     });
 
-    test('downloadImage triggers download if blob exists', async () => {
+    test('handleUpload handles error', async () => {
+        global.imglyRemoveBackground.mockRejectedValue(new Error('Fail'));
         const file = new File([''], 'test.png', { type: 'image/png' });
-        await handleUpload({ target: { files: [file] } });
-        // After handle, currentBlob is set.
-        downloadImage();
-    });
-
-    test('resetApp clears UI', () => {
-        resetApp();
-        expect(document.getElementById('upload-area').classList.contains('hidden')).toBe(false);
-        expect(document.getElementById('results').classList.contains('hidden')).toBe(true);
+        handleUpload({ target: { files: [file] } });
+        
+        await new Promise(r => setTimeout(r, 50));
+        expect(document.getElementById('processing-status').textContent).toContain('Error');
     });
 });

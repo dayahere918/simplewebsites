@@ -51,6 +51,7 @@ function copyDir(src, dest) {
  * Format site name for display (e.g. "picker-wheel" -> "Picker Wheel")
  */
 function formatSiteName(name) {
+  if (!name) return '';
   return name.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 

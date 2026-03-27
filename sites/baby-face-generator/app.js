@@ -314,9 +314,10 @@ function resetAll() {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { 
     TRAITS, blendImages, generateTraits, generateBaby, downloadResult, resetAll, loadParent,
-    extractSkinTone, applyBabyFilter,
-    getState: () => ({ parent1Loaded, parent2Loaded }), 
+    extractSkinTone, applyBabyFilter, alignFace, initFaceAPI,
+    getState: () => ({ parent1Loaded, parent2Loaded, globalLandmarks }), 
     setParent1: v => { parent1Loaded = v; }, 
-    setParent2: v => { parent2Loaded = v; } 
+    setParent2: v => { parent2Loaded = v; },
+    setLandmarks: (p, v) => { globalLandmarks[p] = v; }
   };
 }

@@ -18,6 +18,10 @@ describe('Ads Module', () => {
       expect(getPublisherId()).toBe('ca-pub-test789');
       expect(AD_CONFIG.publisherId).toBe('ca-pub-test789');
     });
+
+    it('handles numeric publisher ID error', () => {
+       expect(() => setPublisherId(123)).toThrow();
+    });
   });
 
   describe('createAdSlot', () => {
@@ -73,6 +77,17 @@ describe('Ads Module', () => {
       const script = generateAdPushScript(3);
       const pushes = script.match(/push\({}\)/g);
       expect(pushes.length).toBe(3);
+    });
+
+    it('handles invalid count for push script', () => {
+      const script = generateAdPushScript(-5);
+      expect(script).toContain('push({})');
+    });
+
+    it('handles non-string attr escaping', () => {
+       const { AD_CONFIG } = require('../ads.js');
+       // Internal test of escapeAttr via createAdSlot null container
+       expect(createAdSlot('s', 'banner', 123)).toContain('id=""');
     });
   });
 });
