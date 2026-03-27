@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Upscaler — Enhance Resolution Free</title>
+    <meta name="description" content="Upscale and enhance your images using advanced AI directly in your browser. 2x and 4x resolution increase with zero server uploads.">
+    <link rel="canonical" href="https://stacky.pages.dev/image-upscaler/">
+    <meta property="og:title" content="AI Image Upscaler"><meta property="og:type" content="website">
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-md">
+        <section class="hero"><h1>🔍 <span class="text-gradient">Image Upscaler</span></h1><p>Enhance resolution using local AI. Maximize quality without losing privacy.</p></section>
+        
+        <div class="card mb-8 text-center" id="upload-area">
+            <div class="drop-zone p-8" onclick="document.getElementById('img-input').click()">
+                <div class="drop-icon text-4xl mb-4">🖼️</div>
+                <p>Select an Image</p>
+                <p class="hint">Works best on small images (Max 500x500 initially due to memory)</p>
+            </div>
+            <input type="file" id="img-input" accept="image/*" class="hidden" onchange="handleUpload(event)">
+        </div>
+
+        <div class="grid qr-grid gap-4 hidden" id="workspace">
+            <div class="card p-0 overflow-hidden flex-col">
+                <div class="p-2 border-b border-border bg-surface text-center font-bold text-sm">Original</div>
+                <img id="img-preview" class="checkerboard-bg object-contain w-full h-64" src="" alt="Original">
+            </div>
+            
+            <div class="card p-0 overflow-hidden flex-col relative">
+                <div class="p-2 border-b border-border bg-surface text-center font-bold text-sm">Upscaled ✨</div>
+                <img id="img-result" class="checkerboard-bg object-contain w-full h-64 hidden" src="" alt="Upscaled">
+                <canvas id="upscale-canvas" class="hidden"></canvas>
+                
+                <div id="loading" class="absolute inset-0 bg-surface/80 flex flex-col items-center justify-center p-4">
+                    <button class="btn btn-accent mb-4 w-full max-w-xs" onclick="startUpscale(2)">Upscale 2x</button>
+                    <!-- <button class="btn btn-primary mb-4 w-full max-w-xs" onclick="startUpscale(4)">Upscale 4x</button> -->
+                    <div id="status-text" class="text-center text-sm font-bold text-gradient mt-2"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="download-area" class="text-center mt-8 hidden">
+             <button class="btn btn-primary" onclick="downloadImage()">📥 Download Enhanced Image</button>
+             <button class="btn btn-secondary ml-4" onclick="location.reload()">↻ Try Another</button>
+        </div>
+        
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Free AI Image Upscaler.</p></footer>
+    
+    <!-- Load TensorFlow.js and Upscaler.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/upscaler@1.0.0-beta.16/dist/browser/umd/upscaler.min.js"></script>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator Pro — Create Custom QR Codes</title>
+    <meta name="description" content="Generate high-resolution QR codes for free. Customize colors, add your logo in the middle, and download in PNG rendering.">
+    <link rel="canonical" href="https://stacky.pages.dev/qr-code-generator/">
+    <meta property="og:title" content="QR Code Generator Pro"><meta property="og:type" content="website">
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-md">
+        <section class="hero"><h1>📱 <span class="text-gradient">QR Code Pro</span></h1><p>Create beautiful, highly customized QR codes instantly.</p></section>
+        
+        <div class="grid qr-grid">
+            <div class="card">
+                <h4 class="mb-4">Details</h4>
+                <div class="form-group mb-4">
+                    <label>Content (URL, Text, etc.)</label>
+                    <input type="text" id="qr-data" class="input-text w-full" value="https://google.com" oninput="debounceGenerate()">
+                </div>
+                
+                <h4 class="mb-4 mt-8">Colors</h4>
+                <div class="flex gap-4 mb-4">
+                    <div class="w-full">
+                        <label class="text-xs">Foreground</label>
+                        <input type="color" id="qr-dark" value="#000000" class="w-full h-10 border-none cursor-pointer p-0" oninput="debounceGenerate()">
+                    </div>
+                    <div class="w-full">
+                        <label class="text-xs">Background</label>
+                        <input type="color" id="qr-light" value="#ffffff" class="w-full h-10 border-none cursor-pointer p-0" oninput="debounceGenerate()">
+                    </div>
+                </div>
+
+                <h4 class="mb-4 mt-8">Logo (Optional)</h4>
+                <div class="drop-zone p-4 text-sm" onclick="document.getElementById('logo-input').click()">
+                    <span>Upload Logo Image</span>
+                </div>
+                <input type="file" id="logo-input" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
+                <button class="btn btn-secondary w-full mt-2 hidden" id="remove-logo" onclick="clearLogo()">Remove Logo</button>
+            </div>
+            
+            <div class="card text-center flex-col items-center justify-center">
+                <div id="qr-container" class="bg-white p-4 rounded-md inline-block mb-8">
+                    <canvas id="qr-canvas"></canvas>
+                </div>
+                <button class="btn btn-primary w-full" onclick="downloadQR()">📥 Download High-Res PNG</button>
+            </div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 QR Code Generator Pro.</p></footer>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

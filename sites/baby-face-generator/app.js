@@ -12,10 +12,16 @@ const TRAITS = {
 let parent1Loaded = false, parent2Loaded = false;
 
 const MODEL_URL = 'https://vladmandic.github.io/face-api/model/';
+let globalLandmarks = { parent1: null, parent2: null };
+
 async function initFaceAPI() {
   if (typeof window === 'undefined' || !window.faceapi) return;
   try {
-    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+    await Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+      faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
+    ]);
+    console.log("FaceAPI models loaded successfully.");
   } catch (e) {
     console.error("Failed to load FaceAPI models:", e);
   }
@@ -41,7 +47,7 @@ function loadParent(event, num) {
       ctx.drawImage(img, (200 - w) / 2, (200 - h) / 2, w, h);
       
       if (window.faceapi && faceapi.nets.tinyFaceDetector.isLoaded) {
-          const detections = await faceapi.detectAllFaces(canvas, new faceapi.TinyFaceDetectorOptions());
+          const detections = await faceapi.detectAllFaces(canvas, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
           if (detections.length === 0) {
               alert('No human face detected! Please upload a clear photo of a human face.');
               ctx.clearRect(0,0,200,200);
@@ -49,6 +55,8 @@ function loadParent(event, num) {
               if(input) input.value = '';
               return;
           }
+          // Store features for morphing
+          globalLandmarks[`parent${num}`] = detections[0].landmarks.positions;
       }
 
       canvas.classList.remove('hidden');
@@ -119,13 +127,47 @@ function applyBabyFilter(ctx, size) {
   ctx.globalCompositeOperation = 'source-over';
 }
 
+function getCenter(points) {
+  let x = 0, y = 0;
+  points.forEach(p => { x += p.x; y += p.y; });
+  return { x: x/points.length, y: y/points.length };
+}
+
+function alignFace(canvas, landmarks, targetEyesScale = 85, targetEyesY = 90, targetEyesCX = 100) {
+  if (!landmarks) return canvas;
+  const leftEye = getCenter(landmarks.slice(36, 42));
+  const rightEye = getCenter(landmarks.slice(42, 48));
+  
+  const dx = rightEye.x - leftEye.x;
+  const dy = rightEye.y - leftEye.y;
+  const currentDist = Math.sqrt(dx*dx + dy*dy);
+  const angle = Math.atan2(dy, dx);
+  
+  const scale = targetEyesScale / Math.max(currentDist, 10);
+  const currentCX = (leftEye.x + rightEye.x) / 2;
+  const currentCY = (leftEye.y + rightEye.y) / 2;
+  
+  const alignedCanvas = (typeof document !== 'undefined') ? document.createElement('canvas') : null;
+  if (!alignedCanvas) return canvas;
+  alignedCanvas.width = 200;
+  alignedCanvas.height = 200;
+  const ctx = alignedCanvas.getContext('2d');
+  
+  ctx.translate(targetEyesCX, targetEyesY);
+  ctx.rotate(-angle);
+  ctx.scale(scale, scale);
+  ctx.translate(-currentCX, -currentCY);
+  ctx.drawImage(canvas, 0, 0);
+  
+  return alignedCanvas;
+}
+
 function blendImages(canvas1, canvas2, outputCanvas) {
   if (!canvas1 || !canvas2 || !outputCanvas) return;
   const SIZE = 200;
   const ctx = outputCanvas.getContext('2d');
   outputCanvas.width = SIZE; outputCanvas.height = SIZE;
 
-  // Extract skin tones from both parents
   const tone1 = extractSkinTone(canvas1, SIZE);
   const tone2 = extractSkinTone(canvas2, SIZE);
 
@@ -136,8 +178,10 @@ function blendImages(canvas1, canvas2, outputCanvas) {
     b: Math.min(255, Math.round((tone1.b + tone2.b) / 2))
   };
 
-  // Get pixel data — scale parents slightly inward for "baby proportion" effect
-  // Draw parent at 85% scale centered (baby features are proportionally smaller on rounder head)
+  // Align faces perfectly based on landmarks so features don't ghost
+  const c1Aligned = alignFace(canvas1, globalLandmarks.parent1, 55, 100, 100);
+  const c2Aligned = alignFace(canvas2, globalLandmarks.parent2, 55, 100, 100);
+
   const tmpCanvas1 = (typeof document !== 'undefined') ? document.createElement('canvas') : null;
   const tmpCanvas2 = (typeof document !== 'undefined') ? document.createElement('canvas') : null;
 
@@ -147,20 +191,17 @@ function blendImages(canvas1, canvas2, outputCanvas) {
     tmpCanvas2.width = SIZE; tmpCanvas2.height = SIZE;
     const tc1 = tmpCanvas1.getContext('2d');
     const tc2 = tmpCanvas2.getContext('2d');
-    // Scale features to ~85% and center (baby-sized)
-    const scale = 0.85;
-    const offset = SIZE * (1 - scale) / 2;
     tc1.fillStyle = `rgb(${babyTone.r},${babyTone.g},${babyTone.b})`;
     tc1.fillRect(0, 0, SIZE, SIZE);
-    tc1.drawImage(canvas1, offset, offset, SIZE * scale, SIZE * scale);
+    tc1.drawImage(c1Aligned, 0, 0, SIZE, SIZE);
     tc2.fillStyle = `rgb(${babyTone.r},${babyTone.g},${babyTone.b})`;
     tc2.fillRect(0, 0, SIZE, SIZE);
-    tc2.drawImage(canvas2, offset, offset, SIZE * scale, SIZE * scale);
+    tc2.drawImage(c2Aligned, 0, 0, SIZE, SIZE);
     d1 = tc1.getImageData(0, 0, SIZE, SIZE);
     d2 = tc2.getImageData(0, 0, SIZE, SIZE);
   } else {
-    d1 = canvas1.getContext('2d').getImageData(0, 0, SIZE, SIZE);
-    d2 = canvas2.getContext('2d').getImageData(0, 0, SIZE, SIZE);
+    d1 = c1Aligned.getContext('2d').getImageData(0, 0, SIZE, SIZE);
+    d2 = c2Aligned.getContext('2d').getImageData(0, 0, SIZE, SIZE);
   }
 
   const out = ctx.createImageData(SIZE, SIZE);
@@ -256,6 +297,7 @@ function resetAll() {
   parent1Loaded = false; parent2Loaded = false;
   if (typeof document === 'undefined') return;
   ['parent1', 'parent2'].forEach(p => {
+    globalLandmarks[p] = null;
     const canvas = document.getElementById(p + '-canvas');
     const input = document.getElementById(p + '-input');
     const slot = canvas?.closest('.upload-slot');

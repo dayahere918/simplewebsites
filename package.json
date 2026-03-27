@@ -11,10 +11,11 @@
     "lint": "eslint sites/*/app.js shared/*.js"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0",
     "@playwright/test": "^1.42.0",
-    "eslint": "^8.56.0"
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "jest-canvas-mock": "^2.5.2",
+    "jest-environment-jsdom": "^29.7.0"
   },
   "engines": {
     "node": ">=18"

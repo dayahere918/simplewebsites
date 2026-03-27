@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Background Remover — Remove Image Backgrounds Instantly</title>
+    <meta name="description" content="Use advanced AI to remove backgrounds from your photos instantly, 100% securely in your browser. No server uploads.">
+    <link rel="canonical" href="https://stacky.pages.dev/background-remover/">
+    <meta property="og:title" content="Free Background Remover"><meta property="og:type" content="website">
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-sm">
+        <section class="hero"><h1>🪄 <span class="text-gradient">Background Remover</span></h1><p>Remove backgrounds instantly. 100% private — processing happens on your device.</p></section>
+        
+        <div class="card upload-area mb-8" id="upload-area">
+            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <div class="drop-icon">📤</div><p>Upload an image</p><p class="hint">Supports JPG, PNG, WEBP</p>
+            </div><input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleUpload(event)">
+        </div>
+
+        <div class="results hidden" id="results">
+            <div class="card text-center mb-8">
+                <canvas id="bg-canvas" class="img-preview checkerboard-bg"></canvas>
+                <div id="processing-status" class="mt-4">Loading AI...</div>
+            </div>
+            <div class="flex justify-center gap-4 mt-4">
+                <button class="btn btn-primary" id="download-btn" disabled onclick="downloadImage()">📥 Download PNG</button>
+                <button class="btn btn-secondary" onclick="resetApp()">↺ Try Another</button>
+            </div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Free Background Remover. Client-side AI magic.</p></footer>
+    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.3/dist/browser.umd.min.js"></script>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

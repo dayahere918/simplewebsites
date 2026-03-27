@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Video Compressor — Compress MP4 Online</title>
+    <meta name="description" content="Compress your videos without losing quality right in your browser. 100% free and very private.">
+    <link rel="canonical" href="https://stacky.pages.dev/video-compressor/">
+    <meta property="og:title" content="Free Video Compressor"><meta property="og:type" content="website">
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-sm">
+        <section class="hero"><h1>🎥 <span class="text-gradient">Video Compressor</span></h1><p>Shrink large videos directly in your browser. No server uploads, total privacy, zero wait times in queues.</p></section>
+        
+        <div class="card upload-area mb-8" id="upload-area">
+            <div class="drop-zone" onclick="document.getElementById('video-input').click()">
+                <div class="drop-icon">🎬</div><p>Select a Video File</p><p class="hint">MP4, MOV, WEBM (Max 500MB)</p>
+            </div><input type="file" id="video-input" accept="video/*" class="hidden" onchange="handleUpload(event)">
+        </div>
+
+        <div class="card hidden mb-8" id="compress-ui">
+            <h4 class="mb-2">Quality Preset</h4>
+            <div class="flex gap-4 mb-4">
+                <button class="btn btn-secondary active" id="btn-hq" onclick="setQuality('high')">High Quality (Larger file)</button>
+                <button class="btn btn-secondary" id="btn-mq" onclick="setQuality('medium')">Medium Quality (Balanced)</button>
+                <button class="btn btn-secondary" id="btn-lq" onclick="setQuality('low')">Low Quality (Smallest file)</button>
+            </div>
+            <button class="btn btn-accent w-full" id="do-compress-btn" onclick="executeCompression()">Compress Video</button>
+            
+            <div id="processing-status" class="mt-4 text-center font-bold text-gradient hidden"></div>
+            
+            <div id="result-ui" class="hidden mt-4 text-center">
+                <p>Compression finished! <span id="saved-space" class="text-green-500"></span></p>
+                <button class="btn btn-primary mt-4" onclick="downloadVideo()">📥 Download Compressed Video</button>
+            </div>
+        </div>
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Free Video Compressor. Client-side processing with WASM.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

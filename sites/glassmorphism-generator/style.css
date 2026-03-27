@@ -1,0 +1,27 @@
+/* Orbs for background preview */
+.glass-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(20px);
+    z-index: 1;
+}
+.orb-1 {
+    width: 200px;
+    height: 200px;
+    background: #00ffff;
+    top: 10%;
+    left: 20%;
+    animation: float 6s ease-in-out infinite alternate;
+}
+.orb-2 {
+    width: 150px;
+    height: 150px;
+    background: #ff00ff;
+    bottom: 20%;
+    right: 20%;
+    animation: float 8s ease-in-out infinite alternate-reverse;
+}
+@keyframes float {
+    0% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(-30px) scale(1.1); }
+}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rank Everything — Top 100 Movies, Games & Crypto</title>
+    <meta name="description" content="Discover the absolute best of everything. Automated real-time rankings for Movies, Video Games, and Cryptocurrencies.">
+    <link rel="canonical" href="https://stacky.pages.dev/rank-everything/">
+    <meta property="og:title" content="Rank Everything Master List"><meta property="og:type" content="website">
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-lg">
+        <section class="hero mb-4"><h1>🏆 <span class="text-gradient">Rank Everything</span></h1><p>Real-time automated leaderboards for the world's most popular categories.</p></section>
+        
+        <div id="api-key-banner" class="card mb-4 hidden border-accent">
+            <h4 class="text-accent mb-2">API Keys Required for Some Categories</h4>
+            <p class="mb-4 text-sm">Crypto works out-of-the-box. Movies require a TMDB key, and Games require a RAWG key (both free).</p>
+            <div class="flex flex-col gap-2 mb-2">
+                <input type="password" id="tmdb-key" class="input-text w-full" placeholder="TMDB API Key (v3)...">
+                <input type="password" id="rawg-key" class="input-text w-full" placeholder="RAWG API Key...">
+            </div>
+            <button class="btn btn-primary" onclick="saveApiKeys()">Save Keys Locally</button>
+        </div>
+
+        <div class="card mb-8">
+            <div class="tabs flex flex-wrap justify-center gap-2 md:gap-4 mb-6">
+                <button class="btn btn-primary active" id="tab-crypto" onclick="loadCategory('crypto')">🪙 Top Crypto</button>
+                <button class="btn btn-secondary" id="tab-movies" onclick="loadCategory('movies')">🎬 Top Movies</button>
+                <button class="btn btn-secondary" id="tab-games" onclick="loadCategory('games')">🎮 Top Games</button>
+            </div>
+            
+            <div id="loading-spinner" class="text-center p-8 hidden animate-pulse font-bold text-accent">Fetching latest rankings...</div>
+            <div id="error-msg" class="text-center p-8 hidden text-red-500 font-bold"></div>
+            
+            <div id="rank-list" class="flex-col gap-4">
+                <!-- List items loaded dynamically via JS -->
+            </div>
+        </div>
+
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Rank Everything Master Aggregator.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

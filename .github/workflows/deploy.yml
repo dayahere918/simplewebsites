@@ -24,7 +24,7 @@ jobs:
         id: changes
         run: |
           # All sites list for fallback
-          ALL_SITES='["picker-wheel","festival-countdown","bill-splitter","emoji-translator","sleep-calculator","startup-idea-generator","loan-visualizer","height-comparison","color-palette-extractor","typing-speed-race","noise-meter","voice-to-text-counter","mood-board-generator","aws-cost-estimator","terraform-snippet-generator","cicd-visualizer","cloud-service-comparison","resume-ats-checker","face-shape-detector","baby-face-generator","pet-breed-identifier","awesome-free-tools"]'
+          ALL_SITES='["picker-wheel","festival-countdown","bill-splitter","emoji-translator","sleep-calculator","startup-idea-generator","loan-visualizer","height-comparison","color-palette-extractor","typing-speed-race","noise-meter","voice-to-text-counter","mood-board-generator","aws-cost-estimator","terraform-snippet-generator","cicd-visualizer","cloud-service-comparison","resume-ats-checker","face-shape-detector","baby-face-generator","pet-breed-identifier","awesome-free-tools","background-remover","pdf-toolkit","video-compressor","temp-mail","qr-code-generator","code-explainer","json-yaml-formatter","glassmorphism-generator","image-upscaler","seo-meta-generator","rank-everything"]'
           
           # Expand detection to include core infrastructure and workflows
           CORE_PATTERN='^(shared/|scripts/|package|jest.config.js|\.github/workflows/|terraform/|\.dockerignore|Dockerfile|docker-compose.yml)'
@@ -120,7 +120,7 @@ jobs:
       - name: Terraform Import (Automated Migration)
         continue-on-error: true
         run: |
-          for site in picker-wheel festival-countdown bill-splitter emoji-translator sleep-calculator startup-idea-generator loan-visualizer height-comparison color-palette-extractor typing-speed-race noise-meter voice-to-text-counter mood-board-generator aws-cost-estimator terraform-snippet-generator cicd-visualizer cloud-service-comparison resume-ats-checker face-shape-detector baby-face-generator pet-breed-identifier awesome-free-tools; do
+          for site in picker-wheel festival-countdown bill-splitter emoji-translator sleep-calculator startup-idea-generator loan-visualizer height-comparison color-palette-extractor typing-speed-race noise-meter voice-to-text-counter mood-board-generator aws-cost-estimator terraform-snippet-generator cicd-visualizer cloud-service-comparison resume-ats-checker face-shape-detector baby-face-generator pet-breed-identifier awesome-free-tools background-remover pdf-toolkit video-compressor temp-mail qr-code-generator code-explainer json-yaml-formatter glassmorphism-generator image-upscaler seo-meta-generator rank-everything; do
             terraform import "cloudflare_pages_project.sites[\"$site\"]" "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/$site" || echo "Project $site not found or already in state"
           done
         env:

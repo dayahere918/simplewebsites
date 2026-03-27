@@ -34,41 +34,21 @@ function setPetType(type) {
   if (btn) { btn.classList.add('active'); btn.classList.remove('btn-secondary'); btn.classList.add('btn-primary'); }
 }
 
-/**
- * Analyze image for brightness, warmth, and contrast
- */
-function analyzeImageFeatures(canvas) {
-  if (!canvas) return { brightness: 128, warmth: 0, contrast: 50 };
-  const ctx = canvas.getContext('2d');
-  if (!ctx || !ctx.getImageData) return { brightness: 128, warmth: 0, contrast: 50 };
-  
-  const w = Math.min(canvas.width, 100);
-  const h = Math.min(canvas.height, 100);
-  const data = ctx.getImageData(0, 0, w, h).data;
-  
-  let totalR = 0, totalG = 0, totalB = 0, count = 0;
-  let minBright = 255, maxBright = 0;
-  
-  for (let i = 0; i < data.length; i += 16) {
-    const r = data[i], g = data[i+1], b = data[i+2];
-    totalR += r; totalG += g; totalB += b;
-    const bright = (r + g + b) / 3;
-    if (bright < minBright) minBright = bright;
-    if (bright > maxBright) maxBright = bright;
-    count++;
+let mobilenetModel = null;
+
+async function loadAIModel() {
+  if (typeof window !== 'undefined' && window.mobilenet) {
+    try {
+      mobilenetModel = await window.mobilenet.load();
+      console.log('MobileNet model loaded successfully.');
+    } catch (e) {
+      console.error('Failed to load MobileNet model:', e);
+    }
   }
-  
-  if (count === 0) return { brightness: 128, warmth: 0, contrast: 50 };
-  
-  const avgR = totalR / count;
-  const avgG = totalG / count;
-  const avgB = totalB / count;
-  
-  return {
-    brightness: (avgR + avgG + avgB) / 3,
-    warmth: (avgR - avgB),  // positive = warm, negative = cool
-    contrast: maxBright - minBright
-  };
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', loadAIModel);
 }
 
 function getImageHash(canvas) {
@@ -82,54 +62,77 @@ function getImageHash(canvas) {
 }
 
 /**
- * Score breeds based on image color analysis
+ * Score breeds based on AI predictions
  */
-function identifyBreed(hash, imageFeatures) {
+function identifyBreed(predictions, hash) {
   const breeds = petType === 'dog' ? DOG_BREEDS : CAT_BREEDS;
-  const features = imageFeatures || { brightness: 128, warmth: 0, contrast: 50 };
   const scores = {};
-
-  // Categorize image features
-  const imgBrightness = features.brightness > 160 ? 'high' : features.brightness > 100 ? 'medium' : 'low';
-  const imgWarmth = features.warmth > 15 ? 'warm' : features.warmth < -15 ? 'cool' : 'neutral';
-  const imgContrast = features.contrast > 150 ? 'high' : features.contrast > 80 ? 'medium' : 'low';
-
+  
+  // Baseline scores to ensure all bars show something
   breeds.forEach((breed, i) => {
-    let score = 5; // base score
-    const cp = breed.colorProfile;
-    
-    // Match brightness
-    if (cp.brightness === imgBrightness) score += 25;
-    else if ((cp.brightness === 'high' && imgBrightness === 'medium') || 
-             (cp.brightness === 'medium' && imgBrightness === 'high') ||
-             (cp.brightness === 'medium' && imgBrightness === 'low') ||
-             (cp.brightness === 'low' && imgBrightness === 'medium')) score += 10;
-    
-    // Match warmth — strongest signal
-    if (cp.warmth === imgWarmth) score += 30;
-    else if ((cp.warmth === 'warm' && imgWarmth === 'neutral') || 
-             (cp.warmth === 'neutral' && imgWarmth === 'warm') ||
-             (cp.warmth === 'cool' && imgWarmth === 'neutral') ||
-             (cp.warmth === 'neutral' && imgWarmth === 'cool')) score += 12;
-    
-    // Match contrast
-    if (cp.contrast === imgContrast) score += 20;
-    else if ((cp.contrast === 'high' && imgContrast === 'medium') ||
-             (cp.contrast === 'medium' && imgContrast === 'high') ||
-             (cp.contrast === 'medium' && imgContrast === 'low') ||
-             (cp.contrast === 'low' && imgContrast === 'medium')) score += 8;
-    
-    // Add hash-based variation so same image gives consistent but varied results
-    score += ((hash * (i + 3) * 7 + i * 11) % 15);
-    
-    scores[breed.name] = score;
+    scores[breed.name] = 2 + (hash % (i + 1));
   });
 
-  // Normalize to percentages
+  if (predictions && predictions.length > 0) {
+    let matchedAny = false;
+    
+    predictions.forEach(pred => {
+      const predName = pred.className.toLowerCase();
+      const probScore = Math.round(pred.probability * 100);
+      
+      breeds.forEach(breed => {
+        const bName = breed.name.toLowerCase();
+        // Check for direct word matches
+        const matches = predName.includes(bName) || 
+                        bName.includes(predName) ||
+                        (bName.includes('poodle') && predName.includes('poodle')) ||
+                        (bName.includes('corgi') && predName.includes('corgi')) ||
+                        (bName === 'german shepherd' && predName.includes('shepherd'));
+        
+        if (matches) {
+          scores[breed.name] += (probScore * 5); // heavily weight actual AI match
+          matchedAny = true;
+        }
+      });
+      
+      // If we are looking at cats and we get 'tiger cat' or 'tabby', associate it dynamically
+      if (petType === 'cat' && !matchedAny) {
+        if (predName.includes('tabby') || predName.includes('tiger cat')) {
+           scores['British Shorthair'] += probScore * 2;
+           scores['Bengal'] += probScore * 2;
+        }
+      }
+    });
+
+    // If the top prediction is very confident but not in our list, we inject it into the scores!
+    if (!matchedAny && predictions[0].probability > 0.15) {
+        const injectedName = predictions[0].className.split(',')[0].trim();
+        // Capitalize words
+        const formattedName = injectedName.replace(/\b\w/g, l => l.toUpperCase());
+        scores[formattedName] = Math.round(predictions[0].probability * 100 * 5);
+        
+        // Add a temporary mock breed profile if it doesn't exist
+        const breedList = petType === 'dog' ? DOG_BREEDS : CAT_BREEDS;
+        if (!breedList.find(b => b.name === formattedName)) {
+            breedList.push({
+                name: formattedName,
+                size: 'Variable',
+                life: '10-15 years',
+                temperament: 'Identified by AI Model',
+                origin: 'Unknown',
+                group: 'AI Detected',
+                care: ['Routine veterinary visits', 'Regular exercise and balanced diet', 'Standard grooming based on coat type', 'Mental stimulation and training'],
+                colorProfile: { brightness: 'medium', warmth: 'neutral', contrast: 'medium' }
+            });
+        }
+    }
+  }
+
+  // Normalize to valid percentages
   const total = Object.values(scores).reduce((a, b) => a + b, 0);
   Object.keys(scores).forEach(k => { scores[k] = Math.round((scores[k] / total) * 100); });
   
-  // Fix rounding to ensure 100%
+  // Fix rounding to ensure exactly 100%
   const diff = 100 - Object.values(scores).reduce((a, b) => a + b, 0);
   const topBreed = Object.keys(scores).sort((a, b) => scores[b] - scores[a])[0];
   scores[topBreed] += diff;
@@ -171,10 +174,20 @@ function analyzeImage(src) {
   img.src = src;
 }
 
-function identifyFromImage(canvas) {
+async function identifyFromImage(canvas) {
   const hash = getImageHash(canvas);
-  const features = analyzeImageFeatures(canvas);
-  const scores = identifyBreed(hash, features);
+  let predictions = null;
+  
+  if (mobilenetModel) {
+    try {
+      predictions = await mobilenetModel.classify(canvas, 5);
+      console.log('MobileNet Predictions:', predictions);
+    } catch (e) {
+      console.error('MobileNet classification error:', e);
+    }
+  }
+
+  const scores = identifyBreed(predictions, hash);
   finalizeResults(scores);
 }
 
@@ -225,9 +238,9 @@ function resetAnalysis() {
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { 
-    DOG_BREEDS, CAT_BREEDS, setPetType, getImageHash, identifyBreed, analyzeImageFeatures,
+    DOG_BREEDS, CAT_BREEDS, setPetType, getImageHash, identifyBreed,
     renderBreedBars, renderBreedInfo, resetAnalysis, handleUpload, analyzeImage,
-    identifyFromImage, finalizeResults,
+    identifyFromImage, finalizeResults, loadAIModel,
     getPetType: () => petType, 
     setPetTypeVal: t => { petType = t; } 
   };

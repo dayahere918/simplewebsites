@@ -107,6 +107,41 @@ function processHtml(html, siteName) {
     processed = processed.replace(/<\/body>/i, `<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "${cfToken}"}'><\/script>\n</body>`);
   }
 
+  // PWA tags
+  if (!processed.includes('rel="manifest"')) {
+    processed = processed.replace(/<\/head>/i, `    <link rel="manifest" href="manifest.json">\n    <meta name="theme-color" content="#1a1a1a">\n</head>`);
+  }
+  
+  // Service Worker Registration
+  if (!processed.includes('serviceWorker.register')) {
+    const swScript = `<script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
+        });
+      }
+    </script>`;
+    processed = processed.replace(/<\/body>/i, `${swScript}\n</body>`);
+  }
+
+  // Open Graph Image
+  if (!processed.includes('og:image')) {
+    processed = processed.replace(/<\/head>/i, `    <meta property="og:image" content="${BASE_URL}/${siteName}/og-image.jpg">\n</head>`);
+  }
+
+  // Schema.org basic WebApplication fallback
+  if (!processed.includes('application/ld+json')) {
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": formatSiteName(siteName),
+      "url": `${BASE_URL}/${siteName}/`,
+      "applicationCategory": "UtilityApplication",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    };
+    processed = processed.replace(/<\/head>/i, `    <script type="application/ld+json">${JSON.stringify(schema)}</script>\n</head>`);
+  }
+
   // Inject nav bar after <body> tag
   const navHtml = generateNavBar(siteName);
   processed = processed.replace(/<body([^>]*)>/i, `<body$1>\n${navHtml}`);
@@ -182,6 +217,27 @@ function buildSite(siteName) {
   </url>
 </urlset>`;
   fs.writeFileSync(path.join(distDir, 'sitemap.xml'), sitemapXml);
+
+  // Generate manifest.json
+  const manifest = {
+    name: formatSiteName(siteName),
+    short_name: formatSiteName(siteName),
+    start_url: ".",
+    display: "standalone",
+    background_color: "#1a1a1a",
+    theme_color: "#1a1a1a"
+  };
+  fs.writeFileSync(path.join(distDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+
+  // Generate generic sw.js (Service Worker)
+  const swCode = `const CACHE_NAME = '${siteName}-v1';
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['./', 'index.html', 'style.css', 'app.js', 'shared-styles.css'])));
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+});`;
+  fs.writeFileSync(path.join(distDir, 'sw.js'), swCode);
 
   // Copy to global dist
   const globalSiteDir = path.join(GLOBAL_DIST, siteName);

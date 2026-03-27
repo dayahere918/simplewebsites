@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON, YAML, XML Formatter & Validator</title>
+    <meta name="description" content="Format, validate, minified, or convert JSON, YAML, and XML documents instantly in your browser. Beautiful dark mode UI.">
+    <link rel="canonical" href="https://stacky.pages.dev/json-yaml-formatter/">
+    <meta property="og:title" content="JSON/YAML Formatter"><meta property="og:type" content="website">
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-lg">
+        <section class="hero mb-4"><h1>>{</} <span class="text-gradient">Formatter & Validator</span></h1><p>Clean, validate, and convert JSON, YAML, and XML instantly.</p></section>
+        
+        <div class="grid format-grid gap-4">
+            <!-- Input Column -->
+            <div class="card p-0 flex-col h-full">
+                <div class="p-4 border-b border-border bg-surface flex justify-between items-center">
+                    <h4 class="m-0">Input</h4>
+                    <select id="input-type" class="input-text py-1 h-auto text-sm" onchange="processData()">
+                        <option value="auto">Auto-Detect</option>
+                        <option value="json">JSON</option>
+                        <option value="yaml">YAML</option>
+                        <option value="xml">XML</option>
+                    </select>
+                </div>
+                <textarea id="raw-input" class="w-full grow p-4 font-mono text-sm bg-bg border-none outline-none resize-none" placeholder="Paste your messy code here..." oninput="processData()" style="min-height:400px"></textarea>
+            </div>
+
+            <!-- Output Column -->
+            <div class="card p-0 flex-col h-full relative">
+                <div class="p-4 border-b border-border bg-surface flex justify-between items-center">
+                    <h4 class="m-0">Output (<span id="status-label" class="text-green-500">Valid</span>)</h4>
+                    <div class="flex gap-2">
+                        <select id="output-type" class="input-text py-1 h-auto text-sm" onchange="processData()">
+                            <option value="json">Format JSON</option>
+                            <option value="yaml">Convert to YAML</option>
+                            <option value="min">Minify JSON</option>
+                        </select>
+                        <button class="btn btn-secondary py-1 text-sm" onclick="copyOutput()">📋 Copy</button>
+                    </div>
+                </div>
+                
+                <div id="error-box" class="hidden p-4 bg-red-900/20 text-red-400 border-b border-red-900/50 font-mono text-sm"></div>
+                
+                <div class="p-4 grow overflow-y-auto bg-bg" style="min-height:400px; max-height:800px;">
+                    <pre class="m-0"><code id="formatted-output" class="language-json"></code></pre>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Developer Formatter Hub.</p></footer>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

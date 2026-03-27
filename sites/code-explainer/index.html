@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Snippet Explainer & Converter</title>
+    <meta name="description" content="Paste any code snippet and get an instant AI explanation or translation to another language. Runs locally using your own free API key.">
+    <link rel="canonical" href="https://stacky.pages.dev/code-explainer/">
+    <meta property="og:title" content="AI Code Explainer"><meta property="og:type" content="website">
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+    
+    <!-- syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-md">
+        <section class="hero"><h1>💻 <span class="text-gradient">AI Code Explainer</span></h1><p>Understand complex code or translate it between languages instantly.</p></section>
+        
+        <div id="api-key-banner" class="card mb-4 hidden border-accent">
+            <h4 class="text-accent mb-2">Setup Required</h4>
+            <p class="mb-4 text-sm">To keep this tool 100% free and serverless, please provide a Groq API Key (Free tier is generous).</p>
+            <div class="flex gap-2">
+                <input type="password" id="api-key-input" class="input-text w-full" placeholder="Enter Groq API Key...">
+                <button class="btn btn-primary" onclick="saveApiKey()">Save</button>
+            </div>
+            <p class="text-xs text-muted mt-2"><a href="https://console.groq.com/keys" target="_blank" rel="noopener">Get a free key here</a>. Stored securely only in your browser's local storage.</p>
+        </div>
+
+        <div class="card mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h4>Your Code</h4>
+                <div class="flex gap-2">
+                    <select id="action-select" class="input-text py-1 h-auto text-sm">
+                        <option value="explain">Explain Code</option>
+                        <option value="python">Convert to Python</option>
+                        <option value="javascript">Convert to JavaScript</option>
+                        <option value="rust">Convert to Rust</option>
+                        <option value="go">Convert to Go</option>
+                    </select>
+                </div>
+            </div>
+            <textarea id="code-input" class="input-text w-full mb-4 font-mono text-sm" rows="10" placeholder="Paste your code snippet here..."></textarea>
+            
+            <button class="btn btn-accent w-full" id="do-action-btn" onclick="executeAI()">⚡ Run AI</button>
+        </div>
+
+        <div class="card hidden p-0 overflow-hidden" id="result-view">
+            <div class="p-4 border-b border-border flex justify-between items-center bg-surface">
+                <h4 id="result-title">AI Output</h4>
+                <button class="btn btn-secondary py-1 text-sm" onclick="copyResult()">📋 Copy</button>
+            </div>
+            <div class="p-4">
+                <div id="ai-loading" class="hidden text-center p-8 font-bold text-accent animate-pulse">Analyzing...</div>
+                <div id="ai-result" class="markdown-body font-mono text-sm"></div>
+            </div>
+        </div>
+        
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 AI Code Explainer. Client-side BYOK tool.</p></footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disposable Temp Mail — Protect Your Inbox from Spam</title>
+    <meta name="description" content="Generate a free temporary email address in one click. Protect your real inbox from spam, bots, and phishing. Auto-refreshes.">
+    <link rel="canonical" href="https://stacky.pages.dev/temp-mail/">
+    <meta property="og:title" content="Disposable Temp Mail"><meta property="og:type" content="website">
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-sm">
+        <section class="hero"><h1>📧 <span class="text-gradient">Temp Mail</span></h1><p>Protect your identity using a free, disposable email address. Good for quick signups.</p></section>
+        
+        <div class="card mb-8 text-center">
+            <h4 class="mb-4">Your Temporary Email Address</h4>
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <input type="text" id="email-address" class="input-text w-full text-center text-xl" readonly value="Loading...">
+                <button class="btn btn-primary" onclick="copyEmail()" title="Copy to clipboard">📋 Copy</button>
+            </div>
+            <button class="btn btn-secondary text-sm" onclick="generateNewEmail()">↻ Generate New Email</button>
+        </div>
+
+        <div class="card mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h4>📥 Inbox</h4>
+                <div class="flex gap-2 items-center">
+                    <span id="countdown-text" class="text-xs text-muted">Auto-refreshing in 10s...</span>
+                    <button class="btn btn-secondary py-1 px-3 text-sm" onclick="fetchMessages(true)">↻ Refresh</button>
+                </div>
+            </div>
+            
+            <div id="messages-list" class="flex-col gap-2">
+                <div class="text-center text-muted p-4">Waiting for emails...</div>
+            </div>
+        </div>
+
+        <div class="card hidden p-6" id="message-view">
+            <button class="btn btn-secondary text-sm mb-4" onclick="closeMessage()">← Back to Inbox</button>
+            <h3 id="msg-subject" class="mb-2"></h3>
+            <p class="text-sm text-muted border-b border-border pb-4 mb-4">From: <span id="msg-from"></span></p>
+            <div id="msg-body" class="markdown-body p-4 bg-surface rounded-md"></div>
+        </div>
+        
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 Disposable Temp Mail. Powered by 1secmail.</p></footer>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>

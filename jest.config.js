@@ -2,6 +2,7 @@ const path = require('path');
 
 module.exports = {
     testEnvironment: 'jsdom',
+    setupFiles: ['jest-canvas-mock'],
     coverageThreshold: {
         global: {
             statements: 90,

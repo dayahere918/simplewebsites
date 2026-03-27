@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Meta Tag & Open Graph Generator</title>
+    <meta name="description" content="Generate perfect SEO meta tags, Open Graph (OG) tags, and Twitter Cards to maximize your website traffic and social media visibility.">
+    <link rel="canonical" href="https://stacky.pages.dev/seo-meta-generator/">
+    <meta property="og:title" content="SEO Meta Tag Generator"><meta property="og:type" content="website">
+    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+    <div class="container container-lg">
+        <section class="hero mb-4"><h1>🔎 <span class="text-gradient">SEO Meta Engine</span></h1><p>Craft perfect tags for Google, Twitter, Facebook, and LinkedIn.</p></section>
+        
+        <div class="grid qr-grid gap-8">
+            <!-- Inputs -->
+            <div class="card flex-col">
+                <h4 class="mb-4">Content Details</h4>
+                
+                <div class="form-group mb-4">
+                    <label>Page Title <span id="title-count" class="text-xs text-muted float-right">0/60</span></label>
+                    <input type="text" id="m-title" class="input-text w-full" placeholder="Epic Guide to Web Development" oninput="generateTags()">
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label>Description <span id="desc-count" class="text-xs text-muted float-right">0/155</span></label>
+                    <textarea id="m-desc" class="input-text w-full" rows="3" placeholder="Learn how to build modern websites..." oninput="generateTags()"></textarea>
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label>Site URL</label>
+                    <input type="url" id="m-url" class="input-text w-full" placeholder="https://example.com/guide" oninput="generateTags()">
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label>Image URL (Open Graph / Twitter)</label>
+                    <input type="url" id="m-img" class="input-text w-full" placeholder="https://example.com/og-image.jpg" oninput="generateTags()">
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label>Keywords (Comma separated)</label>
+                    <input type="text" id="m-key" class="input-text w-full" placeholder="web dev, tutorial, guide" oninput="generateTags()">
+                </div>
+
+                <div class="form-group mb-4">
+                    <label>Author</label>
+                    <input type="text" id="m-author" class="input-text w-full" placeholder="John Doe" oninput="generateTags()">
+                </div>
+            </div>
+
+            <!-- Previews -->
+            <div class="card p-0 flex-col h-full bg-transparent border-0">
+                <div class="card mb-4 overflow-hidden border border-border">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="m-0">Generated Meta Tags</h4>
+                        <button class="btn btn-secondary py-1 text-sm shrink-0" onclick="copyCSS()">📋 Copy All</button>
+                    </div>
+                    <pre class="bg-surface p-4 rounded-md overflow-x-auto m-0"><code id="code-output" class="language-html text-sm"></code></pre>
+                </div>
+                
+                <div class="card">
+                    <h4 class="mb-4">Social Preview (Twitter/X)</h4>
+                    <div class="border border-border rounded-xl overflow-hidden bg-bg">
+                        <div id="prev-img-container" class="w-full h-40 bg-surface flex items-center justify-center border-b border-border overflow-hidden">
+                            <span class="text-muted text-xs">No Image</span>
+                            <img id="prev-img" class="w-full h-full object-cover hidden" src="" onerror="this.classList.add('hidden');this.previousElementSibling.classList.remove('hidden')">
+                        </div>
+                        <div class="p-4">
+                            <p class="text-xs text-muted mb-1" id="prev-url">example.com</p>
+                            <h3 class="text-base m-0 leading-tight mb-1" id="prev-title">Epic Guide to Web Development</h3>
+                            <p class="text-sm text-muted m-0 line-clamp-2" id="prev-desc">Learn how to build modern websites...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+    <footer class="footer"><p>&copy; 2026 SEO Meta Engine.</p></footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+</body>
+</html>
