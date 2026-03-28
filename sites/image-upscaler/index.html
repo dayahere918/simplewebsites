@@ -1,57 +1,252 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image Upscaler — Enhance Resolution Free</title>
-    <meta name="description" content="Upscale and enhance your images using advanced AI directly in your browser. 2x and 4x resolution increase with zero server uploads.">
-    <link rel="canonical" href="https://stacky.pages.dev/image-upscaler/">
-    <meta property="og:title" content="AI Image Upscaler"><meta property="og:type" content="website">
-    <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Toolkit — Resize, Crop, Rotate, Color, Merge & Split</title>
+  <meta name="description" content="Free browser-based image toolkit. Resize, crop, rotate, adjust colors, merge multiple images, and split into tiles. No uploads, 100% private.">
+  <link rel="canonical" href="https://stacky.pages.dev/image-toolkit/">
+  <meta property="og:title" content="Image Toolkit — All-in-one Image Editor">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="shared-styles.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .tab-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:1.5rem; }
+    .toolkit-tab { padding:.5rem 1rem; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); cursor:pointer; font-size:.85rem; transition:all .2s; }
+    .toolkit-tab:hover { border-color:var(--accent); }
+    .toolkit-tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .tab-panel { display:none; }
+    .tab-panel:not(.hidden) { display:block; }
+    .slider-row { display:flex; align-items:center; gap:12px; margin-bottom:.75rem; }
+    .slider-row label { width:110px; font-size:.82rem; color:var(--muted); }
+    .slider-row input[type=range] { flex:1; }
+    .slider-row .val-badge { width:40px; text-align:right; font-size:.8rem; font-weight:600; }
+    .split-tile { display:inline-block; margin:6px; vertical-align:top; text-align:center; }
+    .merge-img-item { display:flex; align-items:center; gap:8px; padding:6px; background:var(--surface); border-radius:6px; margin-bottom:6px; }
+    .merge-img-item .remove-btn { margin-left:auto; background:none; border:none; color:var(--red,#ef4444); cursor:pointer; font-size:1rem; }
+    #split-results { display:flex; flex-wrap:wrap; gap:8px; margin-top:1rem; }
+    .split-tile-label { font-size:.7rem; color:var(--muted); }
+    .preview-container { position:relative; text-align:center; }
+    .status-success { color:var(--green,#22c55e); }
+    .status-error { color:var(--red,#ef4444); }
+    .status-info { color:var(--muted); }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media(max-width:600px) { .grid-2 { grid-template-columns:1fr; } }
+    code { background:var(--surface); padding:1px 5px; border-radius:4px; font-size:.8rem; }
+  </style>
 </head>
 <body>
-    <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
-    <div class="container container-md">
-        <section class="hero"><h1>🔍 <span class="text-gradient">Image Upscaler</span></h1><p>Enhance resolution using local AI. Maximize quality without losing privacy.</p></section>
-        
-        <div class="card mb-8 text-center" id="upload-area">
-            <div class="drop-zone p-8" onclick="document.getElementById('img-input').click()">
-                <div class="drop-icon text-4xl mb-4">🖼️</div>
-                <p>Select an Image</p>
-                <p class="hint">Works best on small images (Max 500x500 initially due to memory)</p>
-            </div>
-            <input type="file" id="img-input" accept="image/*" class="hidden" onchange="handleUpload(event)">
-        </div>
+  <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
+  <div class="container container-md">
+    <section class="hero">
+      <h1>🖼️ <span class="text-gradient">Image Toolkit</span></h1>
+      <p>Resize, crop, rotate, color-correct, merge, and split images — all in your browser. Zero uploads.</p>
+    </section>
 
-        <div class="grid qr-grid gap-4 hidden" id="workspace">
-            <div class="card p-0 overflow-hidden flex-col">
-                <div class="p-2 border-b border-border bg-surface text-center font-bold text-sm">Original</div>
-                <img id="img-preview" class="checkerboard-bg object-contain w-full h-64" src="" alt="Original">
-            </div>
-            
-            <div class="card p-0 overflow-hidden flex-col relative">
-                <div class="p-2 border-b border-border bg-surface text-center font-bold text-sm">Upscaled ✨</div>
-                <img id="img-result" class="checkerboard-bg object-contain w-full h-64 hidden" src="" alt="Upscaled">
-                <canvas id="upscale-canvas" class="hidden"></canvas>
-                
-                <div id="loading" class="absolute inset-0 bg-surface/80 flex flex-col items-center justify-center p-4">
-                    <button class="btn btn-accent mb-4 w-full max-w-xs" onclick="startUpscale(2)">Upscale 2x</button>
-                    <!-- <button class="btn btn-primary mb-4 w-full max-w-xs" onclick="startUpscale(4)">Upscale 4x</button> -->
-                    <div id="status-text" class="text-center text-sm font-bold text-gradient mt-2"></div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="download-area" class="text-center mt-8 hidden">
-             <button class="btn btn-primary" onclick="downloadImage()">📥 Download Enhanced Image</button>
-             <button class="btn btn-secondary ml-4" onclick="location.reload()">↻ Try Another</button>
-        </div>
-        
+    <!-- Upload Area -->
+    <div class="card text-center" id="upload-area">
+      <div class="drop-zone p-8" onclick="document.getElementById('img-input').click()" id="drop-zone-main">
+        <div class="drop-icon text-5xl mb-4">🖼️</div>
+        <p class="font-bold">Drop an image or click to select</p>
+        <p class="hint mt-2">Supports PNG, JPG, WEBP, GIF — up to 4000×4000px</p>
+      </div>
+      <input type="file" id="img-input" accept="image/*" class="hidden" onchange="handleUpload(event)">
+
+      <div class="mt-6">
+        <p class="text-sm text-muted mb-3">Or merge multiple images:</p>
+        <button class="btn btn-secondary" onclick="document.getElementById('merge-input-init').click()">📎 Select Multiple Images to Merge</button>
+        <input type="file" id="merge-input-init" accept="image/*" multiple class="hidden" onchange="handleMergeUpload(event); document.getElementById('upload-area').classList.add('hidden'); document.getElementById('workspace').classList.remove('hidden'); switchTab('merge');">
+      </div>
     </div>
-    <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
-    <footer class="footer"><p>&copy; 2026 Free AI Image Upscaler.</p></footer>
-    
-    <!-- Load TensorFlow.js and Upscaler.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/upscaler@1.0.0-beta.16/dist/browser/umd/upscaler.min.js"></script>
-    <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
+
+    <!-- Workspace -->
+    <div id="workspace" class="hidden">
+
+      <!-- Preview + Info Bar -->
+      <div class="card mb-4">
+        <div class="flex justify-between items-center mb-3">
+          <div>
+            <span class="font-bold">Preview</span>
+            <span class="text-sm text-muted ml-2" id="current-dims"></span>
+          </div>
+          <div class="flex gap-2">
+            <span id="status-text" class="text-sm"></span>
+            <button class="btn btn-secondary btn-sm" onclick="resetToolkit()">✕ Reset</button>
+          </div>
+        </div>
+        <div class="preview-container">
+          <img id="img-preview" style="max-width:100%;max-height:400px;object-fit:contain;border-radius:8px;background:repeating-conic-gradient(#808080 0% 25%, transparent 0% 50%) 0 0 / 16px 16px;" alt="Preview">
+        </div>
+      </div>
+
+      <!-- Tab Bar -->
+      <div class="tab-bar">
+        <button class="toolkit-tab active" id="tab-resize" onclick="switchTab('resize')">📐 Resize</button>
+        <button class="toolkit-tab" id="tab-crop" onclick="switchTab('crop')">✂️ Crop</button>
+        <button class="toolkit-tab" id="tab-rotate" onclick="switchTab('rotate')">🔄 Rotate & Flip</button>
+        <button class="toolkit-tab" id="tab-color" onclick="switchTab('color')">🎨 Colors</button>
+        <button class="toolkit-tab" id="tab-split" onclick="switchTab('split')">⚡ Split</button>
+        <button class="toolkit-tab" id="tab-merge" onclick="switchTab('merge')">🔗 Merge</button>
+        <button class="toolkit-tab" id="tab-download" onclick="switchTab('download')">📥 Download</button>
+      </div>
+
+      <!-- ── RESIZE PANEL ─────────────────── -->
+      <div class="card tab-panel" id="panel-resize">
+        <h4 class="mb-4">📐 Resize Image</h4>
+        <div class="grid-2 mb-4">
+          <div class="form-group">
+            <label>Width (px)</label>
+            <input type="number" id="resize-w" class="input-text w-full" min="1" oninput="onResizeInput('w')">
+          </div>
+          <div class="form-group">
+            <label>Height (px)</label>
+            <input type="number" id="resize-h" class="input-text w-full" min="1" oninput="onResizeInput('h')">
+          </div>
+        </div>
+        <label class="flex items-center gap-2 mb-4 cursor-pointer">
+          <input type="checkbox" id="maintain-ratio" checked> Maintain aspect ratio
+        </label>
+        <div class="flex gap-2 flex-wrap mb-4">
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('resize-w').value=1920;document.getElementById('resize-h').value=1080;onResizeInput('w')">1920×1080</button>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('resize-w').value=1280;document.getElementById('resize-h').value=720;onResizeInput('w')">1280×720</button>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('resize-w').value=800;document.getElementById('resize-h').value=600;onResizeInput('w')">800×600</button>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('resize-w').value=512;document.getElementById('resize-h').value=512;onResizeInput('w')">512×512</button>
+        </div>
+        <button class="btn btn-accent w-full" onclick="applyResize()">Apply Resize</button>
+      </div>
+
+      <!-- ── CROP PANEL ─────────────────── -->
+      <div class="card tab-panel hidden" id="panel-crop">
+        <h4 class="mb-4">✂️ Crop Image</h4>
+        <div class="mb-4">
+          <p class="text-sm font-bold mb-2">Preset Ratios</p>
+          <div class="flex gap-2 flex-wrap">
+            <button class="btn btn-secondary btn-sm" onclick="applyCropPreset('1:1')">Square (1:1)</button>
+            <button class="btn btn-secondary btn-sm" onclick="applyCropPreset('16:9')">Landscape (16:9)</button>
+            <button class="btn btn-secondary btn-sm" onclick="applyCropPreset('4:3')">Standard (4:3)</button>
+            <button class="btn btn-secondary btn-sm" onclick="applyCropPreset('3:2')">Photo (3:2)</button>
+            <button class="btn btn-secondary btn-sm" onclick="applyCropPreset('9:16')">Portrait (9:16)</button>
+          </div>
+        </div>
+        <hr style="border-color:var(--border);margin:1rem 0">
+        <p class="text-sm font-bold mb-2">Manual Crop (pixels)</p>
+        <div class="grid-2 mb-3">
+          <div class="form-group"><label>X (left offset)</label><input type="number" id="crop-x" class="input-text w-full" value="0" min="0"></div>
+          <div class="form-group"><label>Y (top offset)</label><input type="number" id="crop-y" class="input-text w-full" value="0" min="0"></div>
+          <div class="form-group"><label>Width</label><input type="number" id="crop-w" class="input-text w-full" min="1"></div>
+          <div class="form-group"><label>Height</label><input type="number" id="crop-h" class="input-text w-full" min="1"></div>
+        </div>
+        <button class="btn btn-accent w-full" onclick="applyCropManual()">Apply Crop</button>
+      </div>
+
+      <!-- ── ROTATE & FLIP PANEL ─────────── -->
+      <div class="card tab-panel hidden" id="panel-rotate">
+        <h4 class="mb-4">🔄 Rotate & Flip</h4>
+        <div class="flex gap-3 flex-wrap mb-4">
+          <button class="btn btn-secondary" onclick="applyRotate(90)">↻ 90° Right</button>
+          <button class="btn btn-secondary" onclick="applyRotate(-90)">↺ 90° Left</button>
+          <button class="btn btn-secondary" onclick="applyRotate(180)">↕ 180°</button>
+          <button class="btn btn-secondary" onclick="applyFlip('horizontal')">↔ Flip H</button>
+          <button class="btn btn-secondary" onclick="applyFlip('vertical')">↕ Flip V</button>
+        </div>
+        <hr style="border-color:var(--border);margin:1rem 0">
+        <p class="text-sm font-bold mb-2">Custom Tilt (free rotate)</p>
+        <div class="slider-row">
+          <label>Angle (°)</label>
+          <input type="range" id="tilt-angle" min="-180" max="180" value="0" oninput="document.getElementById('tilt-val').textContent=this.value">
+          <span class="val-badge" id="tilt-val">0</span>
+        </div>
+        <button class="btn btn-accent" onclick="applyTilt()">Apply Tilt</button>
+      </div>
+
+      <!-- ── COLOR PANEL ────────────────── -->
+      <div class="card tab-panel hidden" id="panel-color">
+        <h4 class="mb-4">🎨 Color Adjustments</h4>
+        <div class="slider-row"><label>Brightness</label><input type="range" id="adj-brightness" min="0" max="300" value="100" oninput="document.getElementById('adj-brightness-val').textContent=this.value+'%'"><span class="val-badge" id="adj-brightness-val">100%</span></div>
+        <div class="slider-row"><label>Contrast</label><input type="range" id="adj-contrast" min="0" max="300" value="100" oninput="document.getElementById('adj-contrast-val').textContent=this.value+'%'"><span class="val-badge" id="adj-contrast-val">100%</span></div>
+        <div class="slider-row"><label>Saturation</label><input type="range" id="adj-saturation" min="0" max="300" value="100" oninput="document.getElementById('adj-saturation-val').textContent=this.value+'%'"><span class="val-badge" id="adj-saturation-val">100%</span></div>
+        <div class="slider-row"><label>Hue Rotate</label><input type="range" id="adj-hue" min="-180" max="180" value="0" oninput="document.getElementById('adj-hue-val').textContent=this.value+'°'"><span class="val-badge" id="adj-hue-val">0°</span></div>
+        <div class="slider-row"><label>Sepia</label><input type="range" id="adj-sepia" min="0" max="100" value="0" oninput="document.getElementById('adj-sepia-val').textContent=this.value+'%'"><span class="val-badge" id="adj-sepia-val">0%</span></div>
+        <div class="slider-row"><label>Grayscale</label><input type="range" id="adj-grayscale" min="0" max="100" value="0" oninput="document.getElementById('adj-grayscale-val').textContent=this.value+'%'"><span class="val-badge" id="adj-grayscale-val">0%</span></div>
+        <div class="slider-row"><label>Invert</label><input type="range" id="adj-invert" min="0" max="100" value="0" oninput="document.getElementById('adj-invert-val').textContent=this.value+'%'"><span class="val-badge" id="adj-invert-val">0%</span></div>
+        <div class="flex gap-3 mt-4">
+          <button class="btn btn-accent" onclick="applyColors()">✅ Apply Colors</button>
+          <button class="btn btn-secondary" onclick="resetColorSliders()">↻ Reset</button>
+        </div>
+      </div>
+
+      <!-- ── SPLIT PANEL ────────────────── -->
+      <div class="card tab-panel hidden" id="panel-split">
+        <h4 class="mb-4">⚡ Split into Tiles</h4>
+        <p class="hint mb-4">Divide your image into equal tiles for social media grids or puzzle effects.</p>
+        <div class="grid-2 mb-4">
+          <div class="form-group"><label>Columns</label><input type="number" id="split-cols" class="input-text w-full" value="2" min="1" max="10"></div>
+          <div class="form-group"><label>Rows</label><input type="number" id="split-rows" class="input-text w-full" value="2" min="1" max="10"></div>
+        </div>
+        <button class="btn btn-accent w-full" onclick="applySplit()">⚡ Split Image</button>
+        <div id="split-results" class="hidden mt-4"></div>
+      </div>
+
+      <!-- ── MERGE PANEL ────────────────── -->
+      <div class="card tab-panel hidden" id="panel-merge">
+        <h4 class="mb-4">🔗 Merge Images</h4>
+        <p class="hint mb-4">Combine multiple images side-by-side, stacked, or in a grid. The merged result becomes your working image.</p>
+        <button class="btn btn-secondary mb-4" onclick="document.getElementById('merge-input').click()">+ Add Images</button>
+        <input type="file" id="merge-input" accept="image/*" multiple class="hidden" onchange="handleMergeUpload(event)">
+        <div id="merge-preview-list" class="mb-4"></div>
+        <div class="form-group mb-4">
+          <label>Layout</label>
+          <select id="merge-layout" class="input-text w-full mt-2">
+            <option value="horizontal">Side by Side (Horizontal)</option>
+            <option value="vertical">Stacked (Vertical)</option>
+            <option value="grid">Grid</option>
+          </select>
+        </div>
+        <div class="form-group mb-4" id="merge-cols-group">
+          <label>Grid Columns</label>
+          <input type="number" id="merge-cols" class="input-text w-full mt-2" value="2" min="1" max="6">
+        </div>
+        <button class="btn btn-accent w-full hidden" id="do-merge-btn" onclick="applyMerge()">🔗 Merge & Set as Working Image</button>
+      </div>
+
+      <!-- ── DOWNLOAD PANEL ─────────────── -->
+      <div class="card tab-panel hidden" id="panel-download">
+        <h4 class="mb-4">📥 Download Result</h4>
+        <p class="hint mb-4">Download in your preferred format. PNG preserves transparency; JPG/WebP are smaller file sizes.</p>
+        <div class="flex gap-3 flex-wrap">
+          <button class="btn btn-primary" onclick="downloadResult('png')">📥 PNG (lossless)</button>
+          <button class="btn btn-secondary" onclick="downloadResult('jpg')">📥 JPG (90% quality)</button>
+          <button class="btn btn-secondary" onclick="downloadResult('webp')">📥 WebP (90% quality)</button>
+        </div>
+      </div>
+
+    </div><!-- /workspace -->
+  </div>
+
+  <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
+  <footer class="footer"><p>&copy; 2026 Image Toolkit — Free browser-based image editor. No uploads required.</p></footer>
+
+  <script src="app.js"></script>
+  <script src="../../shared/theme-toggle.js"></script>
+  <script>
+    // Initialize tab panels visibility
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.tab-panel').forEach((p, i) => {
+        if (i === 0) p.classList.remove('hidden');
+      });
+
+      // Drag-over upload support
+      const dz = document.getElementById('drop-zone-main');
+      if (dz) {
+        dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+        dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+        dz.addEventListener('drop', e => {
+          e.preventDefault();
+          dz.classList.remove('drag-over');
+          const files = e.dataTransfer?.files;
+          if (files?.length) handleUpload({ target: { files } });
+        });
+      }
+    });
+  </script>
 </body>
 </html>

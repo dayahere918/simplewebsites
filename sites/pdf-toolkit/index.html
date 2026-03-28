@@ -24,24 +24,45 @@
                     <div class="drop-icon">📎</div><p>Select PDF Files</p>
                 </div>
                 <input type="file" id="merge-input" accept="application/pdf" multiple class="hidden" onchange="handleMergeUpload(event)">
+                <div id="merge-count" class="text-sm text-muted mt-2"></div>
                 <div id="merge-list" class="mt-4 flex-col gap-2"></div>
                 <button class="btn btn-accent w-full mt-4 hidden" id="do-merge-btn" onclick="executeMerge()">Combine & Download</button>
             </div>
 
             <div id="mode-split" class="hidden">
-                <p class="mb-4">Select a PDF to extract pages.</p>
+                <p class="mb-4">Select a PDF to extract specific pages or all pages.</p>
+
+                <!-- Drop zone — hidden after file selected -->
                 <div class="drop-zone" id="split-drop" onclick="document.getElementById('split-input').click()">
                     <div class="drop-icon">✂️</div><p>Select a PDF File</p>
                 </div>
                 <input type="file" id="split-input" accept="application/pdf" class="hidden" onchange="handleSplitUpload(event)">
+
+                <!-- Split UI — revealed after file selected (was always hidden — FIXED) -->
                 <div id="split-ui" class="hidden mt-4">
-                    <p id="split-filename" class="font-bold"></p>
-                    <p class="hint mb-2">Enter page numbers to extract (e.g. 1, 3, 5-7):</p>
-                    <input type="text" id="split-pages" class="input-text w-full mb-4" placeholder="1, 2, 4-6">
-                    <button class="btn btn-accent w-full" onclick="executeSplit()">Extract & Download</button>
+                    <p id="split-file-info" class="font-bold text-accent mb-2"></p>
+                    <p id="split-page-count-info" class="hint mb-3 text-sm"></p>
+
+                    <div class="form-group mb-4">
+                        <label class="font-bold">Pages to Extract</label>
+                        <input type="text" id="split-pages" class="input-text w-full mt-2"
+                               placeholder="e.g. 1, 3, 5-7  (leave blank for all pages)">
+                        <p class="hint mt-1">Use commas and dashes: <code>1, 3, 5-7</code></p>
+                    </div>
+
+                    <button class="btn btn-accent w-full" id="do-split-btn" onclick="executeSplit()">✂️ Extract & Download</button>
+                    <button class="btn btn-secondary w-full mt-2" onclick="document.getElementById('split-drop').classList.remove('hidden'); document.getElementById('split-ui').classList.add('hidden'); document.getElementById('split-input').value=''">↻ Choose Another File</button>
+                </div>
+
+                <!-- Results -->
+                <div id="split-results" class="hidden mt-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="font-bold" id="split-page-count"></p>
+                    </div>
+                    <div id="output-list" class="flex-col gap-2"></div>
                 </div>
             </div>
-            
+
             <div id="processing-status" class="mt-4 text-center font-bold text-gradient hidden">Processing...</div>
         </div>
     </div>

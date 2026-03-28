@@ -1,6 +1,6 @@
 /**
  * Pet Breed Identifier — Core Logic
- * Breed detection using image color/brightness analysis
+ * Breed detection using MobileNet AI with human/non-pet detection guard
  */
 const DOG_BREEDS = [
   { name: 'Golden Retriever', size: 'Large', life: '10-12 years', temperament: 'Friendly, Reliable, Trustworthy', origin: 'Scotland', group: 'Sporting', care: ['Regular brushing 2-3x/week', 'Daily exercise (1-2 hours)', 'Prone to hip dysplasia — regular vet checks', 'Love swimming — great for water activities'], colorProfile: { brightness: 'high', warmth: 'warm', contrast: 'low' } },
@@ -11,6 +11,7 @@ const DOG_BREEDS = [
   { name: 'Beagle', size: 'Small-Medium', life: '12-15 years', temperament: 'Merry, Friendly, Curious', origin: 'England', group: 'Hound', care: ['Moderate exercise daily', 'Prone to weight gain', 'Strong nose — keep on leash outdoors', 'Regular ear cleaning needed'], colorProfile: { brightness: 'medium', warmth: 'warm', contrast: 'medium' } },
   { name: 'Siberian Husky', size: 'Medium-Large', life: '12-14 years', temperament: 'Outgoing, Mischievous, Loyal', origin: 'Siberia', group: 'Working', care: ['Very heavy shedding twice yearly', 'Needs extensive exercise', 'Escape artists — secure fencing needed', 'Do well in cold climates'], colorProfile: { brightness: 'high', warmth: 'cool', contrast: 'high' } },
   { name: 'Corgi', size: 'Small', life: '12-15 years', temperament: 'Affectionate, Smart, Alert', origin: 'Wales', group: 'Herding', care: ['Moderate exercise daily', 'Watch for back issues', 'Double coat — regular brushing', 'Mental stimulation important'], colorProfile: { brightness: 'medium', warmth: 'warm', contrast: 'medium' } },
+  { name: 'Pekinese', size: 'Small', life: '12-14 years', temperament: 'Confident, Loyal, Stubborn', origin: 'China', group: 'Toy', care: ['Daily brushing required', 'Not suited for hot climates', 'Moderate, low-impact walks', 'Regular eye cleaning'], colorProfile: { brightness: 'medium', warmth: 'warm', contrast: 'low' } },
 ];
 
 const CAT_BREEDS = [
@@ -23,6 +24,57 @@ const CAT_BREEDS = [
   { name: 'Scottish Fold', size: 'Medium', life: '11-15 years', temperament: 'Sweet, Quiet, Adaptable', origin: 'Scotland', group: 'Shorthair', care: ['Easy grooming', 'Check ear folds for issues', 'Moderate exercise', 'Great apartment cat'], colorProfile: { brightness: 'medium', warmth: 'neutral', contrast: 'low' } },
   { name: 'Sphynx', size: 'Medium', life: '12-14 years', temperament: 'Lively, Friendly, Energetic', origin: 'Canada', group: 'Hairless', care: ['Weekly baths needed', 'Keep warm in cold weather', 'Clean ears regularly', 'Sunscreen for outdoor time'], colorProfile: { brightness: 'medium', warmth: 'warm', contrast: 'low' } },
 ];
+
+/**
+ * Keywords that indicate a human is in the image — MobileNet class names
+ * Used to guard against false pet identifications on human photos
+ */
+const HUMAN_KEYWORDS = [
+  'person', 'man', 'woman', 'boy', 'girl', 'human', 'face', 'suit', 'shirt',
+  'tie', 'jersey', 'gown', 'dress', 'hair', 'people', 'portrait', 'bodybuilder',
+  'bridegroom', 'sarong', 'miniskirt', 'bikini', 'swimming cap', 'cowboy hat',
+  'mortarboard', 'academic', 'military', 'police', 'lab coat', 'apron'
+];
+
+/**
+ * Keywords that indicate a non-pet object in the image
+ */
+const NON_PET_KEYWORDS = [
+  'car', 'truck', 'vehicle', 'building', 'house', 'food', 'pizza', 'burger',
+  'tree', 'plant', 'phone', 'computer', 'laptop', 'table', 'chair', 'desk',
+  'television', 'screen', 'aircraft', 'ship', 'boat', 'weapon', 'gun'
+];
+
+/**
+ * Check if MobileNet predictions indicate a human is in the image
+ * @param {Array} predictions - MobileNet prediction array [{className, probability}]
+ * @returns {boolean}
+ */
+function isHumanImage(predictions) {
+  if (!predictions || predictions.length === 0) return false;
+  // Check top 3 predictions (highest confidence)
+  const topPreds = predictions.slice(0, 3);
+  return topPreds.some(pred => {
+    const name = (pred.className || '').toLowerCase();
+    return HUMAN_KEYWORDS.some(kw => name.includes(kw));
+  });
+}
+
+/**
+ * Check if MobileNet predictions indicate non-pet content
+ * @param {Array} predictions
+ * @returns {boolean}
+ */
+function isNonPetImage(predictions) {
+  if (!predictions || predictions.length === 0) return false;
+  const topPreds = predictions.slice(0, 2);
+  // Only flag non-pet if confidence is high (>50%) and no animal-like terms
+  return topPreds.some(pred => {
+    const name = (pred.className || '').toLowerCase();
+    const isHighConf = pred.probability > 0.5;
+    return isHighConf && NON_PET_KEYWORDS.some(kw => name.includes(kw));
+  });
+}
 
 let petType = 'dog';
 
@@ -62,12 +114,39 @@ function getImageHash(canvas) {
 }
 
 /**
+ * Show "no pet detected" message in the results area
+ */
+function showNoPetDetected(reason) {
+  if (typeof document === 'undefined') return;
+  const badge = document.getElementById('breed-badge');
+  const conf = document.getElementById('confidence-text');
+  const barsEl = document.getElementById('breed-bars');
+  const infoEl = document.getElementById('breed-info');
+  const tipsEl = document.getElementById('care-tips');
+
+  if (badge) {
+    badge.textContent = '⚠️ No Pet Detected';
+    badge.style.background = 'linear-gradient(135deg, #f97316, #ef4444)';
+  }
+  if (conf) conf.textContent = reason || 'Please upload a clear photo of a dog or cat.';
+  if (barsEl) barsEl.innerHTML = `<div class="no-pet-msg" style="text-align:center;padding:2rem;color:var(--muted)">
+    <div style="font-size:3rem;margin-bottom:1rem">🐾</div>
+    <p>Upload a photo of a dog or cat for breed identification.</p>
+  </div>`;
+  if (infoEl) infoEl.innerHTML = '';
+  if (tipsEl) tipsEl.innerHTML = '';
+
+  document.getElementById('upload-area')?.classList.add('hidden');
+  document.getElementById('results')?.classList.remove('hidden');
+}
+
+/**
  * Score breeds based on AI predictions
  */
 function identifyBreed(predictions, hash) {
   const breeds = petType === 'dog' ? DOG_BREEDS : CAT_BREEDS;
   const scores = {};
-  
+
   // Baseline scores to ensure all bars show something
   breeds.forEach((breed, i) => {
     scores[breed.name] = 2 + (hash % (i + 1));
@@ -75,43 +154,43 @@ function identifyBreed(predictions, hash) {
 
   if (predictions && predictions.length > 0) {
     let matchedAny = false;
-    
+
     predictions.forEach(pred => {
       const predName = pred.className.toLowerCase();
       const probScore = Math.round(pred.probability * 100);
-      
+
       breeds.forEach(breed => {
         const bName = breed.name.toLowerCase();
-        // Check for direct word matches
-        const matches = predName.includes(bName) || 
+        const matches = predName.includes(bName) ||
                         bName.includes(predName) ||
                         (bName.includes('poodle') && predName.includes('poodle')) ||
                         (bName.includes('corgi') && predName.includes('corgi')) ||
-                        (bName === 'german shepherd' && predName.includes('shepherd'));
-        
+                        (bName === 'german shepherd' && predName.includes('shepherd')) ||
+                        (bName === 'pekinese' && predName.includes('pekingese'));
+
         if (matches) {
-          scores[breed.name] += (probScore * 5); // heavily weight actual AI match
+          scores[breed.name] += (probScore * 5);
           matchedAny = true;
         }
       });
-      
-      // If we are looking at cats and we get 'tiger cat' or 'tabby', associate it dynamically
+
+      // Cat-specific keyword boosting
       if (petType === 'cat' && !matchedAny) {
         if (predName.includes('tabby') || predName.includes('tiger cat')) {
            scores['British Shorthair'] += probScore * 2;
            scores['Bengal'] += probScore * 2;
         }
+        if (predName.includes('siamese')) scores['Siamese'] += probScore * 3;
+        if (predName.includes('persian')) scores['Persian'] += probScore * 3;
       }
     });
 
-    // If the top prediction is very confident but not in our list, we inject it into the scores!
+    // Inject dynamic AI-detected breed if confident and unmatched
     if (!matchedAny && predictions[0].probability > 0.15) {
         const injectedName = predictions[0].className.split(',')[0].trim();
-        // Capitalize words
         const formattedName = injectedName.replace(/\b\w/g, l => l.toUpperCase());
         scores[formattedName] = Math.round(predictions[0].probability * 100 * 5);
-        
-        // Add a temporary mock breed profile if it doesn't exist
+
         const breedList = petType === 'dog' ? DOG_BREEDS : CAT_BREEDS;
         if (!breedList.find(b => b.name === formattedName)) {
             breedList.push({
@@ -131,12 +210,12 @@ function identifyBreed(predictions, hash) {
   // Normalize to valid percentages
   const total = Object.values(scores).reduce((a, b) => a + b, 0);
   Object.keys(scores).forEach(k => { scores[k] = Math.round((scores[k] / total) * 100); });
-  
+
   // Fix rounding to ensure exactly 100%
   const diff = 100 - Object.values(scores).reduce((a, b) => a + b, 0);
   const topBreed = Object.keys(scores).sort((a, b) => scores[b] - scores[a])[0];
   scores[topBreed] += diff;
-  
+
   return scores;
 }
 
@@ -161,11 +240,14 @@ function analyzeImage(src) {
     if (h > maxH) { w = w * maxH / h; h = maxH; }
     canvas.width = w; canvas.height = h;
     ctx.drawImage(img, 0, 0, w, h);
-    
+
     document.getElementById('upload-area')?.classList.add('hidden');
     document.getElementById('results')?.classList.remove('hidden');
     const badge = document.getElementById('breed-badge');
-    if (badge) badge.textContent = "Analyzing...";
+    if (badge) {
+      badge.textContent = 'Analyzing...';
+      badge.style.background = '';
+    }
 
     setTimeout(() => {
       identifyFromImage(canvas);
@@ -177,13 +259,25 @@ function analyzeImage(src) {
 async function identifyFromImage(canvas) {
   const hash = getImageHash(canvas);
   let predictions = null;
-  
+
   if (mobilenetModel) {
     try {
       predictions = await mobilenetModel.classify(canvas, 5);
       console.log('MobileNet Predictions:', predictions);
     } catch (e) {
       console.error('MobileNet classification error:', e);
+    }
+  }
+
+  // ✅ HUMAN/NON-PET DETECTION GUARD
+  if (predictions) {
+    if (isHumanImage(predictions)) {
+      showNoPetDetected('Human face detected. Please upload a photo of a dog or cat.');
+      return;
+    }
+    if (isNonPetImage(predictions)) {
+      showNoPetDetected('No animal detected in this image. Please upload a pet photo.');
+      return;
     }
   }
 
@@ -196,7 +290,7 @@ function finalizeResults(scores) {
   const topBreed = Object.keys(scores).sort((a, b) => scores[b] - scores[a])[0];
   const badge = document.getElementById('breed-badge');
   const conf = document.getElementById('confidence-text');
-  if (badge) badge.textContent = topBreed;
+  if (badge) { badge.textContent = topBreed; badge.style.background = ''; }
   if (conf) conf.textContent = `${scores[topBreed]}% confidence`;
   renderBreedBars(scores, topBreed);
   renderBreedInfo(topBreed);
@@ -237,11 +331,12 @@ function resetAnalysis() {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { 
-    DOG_BREEDS, CAT_BREEDS, setPetType, getImageHash, identifyBreed,
+  module.exports = {
+    DOG_BREEDS, CAT_BREEDS, HUMAN_KEYWORDS, NON_PET_KEYWORDS,
+    setPetType, getImageHash, identifyBreed, isHumanImage, isNonPetImage,
     renderBreedBars, renderBreedInfo, resetAnalysis, handleUpload, analyzeImage,
-    identifyFromImage, finalizeResults, loadAIModel,
-    getPetType: () => petType, 
-    setPetTypeVal: t => { petType = t; } 
+    identifyFromImage, finalizeResults, loadAIModel, showNoPetDetected,
+    getPetType: () => petType,
+    setPetTypeVal: t => { petType = t; }
   };
 }

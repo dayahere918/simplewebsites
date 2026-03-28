@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Disposable Temp Mail — Protect Your Inbox from Spam</title>
-    <meta name="description" content="Generate a free temporary email address in one click. Protect your real inbox from spam, bots, and phishing. Auto-refreshes.">
+    <meta name="description" content="Generate a free temporary email address in one click. Protect your real inbox from spam, bots and phishing. Auto-refreshes every 10 seconds.">
     <link rel="canonical" href="https://stacky.pages.dev/temp-mail/">
     <meta property="og:title" content="Disposable Temp Mail"><meta property="og:type" content="website">
     <link rel="stylesheet" href="shared-styles.css"><link rel="stylesheet" href="style.css">
@@ -10,28 +10,37 @@
 <body>
     <div class="ad-container ad-banner" id="ad-top"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="TOP_SLOT"></ins></div>
     <div class="container container-sm">
-        <section class="hero"><h1>📧 <span class="text-gradient">Temp Mail</span></h1><p>Protect your identity using a free, disposable email address. Good for quick signups.</p></section>
-        
+        <section class="hero"><h1>📧 <span class="text-gradient">Temp Mail</span></h1><p>Protect your identity with a free, disposable email address. Good for quick signups — no registration needed.</p></section>
+
         <div class="card mb-8 text-center">
-            <h4 class="mb-4">Your Temporary Email Address</h4>
-            <div class="flex items-center justify-center gap-2 mb-4">
-                <input type="text" id="email-address" class="input-text w-full text-center text-xl" readonly value="Loading...">
-                <button class="btn btn-primary" onclick="copyEmail()" title="Copy to clipboard">📋 Copy</button>
+            <div class="flex justify-between items-center mb-2">
+                <h4 class="m-0">Your Temporary Email</h4>
+                <span id="provider-badge" class="text-xs text-muted" title="Active mail provider">⚡ 1secMail</span>
             </div>
-            <button class="btn btn-secondary text-sm" onclick="generateNewEmail()">↻ Generate New Email</button>
+            <div class="flex items-center justify-center gap-2 mb-3">
+                <input type="text" id="email-address" class="input-text w-full text-center font-bold" readonly value="Generating...">
+                <button class="btn btn-primary" id="copy-email-btn" onclick="copyEmail()" title="Copy to clipboard">📋 Copy</button>
+            </div>
+            <div class="flex gap-2 justify-center">
+                <button class="btn btn-secondary text-sm" onclick="generateNewEmail()">↻ New Address</button>
+                <button class="btn btn-secondary text-sm" onclick="fetchMessages(false)">🔄 Refresh Now</button>
+            </div>
         </div>
 
         <div class="card mb-8">
             <div class="flex justify-between items-center mb-4">
                 <h4>📥 Inbox</h4>
-                <div class="flex gap-2 items-center">
-                    <span id="countdown-text" class="text-xs text-muted">Auto-refreshing in 10s...</span>
-                    <button class="btn btn-secondary py-1 px-3 text-sm" onclick="fetchMessages(true)">↻ Refresh</button>
+                <div class="flex gap-3 items-center">
+                    <div id="loading-spinner" class="hidden text-xs text-muted">Loading...</div>
+                    <span id="status-text" class="text-xs text-muted">Auto-refresh in 10s...</span>
                 </div>
             </div>
-            
-            <div id="messages-list" class="flex-col gap-2">
-                <div class="text-center text-muted p-4">Waiting for emails...</div>
+            <div id="inbox-list">
+                <div class="text-center text-muted p-8">
+                    <div style="font-size:2.5rem;margin-bottom:1rem">📭</div>
+                    <p>Empty Inbox — waiting for mail...</p>
+                    <p class="hint mt-2">Emails sent to your address will appear here automatically.</p>
+                </div>
             </div>
         </div>
 
@@ -39,12 +48,11 @@
             <button class="btn btn-secondary text-sm mb-4" onclick="closeMessage()">← Back to Inbox</button>
             <h3 id="msg-subject" class="mb-2"></h3>
             <p class="text-sm text-muted border-b border-border pb-4 mb-4">From: <span id="msg-from"></span></p>
-            <div id="msg-body" class="markdown-body p-4 bg-surface rounded-md"></div>
+            <div id="msg-body" class="p-4 bg-surface rounded-md" style="max-height:60vh;overflow-y:auto"></div>
         </div>
-        
     </div>
     <div class="ad-container ad-banner" id="ad-bottom"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="BOTTOM_SLOT"></ins></div>
-    <footer class="footer"><p>&copy; 2026 Disposable Temp Mail. Powered by 1secmail.</p></footer>
+    <footer class="footer"><p>&copy; 2026 Disposable Temp Mail. Private &amp; free — no registration required.</p></footer>
     <script src="app.js"></script><script src="../../shared/theme-toggle.js"></script>
 </body>
 </html>

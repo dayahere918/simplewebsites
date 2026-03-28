@@ -1,184 +1,251 @@
 /**
  * Comprehensive tests for json-yaml-formatter
- * Tests all pure logic functions and DOM behavior
+ * Tests sanitizeYamlInput, parseInput, formatOutput, generateDiff, escapeHtml
  */
-const { processData, parseInput, formatOutput, generateDiff, escapeHtml, copyOutput } = require('../app');
+const {
+  parseInput, formatOutput, generateDiff, escapeHtml,
+  sanitizeYamlInput, toggleDiffView, runDiff
+} = require('../app');
 
-const mockYaml = {
-    load: jest.fn().mockImplementation(str => {
-        if (str === 'invalid: yaml: {') throw new Error('Bad YAML');
-        return { a: 1, b: 'hello' };
-    }),
-    dump: jest.fn().mockReturnValue('a: 1\nb: hello\n')
+// Mock jsyaml
+const mockYamlLib = {
+  load: jest.fn((str) => {
+    // Simple mock: parse key: value pairs
+    if (str.includes('invalid_yaml_!!!')) throw new Error('YAML parse error');
+    const result = {};
+    str.split('\n').forEach(line => {
+      const m = line.match(/^(\w+):\s*(.+)$/);
+      if (m) result[m[1]] = m[2].replace(/^["']|["']$/g, '');
+    });
+    return result;
+  }),
+  dump: jest.fn((obj) => Object.entries(obj).map(([k, v]) => `${k}: ${v}`).join('\n')),
 };
 
 const DOM_HTML = `
-    <textarea id="raw-input"></textarea>
-    <select id="input-type">
-        <option value="json">JSON</option>
-        <option value="yaml">YAML</option>
-        <option value="xml">XML</option>
-        <option value="auto">Auto</option>
-    </select>
-    <select id="output-type">
-        <option value="json">JSON</option>
-        <option value="yaml">YAML</option>
-        <option value="min">Minify</option>
-    </select>
-    <code id="formatted-output"></code>
-    <div id="error-box" class="hidden"></div>
-    <span id="status-label"></span>
-    <button id="copy-btn">📋 Copy</button>
+  <textarea id="raw-input"></textarea>
+  <select id="input-type"><option value="auto">Auto-Detect</option><option value="json">JSON</option><option value="yaml">YAML</option></select>
+  <select id="output-type"><option value="json">JSON</option><option value="yaml">YAML</option></select>
+  <code id="formatted-output"></code>
+  <div id="error-box" class="hidden"></div>
+  <div id="notice-box" class="hidden"></div>
+  <span id="status-label"></span>
+  <div id="diff-panel" class="hidden"></div>
+  <textarea id="diff-input-a"></textarea>
+  <textarea id="diff-input-b"></textarea>
+  <div id="diff-result"></div>
 `;
 
 beforeEach(() => {
-    document.body.innerHTML = DOM_HTML;
-    global.jsyaml = mockYaml;
-    jest.clearAllMocks();
+  document.body.innerHTML = DOM_HTML;
+  global.jsyaml = mockYamlLib;
+  jest.clearAllMocks();
 });
 
-describe('JSON/YAML Formatter — parseInput', () => {
-    test('parses JSON correctly', () => {
-        const r = parseInput('{"a":1}', 'json', mockYaml);
-        expect(r.error).toBeNull();
-        expect(r.parsed).toEqual({ a: 1 });
-        expect(r.detectedType).toBe('json');
-    });
+// ── sanitizeYamlInput ────────────────────────────────────
 
-    test('returns error for invalid JSON', () => {
-        const r = parseInput('not json', 'json', mockYaml);
-        expect(r.error).toBeTruthy();
-    });
+describe('sanitizeYamlInput()', () => {
+  test('replaces leading tabs with 2-space indent', () => {
+    const input = 'service:\n\tname: web\n\tport: 80';
+    const { sanitized, hadTabs } = sanitizeYamlInput(input);
+    expect(hadTabs).toBe(true);
+    expect(sanitized).not.toContain('\t');
+    expect(sanitized).toContain('  name: web');
+  });
 
-    test('parses YAML correctly', () => {
-        const r = parseInput('a: 1', 'yaml', mockYaml);
-        expect(r.error).toBeNull();
-        expect(r.detectedType).toBe('yaml');
-    });
+  test('returns hadTabs: false for space-indented input', () => {
+    const input = 'service:\n  name: web\n  port: 80';
+    const { sanitized, hadTabs } = sanitizeYamlInput(input);
+    expect(hadTabs).toBe(false);
+    expect(sanitized).toBe(input);
+  });
 
-    test('returns error for invalid YAML', () => {
-        const r = parseInput('invalid: yaml: {', 'yaml', mockYaml);
-        expect(r.error).toBeTruthy();
-    });
+  test('handles multiple levels of tabs', () => {
+    const input = 'a:\n\tb:\n\t\tc: val';
+    const { sanitized } = sanitizeYamlInput(input);
+    expect(sanitized).toBe('a:\n  b:\n    c: val');
+  });
 
-    test('parses XML correctly', () => {
-        const r = parseInput('<root></root>', 'xml', mockYaml);
-        expect(r.error).toBeNull();
-        expect(r.detectedType).toBe('xml');
-    });
+  test('returns empty string for empty input', () => {
+    const { sanitized, hadTabs } = sanitizeYamlInput('');
+    expect(sanitized).toBe('');
+    expect(hadTabs).toBe(false);
+  });
 
-    test('returns error for invalid XML', () => {
-        const r = parseInput('<root><unclosed>', 'xml', mockYaml);
-        // DOMParser may set parsererror
-        // just check it completes
-        expect(r).toBeDefined();
-    });
+  test('handles non-string input gracefully', () => {
+    const { sanitized, hadTabs } = sanitizeYamlInput(null);
+    expect(sanitized).toBe('');
+    expect(hadTabs).toBe(false);
+  });
 
-    test('auto-detects JSON from {', () => {
-        const r = parseInput('{"key":"val"}', 'auto', mockYaml);
-        expect(r.detectedType).toBe('json');
-    });
-
-    test('auto-detects JSON from [', () => {
-        const r = parseInput('[1,2,3]', 'auto', mockYaml);
-        expect(r.detectedType).toBe('json');
-    });
-
-    test('auto-detects XML from <', () => {
-        const r = parseInput('<root/>', 'auto', mockYaml);
-        expect(r.detectedType).toBe('xml');
-    });
-
-    test('auto-detects YAML for other content', () => {
-        const r = parseInput('a: 1', 'auto', mockYaml);
-        expect(r.detectedType).toBe('yaml');
-    });
+  test('only replaces LEADING tabs, not mid-line tabs', () => {
+    const input = 'key:\tvalue\n\tnested: val';
+    const { sanitized } = sanitizeYamlInput(input);
+    expect(sanitized).toContain('key:\tvalue'); // mid-line tab preserved
+    expect(sanitized).toContain('  nested: val'); // leading tab converted
+  });
 });
 
-describe('JSON/YAML Formatter — formatOutput', () => {
-    test('formats to JSON', () => {
-        const { outStr, langClass } = formatOutput({ a: 1 }, 'json', 'json', '', mockYaml);
-        expect(outStr).toContain('"a"');
-        expect(langClass).toBe('language-json');
-    });
+// ── parseInput — JSON ────────────────────────────────────
 
-    test('formats to YAML', () => {
-        const { outStr, langClass } = formatOutput({ a: 1 }, 'json', 'yaml', '', mockYaml);
-        expect(outStr).toBe('a: 1\nb: hello\n');
-        expect(langClass).toBe('language-yaml');
-    });
+describe('parseInput() — JSON', () => {
+  test('parses valid JSON', () => {
+    const { parsed, detectedType, error } = parseInput('{"key":"val"}', 'json', mockYamlLib);
+    expect(parsed).toEqual({ key: 'val' });
+    expect(detectedType).toBe('json');
+    expect(error).toBeNull();
+  });
 
-    test('formats to minified JSON', () => {
-        const { outStr, langClass } = formatOutput({ a: 1 }, 'json', 'min', '', mockYaml);
-        expect(outStr).toBe('{"a":1}');
-        expect(langClass).toBe('language-json');
-    });
+  test('returns error for invalid JSON', () => {
+    const { error } = parseInput('{bad json}', 'json', mockYamlLib);
+    expect(error).not.toBeNull();
+  });
 
-    test('passes through XML with formatting', () => {
-        const xml = '<root><child/></root>';
-        const { outStr, langClass } = formatOutput(xml, 'xml', 'json', xml, mockYaml);
-        expect(langClass).toBe('language-markup');
-    });
+  test('auto-detects JSON by { prefix', () => {
+    const { detectedType } = parseInput('{"a":1}', 'auto', mockYamlLib);
+    expect(detectedType).toBe('json');
+  });
+
+  test('auto-detects JSON by [ prefix', () => {
+    const { detectedType, parsed } = parseInput('[1,2,3]', 'auto', mockYamlLib);
+    expect(detectedType).toBe('json');
+    expect(parsed).toEqual([1, 2, 3]);
+  });
 });
 
-describe('JSON/YAML Formatter — generateDiff', () => {
-    test('diff identical lines marks as same', () => {
-        const diff = generateDiff('a\nb', 'a\nb');
-        expect(diff).toContain('diff-same');
-    });
+// ── parseInput — YAML ────────────────────────────────────
 
-    test('diff shows removed lines', () => {
-        const diff = generateDiff('a\nb', 'a');
-        expect(diff).toContain('diff-removed');
-    });
+describe('parseInput() — YAML', () => {
+  test('parses valid YAML', () => {
+    const { parsed, detectedType, error } = parseInput('key: value', 'yaml', mockYamlLib);
+    expect(mockYamlLib.load).toHaveBeenCalled();
+    expect(detectedType).toBe('yaml');
+    expect(error).toBeNull();
+  });
 
-    test('diff shows added lines', () => {
-        const diff = generateDiff('a', 'a\nb');
-        expect(diff).toContain('diff-added');
-    });
+  test('auto-sanitizes tab-indented YAML', () => {
+    const tabYaml = 'service:\n\tname: web';
+    const { error, notice } = parseInput(tabYaml, 'yaml', mockYamlLib);
+    expect(error).toBeNull();
+    expect(notice).toContain('Tab');
+  });
 
-    test('diff shows changed lines', () => {
-        const diff = generateDiff('a', 'b');
-        expect(diff).toContain('diff-removed');
-        expect(diff).toContain('diff-added');
-    });
+  test('auto-detects YAML for non-JSON, non-XML input', () => {
+    const { detectedType } = parseInput('key: value\nother: stuff', 'auto', mockYamlLib);
+    expect(detectedType).toBe('yaml');
+  });
+
+  test('returns parse error for malformed YAML', () => {
+    const { error } = parseInput('invalid_yaml_!!!', 'yaml', mockYamlLib);
+    expect(error).not.toBeNull();
+  });
+
+  test('no notice for clean YAML input', () => {
+    const { notice } = parseInput('key: value', 'yaml', mockYamlLib);
+    expect(notice).toBeNull();
+  });
 });
 
-describe('JSON/YAML Formatter — escapeHtml', () => {
-    test('escapes all special chars', () => {
-        expect(escapeHtml('<script>')).toBe('&lt;script&gt;');
-        expect(escapeHtml('"test"')).toBe('&quot;test&quot;');
-        expect(escapeHtml('a & b')).toBe('a &amp; b');
-    });
+// ── parseInput — XML ─────────────────────────────────────
+
+describe('parseInput() — XML', () => {
+  test('detects XML by < prefix in auto mode', () => {
+    global.DOMParser = class {
+      parseFromString(s, t) {
+        return { querySelector: () => null };
+      }
+    };
+    const { detectedType } = parseInput('<root><a>1</a></root>', 'auto', mockYamlLib);
+    expect(detectedType).toBe('xml');
+  });
 });
 
-describe('JSON/YAML Formatter — processData DOM', () => {
-    test('empty input shows Empty status', () => {
-        document.getElementById('raw-input').value = '';
-        processData();
-        expect(document.getElementById('status-label').textContent).toBe('Empty');
-    });
+// ── formatOutput ─────────────────────────────────────────
 
-    test('valid JSON shows Valid status', () => {
-        document.getElementById('raw-input').value = '{"a":1}';
-        document.getElementById('input-type').value = 'json';
-        document.getElementById('output-type').value = 'json';
-        processData();
-        expect(document.getElementById('status-label').textContent).toContain('Valid');
-    });
+describe('formatOutput()', () => {
+  test('formats parsed JSON to pretty JSON string', () => {
+    const { outStr, langClass } = formatOutput({ a: 1 }, 'json', 'json', '', mockYamlLib);
+    expect(outStr).toBe(JSON.stringify({ a: 1 }, null, 2));
+    expect(langClass).toBe('language-json');
+  });
 
-    test('invalid JSON shows error', () => {
-        document.getElementById('raw-input').value = '{invalid}';
-        document.getElementById('input-type').value = 'json';
-        processData();
-        expect(document.getElementById('error-box').classList.contains('hidden')).toBe(false);
-    });
+  test('formats parsed to YAML using yamlLib.dump', () => {
+    const { outStr, langClass } = formatOutput({ a: 1 }, 'json', 'yaml', '', mockYamlLib);
+    expect(mockYamlLib.dump).toHaveBeenCalled();
+    expect(langClass).toBe('language-yaml');
+  });
 
-    test('YAML input with YAML output', () => {
-        document.getElementById('raw-input').value = 'key: value';
-        document.getElementById('input-type').value = 'yaml';
-        document.getElementById('output-type').value = 'yaml';
-        processData();
-        expect(document.getElementById('status-label').textContent).toContain('YAML');
-    });
+  test('minifies JSON', () => {
+    const { outStr, langClass } = formatOutput({ a: 1, b: 2 }, 'json', 'min', '', mockYamlLib);
+    expect(outStr).toBe('{"a":1,"b":2}');
+    expect(langClass).toBe('language-json');
+  });
+});
+
+// ── generateDiff ─────────────────────────────────────────
+
+describe('generateDiff()', () => {
+  test('marks equal lines as diff-same', () => {
+    const html = generateDiff('hello', 'hello');
+    expect(html).toContain('diff-same');
+    expect(html).toContain('hello');
+  });
+
+  test('marks removed lines as diff-removed', () => {
+    const html = generateDiff('old line', '');
+    expect(html).toContain('diff-removed');
+    expect(html).toContain('old line');
+  });
+
+  test('marks added lines as diff-added', () => {
+    const html = generateDiff('', 'new line');
+    expect(html).toContain('diff-added');
+    expect(html).toContain('new line');
+  });
+
+  test('handles multiline diffs', () => {
+    const html = generateDiff('a\nb\nc', 'a\nx\nc');
+    expect(html).toContain('diff-removed'); // b → x
+    expect(html).toContain('diff-added');
+  });
+
+  test('handles identical empty strings (one same-line div)', () => {
+    const result = generateDiff('', '');
+    expect(result).toContain('diff-same');
+  });
+});
+
+// ── escapeHtml ───────────────────────────────────────────
+
+describe('escapeHtml()', () => {
+  test('escapes &, <, >, "', () => {
+    const result = escapeHtml('<div class="test">&</div>');
+    expect(result).toBe('&lt;div class=&quot;test&quot;&gt;&amp;&lt;/div&gt;');
+  });
+
+  test('handles empty string', () => {
+    expect(escapeHtml('')).toBe('');
+  });
+
+  test('handles non-string input via String()', () => {
+    expect(escapeHtml(42)).toBe('42');
+  });
+});
+
+// ── toggleDiffView / runDiff ─────────────────────────────
+
+describe('toggleDiffView() and runDiff()', () => {
+  test('toggleDiffView toggles hidden class', () => {
+    toggleDiffView();
+    expect(document.getElementById('diff-panel').classList.contains('hidden')).toBe(false);
+    toggleDiffView();
+    expect(document.getElementById('diff-panel').classList.contains('hidden')).toBe(true);
+  });
+
+  test('runDiff updates diff-result innerHTML', () => {
+    document.getElementById('diff-input-a').value = 'line1';
+    document.getElementById('diff-input-b').value = 'line2';
+    runDiff();
+    expect(document.getElementById('diff-result').innerHTML).toContain('diff-');
+  });
 });

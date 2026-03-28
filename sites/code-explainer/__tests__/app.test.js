@@ -1,252 +1,308 @@
 /**
  * Comprehensive tests for code-explainer
- * Tests pure logic and DOM interactions with mocked fetch
+ * Tests detectLanguage, buildSystemPrompt, markdownToHtml, executeWithFallback, GROQ_MODELS
  */
 const {
-    detectLanguage, buildSystemPrompt, escapeHTML, sanitize, markdownToHtml,
-    saveApiKey, checkApiKey, clearApiKey, executeAI, copyResult, setApiKey
+  detectLanguage, buildSystemPrompt, escapeHTML, sanitize, markdownToHtml,
+  checkApiKey, saveApiKey, clearApiKey, copyResult, executeWithFallback,
+  GROQ_MODELS, setApiKey, tryGroqModel
 } = require('../app');
 
 const DOM_HTML = `
-    <div id="api-key-banner" class="hidden"></div>
-    <input id="api-key-input" value="">
-    <textarea id="code-input"></textarea>
-    <select id="action-select">
-        <option value="explain">Explain</option>
-        <option value="python">Python</option>
-    </select>
-    <div id="result-view" class="hidden"></div>
-    <div id="ai-loading" class="hidden"></div>
-    <div id="ai-result" class="hidden"></div>
-    <span id="result-title"></span>
-    <span id="detected-lang"></span>
-    <button id="do-action-btn"></button>
-    <button id="copy-result-btn">Copy</button>
+  <div id="api-key-banner" class="hidden"></div>
+  <input id="api-key-input" type="text" value="gsk_test_key_123" />
+  <textarea id="code-input"></textarea>
+  <select id="action-select"><option value="explain">Explain Code</option><option value="python">Python</option></select>
+  <div id="result-view" class="hidden"></div>
+  <div id="ai-loading" class="hidden"></div>
+  <div id="ai-result" class="hidden"></div>
+  <div id="result-title"></div>
+  <div id="detected-lang"></div>
+  <button id="do-action-btn"></button>
+  <button id="copy-result-btn">📋 Copy</button>
+  <div id="ai-status-msg"></div>
 `;
 
-const localStorageMock = (() => {
-    let store = {};
-    return {
-        getItem: (k) => store[k] !== undefined ? store[k] : null,
-        setItem: (k, v) => { store[k] = String(v); },
-        removeItem: (k) => { delete store[k]; },
-        clear: () => { store = {}; }
-    };
-})();
-
 beforeEach(() => {
-    document.body.innerHTML = DOM_HTML;
-    Object.defineProperty(window, 'localStorage', { value: localStorageMock, configurable: true });
-    localStorageMock.clear();
-    global.fetch = jest.fn();
-    Object.defineProperty(navigator, 'clipboard', {
-        value: { writeText: jest.fn().mockResolvedValue(undefined) },
-        configurable: true
-    });
-    setApiKey('');
+  document.body.innerHTML = DOM_HTML;
+  setApiKey('gsk_test_key_123');
+  global.localStorage = {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn()
+  };
+  global.fetch = jest.fn();
 });
 
-describe('Code Explainer — detectLanguage', () => {
-    test('detects JavaScript', () => {
-        expect(detectLanguage('const x = 5; console.log(x);')).toBe('JavaScript');
-    });
+// ── GROQ_MODELS ──────────────────────────────────────────
 
-    test('detects Python', () => {
-        expect(detectLanguage('def hello():\n    pass')).toBe('Python');
-    });
+describe('GROQ_MODELS constant', () => {
+  test('is non-empty array', () => {
+    expect(Array.isArray(GROQ_MODELS)).toBe(true);
+    expect(GROQ_MODELS.length).toBeGreaterThanOrEqual(2);
+  });
 
-    test('detects Java', () => {
-        expect(detectLanguage('public class Main { System.out.println("hi"); }')).toBe('Java');
-    });
+  test('does NOT contain deprecated llama3-8b-8192', () => {
+    expect(GROQ_MODELS).not.toContain('llama3-8b-8192');
+  });
 
-    test('detects TypeScript', () => {
-        // interface keyword is unique to TypeScript
-        expect(detectLanguage('interface User { name: string; age: number; }')).toBe('TypeScript');
-    });
+  test('contains llama3-70b-8192 as primary model', () => {
+    expect(GROQ_MODELS[0]).toBe('llama3-70b-8192');
+  });
 
-    test('detects Go', () => {
-        expect(detectLanguage('func main() { fmt.Println("hi") }')).toBe('Go');
-    });
-
-    test('detects Rust', () => {
-        expect(detectLanguage('fn main() { println!("hi") }')).toBe('Rust');
-    });
-
-    test('detects SQL', () => {
-        expect(detectLanguage('SELECT * FROM users WHERE id = 1')).toBe('SQL');
-    });
-
-    test('detects HTML', () => {
-        expect(detectLanguage('<div class="hello"></div>')).toBe('HTML');
-    });
-
-    test('returns Unknown for unrecognized code', () => {
-        expect(detectLanguage('xyzzy frobble blarg')).toBe('Unknown');
-    });
+  test('contains at least one fallback model', () => {
+    expect(GROQ_MODELS.length).toBeGreaterThanOrEqual(2);
+  });
 });
 
-describe('Code Explainer — buildSystemPrompt', () => {
-    test('builds explain prompt with language', () => {
-        const p = buildSystemPrompt('explain', 'Python');
-        expect(p).toContain('Python');
-        expect(p).toContain('Explain');
-    });
+// ── detectLanguage ───────────────────────────────────────
 
-    test('builds conversion prompt', () => {
-        const p = buildSystemPrompt('python', 'JavaScript');
-        expect(p).toContain('PYTHON');
-        expect(p).toContain('converted code');
-    });
+describe('detectLanguage()', () => {
+  test('detects JavaScript', () => {
+    expect(detectLanguage('const x = require("path");')).toBe('JavaScript');
+  });
+
+  test('detects JavaScript with arrow function', () => {
+    expect(detectLanguage('const fn = () => console.log("hello");')).toBe('JavaScript');
+  });
+
+  test('detects TypeScript by type annotation', () => {
+    expect(detectLanguage('const x: string = "hello"; interface Foo {}')).toBe('TypeScript');
+  });
+
+  test('detects Python by def keyword', () => {
+    expect(detectLanguage('def hello():\n  print("hi")')).toBe('Python');
+  });
+
+  test('detects Python by import', () => {
+    expect(detectLanguage('import os\nfrom pathlib import Path')).toBe('Python');
+  });
+
+  test('detects Java by System.out.println', () => {
+    expect(detectLanguage('public class Main { System.out.println("hi"); }')).toBe('Java');
+  });
+
+  test('detects Go by func keyword', () => {
+    expect(detectLanguage('func main() { fmt.Println("hi") }')).toBe('Go');
+  });
+
+  test('detects Rust by fn keyword', () => {
+    expect(detectLanguage('fn main() { println!("hi"); }')).toBe('Rust');
+  });
+
+  test('detects SQL by SELECT keyword', () => {
+    expect(detectLanguage('SELECT * FROM users WHERE id = 1')).toBe('SQL');
+  });
+
+  test('detects HTML', () => {
+    expect(detectLanguage('<html><body><div>test</div></body></html>')).toBe('HTML');
+  });
+
+  test('detects Shell by echo keyword', () => {
+    expect(detectLanguage('echo "hello" && sudo apt install')).toBe('Shell');
+  });
+
+  test('returns Unknown for unrecognized code', () => {
+    expect(detectLanguage('xyz abc 123 @@@')).toBe('Unknown');
+  });
 });
 
-describe('Code Explainer — escapeHTML', () => {
-    test('escapes special chars', () => {
-        const result = escapeHTML('<script>&"\'</script>');
-        expect(result).toContain('&lt;');
-        expect(result).toContain('&amp;');
-        expect(result).toContain('&quot;');
-    });
+// ── buildSystemPrompt ─────────────────────────────────────
 
-    test('returns empty string for null/undefined', () => {
-        expect(escapeHTML(null)).toBe('');
-        expect(escapeHTML(undefined)).toBe('');
-    });
+describe('buildSystemPrompt()', () => {
+  test('returns explain prompt with language for explain action', () => {
+    const prompt = buildSystemPrompt('explain', 'JavaScript');
+    expect(prompt).toContain('JavaScript');
+    expect(prompt).toContain('Explain');
+    expect(prompt).toContain('markdown');
+  });
+
+  test('returns convert prompt for non-explain action', () => {
+    const prompt = buildSystemPrompt('python', 'JavaScript');
+    expect(prompt).toContain('PYTHON');
+    expect(prompt).toContain('triple backticks');
+  });
+
+  test('works without detectedLang', () => {
+    const prompt = buildSystemPrompt('explain');
+    expect(typeof prompt).toBe('string');
+    expect(prompt.length).toBeGreaterThan(20);
+  });
+
+  test('explain prompt mentions complexity', () => {
+    const prompt = buildSystemPrompt('explain', 'Python');
+    expect(prompt).toContain('complexity');
+  });
 });
 
-describe('Code Explainer — sanitize', () => {
-    test('removes script tags', () => {
-        const result = sanitize('<script>alert(1)</script>safe text');
-        expect(result).not.toContain('<script>');
-        expect(result).toContain('safe text');
-    });
+// ── escapeHTML ───────────────────────────────────────────
 
-    test('leaves regular HTML intact', () => {
-        expect(sanitize('<p>Hello</p>')).toContain('<p>');
-    });
+describe('escapeHTML()', () => {
+  test('escapes all HTML special chars', () => {
+    const r = escapeHTML('<script>alert("xss")</script>');
+    expect(r).not.toContain('<script>');
+    expect(r).toContain('&lt;script&gt;');
+  });
+
+  test('returns empty string for non-string input', () => {
+    expect(escapeHTML(null)).toBe('');
+    expect(escapeHTML(undefined)).toBe('');
+  });
+
+  test('escapes single quotes', () => {
+    expect(escapeHTML("it's")).toContain('&#39;');
+  });
 });
 
-describe('Code Explainer — markdownToHtml', () => {
-    test('converts code blocks', () => {
-        const html = markdownToHtml('```\nconsole.log(1)\n```');
-        expect(html).toContain('<pre>');
-        expect(html).toContain('<code>');
-    });
+// ── sanitize ─────────────────────────────────────────────
 
-    test('converts bold text', () => {
-        expect(markdownToHtml('**bold**')).toContain('<strong>');
-    });
+describe('sanitize()', () => {
+  test('removes script tags', () => {
+    const result = sanitize('<p>Hello</p><script>alert(1)</script>');
+    expect(result).not.toContain('<script>');
+    expect(result).toContain('<p>Hello</p>');
+  });
 
-    test('converts headings', () => {
-        expect(markdownToHtml('## Title')).toContain('<h2>');
-        expect(markdownToHtml('# Main')).toContain('<h1>');
-    });
-
-    test('converts inline code', () => {
-        expect(markdownToHtml('use `x` here')).toContain('<code>');
-    });
+  test('preserves non-script HTML', () => {
+    const result = sanitize('<p class="test">Hello</p>');
+    expect(result).toContain('<p class="test">Hello</p>');
+  });
 });
 
-describe('Code Explainer — localStorage functions', () => {
-    test('checkApiKey hides banner when key in localStorage', () => {
-        localStorageMock.setItem('stacky_groq_key', 'gsk_test');
-        document.getElementById('api-key-banner').classList.remove('hidden');
-        checkApiKey();
-        expect(document.getElementById('api-key-banner').classList.contains('hidden')).toBe(true);
-    });
+// ── markdownToHtml ───────────────────────────────────────
 
-    test('checkApiKey shows banner when no key', () => {
-        localStorageMock.clear();
-        document.getElementById('api-key-banner').classList.add('hidden');
-        checkApiKey();
-        expect(document.getElementById('api-key-banner').classList.contains('hidden')).toBe(false);
-    });
+describe('markdownToHtml()', () => {
+  test('converts code blocks', () => {
+    const html = markdownToHtml('```\nconst x = 1;\n```');
+    expect(html).toContain('<pre><code>');
+    expect(html).toContain('</code></pre>');
+  });
 
-    test('saveApiKey stores valid key', () => {
-        document.getElementById('api-key-input').value = 'gsk_mykey';
-        saveApiKey();
-        expect(localStorageMock.getItem('stacky_groq_key')).toBe('gsk_mykey');
-    });
+  test('converts inline code', () => {
+    const html = markdownToHtml('use `console.log` for output');
+    expect(html).toContain('<code>console.log</code>');
+  });
 
-    test('saveApiKey skips empty input', () => {
-        document.getElementById('api-key-input').value = '   ';
-        saveApiKey();
-        expect(localStorageMock.getItem('stacky_groq_key')).toBeNull();
-    });
+  test('converts bold', () => {
+    const html = markdownToHtml('**important**');
+    expect(html).toContain('<strong>important</strong>');
+  });
 
-    test('clearApiKey removes key from storage', () => {
-        localStorageMock.setItem('stacky_groq_key', 'gsk_test');
-        clearApiKey();
-        expect(localStorageMock.getItem('stacky_groq_key')).toBeNull();
-    });
+  test('converts h2 headers', () => {
+    const html = markdownToHtml('## Overview');
+    expect(html).toContain('<h2>Overview</h2>');
+  });
+
+  test('converts h3 headers', () => {
+    const html = markdownToHtml('### Detail');
+    expect(html).toContain('<h3>Detail</h3>');
+  });
+
+  test('sanitizes script tags in output', () => {
+    const html = markdownToHtml('<script>bad()</script>');
+    expect(html).not.toContain('<script>');
+  });
 });
 
-describe('Code Explainer — executeAI', () => {
-    test('shows alert without API key', async () => {
-        global.alert = jest.fn();
-        setApiKey('');
-        document.getElementById('code-input').value = 'const x = 5;';
-        await executeAI();
-        expect(global.alert).toHaveBeenCalled();
+// ── executeWithFallback ───────────────────────────────────
+
+describe('executeWithFallback()', () => {
+  test('uses first model on success', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ choices: [{ message: { content: 'Explanation here' } }] })
     });
 
-    test('returns early without code', async () => {
-        setApiKey('gsk_test');
-        document.getElementById('code-input').value = '';
-        await executeAI();
-        expect(global.fetch).not.toHaveBeenCalled();
-    });
+    const { result, model } = await executeWithFallback('System prompt', 'const x = 1;');
+    expect(result).toBe('Explanation here');
+    expect(model).toBe(GROQ_MODELS[0]);
+  });
 
-    test('success path shows result', async () => {
-        setApiKey('gsk_test');
-        document.getElementById('code-input').value = 'const x = 5;';
-        global.fetch = jest.fn().mockResolvedValue({
-            ok: true,
-            json: jest.fn().mockResolvedValue({
-                choices: [{ message: { content: '## Explanation\nThis is x = 5.' } }]
-            })
+  test('falls back to second model on 400 error', async () => {
+    let callCount = 0;
+    global.fetch = jest.fn().mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return Promise.resolve({
+          ok: false,
+          status: 400,
+          json: async () => ({ error: { message: 'Model deprecated' } }),
+          statusText: 'Bad Request'
         });
-        await executeAI();
-        expect(document.getElementById('ai-result').classList.contains('hidden')).toBe(false);
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ choices: [{ message: { content: 'Fallback result' } }] })
+      });
     });
 
-    test('handles 401 error and clears key', async () => {
-        setApiKey('bad_key');
-        document.getElementById('code-input').value = 'code';
-        global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 401, statusText: 'Unauthorized' });
-        await executeAI();
-        expect(document.getElementById('ai-result').innerHTML).toContain('Invalid API Key');
+    const { result, model } = await executeWithFallback('System prompt', 'code');
+    expect(result).toBe('Fallback result');
+    expect(model).toBe(GROQ_MODELS[1]);
+  });
+
+  test('throws immediately on 401 auth error without trying fallback', async () => {
+    let callCount = 0;
+    global.fetch = jest.fn().mockImplementation(() => {
+      callCount++;
+      return Promise.resolve({
+        ok: false,
+        status: 401,
+        json: async () => ({ error: { message: 'Invalid API Key' } }),
+        statusText: 'Unauthorized'
+      });
     });
 
-    test('handles generic API error', async () => {
-        setApiKey('gsk_test');
-        document.getElementById('code-input').value = 'code';
-        global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 500, statusText: 'Internal Error' });
-        await executeAI();
-        expect(document.getElementById('ai-result').innerHTML).toContain('Error');
+    await expect(executeWithFallback('prompt', 'code')).rejects.toThrow();
+    expect(callCount).toBe(1); // only tried once
+  });
+
+  test('tries all models before throwing', async () => {
+    let callCount = 0;
+    global.fetch = jest.fn().mockImplementation(() => {
+      callCount++;
+      return Promise.resolve({
+        ok: false,
+        status: 503,
+        json: async () => ({ error: { message: 'Service unavailable' } }),
+        statusText: 'Service Unavailable'
+      });
     });
 
-    test('handles network failure', async () => {
-        setApiKey('gsk_test');
-        document.getElementById('code-input').value = 'code';
-        global.fetch = jest.fn().mockRejectedValue(new Error('Network Error'));
-        await executeAI();
-        expect(document.getElementById('ai-result').innerHTML).toContain('Network Error');
-    });
+    await expect(executeWithFallback('prompt', 'code')).rejects.toThrow();
+    expect(callCount).toBe(GROQ_MODELS.length);
+  });
 });
 
-describe('Code Explainer — copyResult', () => {
-    test('copies result to clipboard', async () => {
-        const result = document.getElementById('ai-result');
-        result.textContent = 'explanation text';
-        copyResult();
-        // allow any internal microtasks to settle
-        await new Promise(r => setTimeout(r, 0));
-        expect(navigator.clipboard.writeText).toHaveBeenCalledWith('explanation text');
-    });
+// ── API Key management ────────────────────────────────────
 
-    test('does nothing if result is empty', () => {
-        document.getElementById('ai-result').textContent = '';
-        copyResult();
-        expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
-    });
+describe('API Key management', () => {
+  beforeEach(() => {
+    // Use real jsdom localStorage
+    window.localStorage.clear();
+    jest.restoreAllMocks();
+  });
+
+  test('checkApiKey hides banner when key exists', () => {
+    window.localStorage.setItem('stacky_groq_key', 'gsk_test_123');
+    checkApiKey();
+    expect(document.getElementById('api-key-banner').classList.contains('hidden')).toBe(true);
+  });
+
+  test('checkApiKey shows banner when no key', () => {
+    window.localStorage.removeItem('stacky_groq_key');
+    checkApiKey();
+    expect(document.getElementById('api-key-banner').classList.contains('hidden')).toBe(false);
+  });
+
+  test('saveApiKey stores key and hides banner', () => {
+    saveApiKey();
+    expect(window.localStorage.getItem('stacky_groq_key')).toBe('gsk_test_key_123');
+  });
+
+  test('clearApiKey removes key', () => {
+    window.localStorage.setItem('stacky_groq_key', 'test');
+    clearApiKey();
+    expect(window.localStorage.getItem('stacky_groq_key')).toBeNull();
+  });
 });

@@ -1,6 +1,7 @@
 /**
  * Baby Face Generator — Core Logic
- * Blends two parent photos using advanced face morphing to simulate a "baby" face
+ * Blends two parent photos using face morphing to preview a baby face
+ * FIXED: Replaced destructive destination-in composite with non-destructive overlay approach
  */
 const TRAITS = {
   eyes: ['Big brown eyes', 'Bright blue eyes', 'Hazel eyes', 'Green eyes', 'Dark eyes'],
@@ -21,9 +22,9 @@ async function initFaceAPI() {
       faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
       faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
     ]);
-    console.log("FaceAPI models loaded successfully.");
+    console.log('FaceAPI models loaded successfully.');
   } catch (e) {
-    console.error("Failed to load FaceAPI models:", e);
+    console.error('Failed to load FaceAPI models:', e);
   }
 }
 if (typeof document !== 'undefined') {
@@ -31,25 +32,34 @@ if (typeof document !== 'undefined') {
 }
 
 /**
+ * Check if face landmark data is available for a given parent
+ * @param {string} parent - 'parent1' | 'parent2'
+ * @returns {boolean}
+ */
+function isLandmarkAvailable(parent) {
+  return !!(globalLandmarks[parent] && globalLandmarks[parent].length > 0);
+}
+
+/**
  * Compute scaling and centering params for drawing an image onto a target square canvas
  */
 function getDrawImageParams(imgW, imgH, targetSize) {
-    const scale = Math.max(targetSize / imgW, targetSize / imgH);
-    const w = imgW * scale;
-    const h = imgH * scale;
-    return {
-        dx: (targetSize - w) / 2,
-        dy: (targetSize - h) / 2,
-        dw: w,
-        dh: h
-    };
+  const scale = Math.max(targetSize / imgW, targetSize / imgH);
+  const w = imgW * scale;
+  const h = imgH * scale;
+  return {
+    dx: (targetSize - w) / 2,
+    dy: (targetSize - h) / 2,
+    dw: w,
+    dh: h
+  };
 }
 
 function updateParentState(num, isLoaded) {
-    if (num === 1) parent1Loaded = isLoaded;
-    if (num === 2) parent2Loaded = isLoaded;
-    const btn = typeof document !== 'undefined' ? document.getElementById('generate-btn') : null;
-    if (btn) btn.disabled = !(parent1Loaded && parent2Loaded);
+  if (num === 1) parent1Loaded = isLoaded;
+  if (num === 2) parent2Loaded = isLoaded;
+  const btn = typeof document !== 'undefined' ? document.getElementById('generate-btn') : null;
+  if (btn) btn.disabled = !(parent1Loaded && parent2Loaded);
 }
 
 function loadParent(event, num) {
@@ -64,24 +74,29 @@ function loadParent(event, num) {
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       canvas.width = 200; canvas.height = 200;
-      
+
       const { dx, dy, dw, dh } = getDrawImageParams(img.width, img.height, 200);
       ctx.drawImage(img, dx, dy, dw, dh);
-      
+
+      // Attempt face detection — but don't block if FaceAPI fails
       if (typeof window !== 'undefined' && window.faceapi && faceapi.nets.tinyFaceDetector.isLoaded) {
+        try {
           const detections = await faceapi.detectAllFaces(canvas, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
           if (detections.length === 0) {
-              alert('No human face detected! Please upload a clear photo of a human face.');
-              ctx.clearRect(0,0,200,200);
-              const input = document.getElementById(`parent${num}-input`);
-              if(input) input.value = '';
-              return;
+            // Soft warning — don't block the upload, just clear landmarks
+            console.warn(`No face detected in parent${num} — proceeding without landmark alignment`);
+            globalLandmarks[`parent${num}`] = null;
+          } else {
+            globalLandmarks[`parent${num}`] = detections[0].landmarks.positions;
           }
-          globalLandmarks[`parent${num}`] = detections[0].landmarks.positions;
+        } catch (e) {
+          console.warn('FaceAPI detection failed:', e.message);
+          globalLandmarks[`parent${num}`] = null;
+        }
       }
 
       canvas.classList.remove('hidden');
-      const slot = canvas.closest('.upload-slot');
+      const slot = canvas.closest?.('.upload-slot') || canvas.parentElement;
       const dz = slot ? slot.querySelector('.drop-zone') : null;
       if (dz) dz.classList.add('hidden');
       updateParentState(num, true);
@@ -99,7 +114,7 @@ function extractSkinTone(canvas, size) {
   const ctx = canvas.getContext('2d');
   if (!ctx || !ctx.getImageData) return { r: 200, g: 170, b: 150 };
   const margin = Math.floor(size * 0.3);
-  const sampleSize = size - margin * 2;
+  const sampleSize = Math.max(size - margin * 2, 1);
   const data = ctx.getImageData(margin, margin, sampleSize, sampleSize).data;
   let r = 0, g = 0, b = 0, count = 0;
   for (let i = 0; i < data.length; i += 16) {
@@ -110,73 +125,99 @@ function extractSkinTone(canvas, size) {
 }
 
 /**
- * Apply baby-ification filter: strong softening, warmth, round face
+ * Apply a warm vignette to an existing canvas — NON-DESTRUCTIVE
+ * Uses source-over (not destination-in) so existing pixels are preserved.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} size
+ */
+function applyWarmVignette(ctx, size) {
+  if (!ctx) return;
+  // Warm color overlay at low alpha — softens the image slightly
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 0.08;
+  ctx.fillStyle = 'rgba(255, 220, 190, 1)';
+  ctx.fillRect(0, 0, size, size);
+  ctx.globalAlpha = 1.0;
+
+  // Radial vignette darkening around edges (non-destructive multiply)
+  ctx.globalCompositeOperation = 'multiply';
+  const vignette = ctx.createRadialGradient(size/2, size/2, size * 0.2, size/2, size/2, size * 0.75);
+  vignette.addColorStop(0, 'rgba(255,255,255,1)');  // center: no change
+  vignette.addColorStop(1, 'rgba(200,185,175,1)');  // edge: warm soft darkening
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0, 0, size, size);
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+/**
+ * Apply baby-face softening — NON-DESTRUCTIVE
+ * Draws a soft-blurred copy ON TOP at low opacity instead of destroying content
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {HTMLCanvasElement} canvas
+ * @param {number} size
  */
 function applyBabyFilter(ctx, size) {
   if (!ctx) return;
-  // Warm overlay
-  ctx.globalCompositeOperation = 'overlay';
-  ctx.fillStyle = 'rgba(255, 220, 200, 0.12)';
-  ctx.fillRect(0, 0, size, size);
-  ctx.globalCompositeOperation = 'source-over';
+  const canvas = ctx.canvas;
+  if (!canvas) return;
 
-  // Strong softening — babies have very soft features
-  ctx.filter = 'blur(2.5px) brightness(1.1) saturate(1.15)';
-  ctx.drawImage(ctx.canvas, 0, 0);
-  ctx.filter = 'none';
+  // Create temp canvas with blur applied
+  let tmp;
+  if (typeof document !== 'undefined') {
+    tmp = document.createElement('canvas');
+    tmp.width = size;
+    tmp.height = size;
+  } else {
+    return; // skip in non-DOM environments
+  }
 
-  // Oval vignette for face shape
-  ctx.globalCompositeOperation = 'destination-in';
-  const gradient = ctx.createRadialGradient(size/2, size/2, size*0.15, size/2, size/2, size*0.45);
-  gradient.addColorStop(0, 'rgba(255,255,255,1)');
-  gradient.addColorStop(0.6, 'rgba(255,255,255,1)');
-  gradient.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, size, size);
-  ctx.globalCompositeOperation = 'source-over';
+  const tmpCtx = tmp.getContext('2d');
+  tmpCtx.filter = 'blur(1.5px) brightness(1.08) saturate(1.1)';
+  tmpCtx.drawImage(canvas, 0, 0);
+  tmpCtx.filter = 'none';
 
-  // Soft warm background behind oval
-  const bgGrad = ctx.createRadialGradient(size/2, size/2, size*0.3, size/2, size/2, size*0.5);
-  bgGrad.addColorStop(0, 'rgba(255,230,215,0)');
-  bgGrad.addColorStop(1, 'rgba(255,230,215,0.7)');
-  ctx.globalCompositeOperation = 'destination-over';
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, size, size);
+  // Blend the soft version OVER the original at low opacity (non-destructive)
   ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 0.35;
+  ctx.drawImage(tmp, 0, 0);
+  ctx.globalAlpha = 1.0;
+
+  // Add warm vignette on top
+  applyWarmVignette(ctx, size);
 }
 
 function getCenter(points) {
   let x = 0, y = 0;
   points.forEach(p => { x += p.x; y += p.y; });
-  return { x: x/points.length, y: y/points.length };
+  return { x: x / points.length, y: y / points.length };
 }
 
 function alignFace(canvas, landmarks, targetEyesScale = 85, targetEyesY = 90, targetEyesCX = 100) {
-  if (!landmarks) return canvas;
+  if (!landmarks) return canvas; // fallback: return original if no landmarks
   const leftEye = getCenter(landmarks.slice(36, 42));
   const rightEye = getCenter(landmarks.slice(42, 48));
-  
+
   const dx = rightEye.x - leftEye.x;
   const dy = rightEye.y - leftEye.y;
   const currentDist = Math.sqrt(dx*dx + dy*dy);
   const angle = Math.atan2(dy, dx);
-  
+
   const scale = targetEyesScale / Math.max(currentDist, 10);
   const currentCX = (leftEye.x + rightEye.x) / 2;
   const currentCY = (leftEye.y + rightEye.y) / 2;
-  
+
   const alignedCanvas = (typeof document !== 'undefined') ? document.createElement('canvas') : null;
   if (!alignedCanvas) return canvas;
   alignedCanvas.width = 200;
   alignedCanvas.height = 200;
   const ctx = alignedCanvas.getContext('2d');
-  
+
   ctx.translate(targetEyesCX, targetEyesY);
   ctx.rotate(-angle);
   ctx.scale(scale, scale);
   ctx.translate(-currentCX, -currentCY);
   ctx.drawImage(canvas, 0, 0);
-  
+
   return alignedCanvas;
 }
 
@@ -189,32 +230,40 @@ function blendImages(canvas1, canvas2, outputCanvas) {
   const tone1 = extractSkinTone(canvas1, SIZE);
   const tone2 = extractSkinTone(canvas2, SIZE);
 
-  // Baby skin tone — average with warmth boost
+  // Baby skin tone — average of parents with slight warmth boost
   const babyTone = {
     r: Math.min(255, Math.round((tone1.r + tone2.r) / 2 + 8)),
     g: Math.min(255, Math.round((tone1.g + tone2.g) / 2 + 5)),
     b: Math.min(255, Math.round((tone1.b + tone2.b) / 2))
   };
 
-  // Align faces perfectly based on landmarks so features don't ghost
-  const c1Aligned = alignFace(canvas1, globalLandmarks.parent1, 55, 100, 100);
-  const c2Aligned = alignFace(canvas2, globalLandmarks.parent2, 55, 100, 100);
+  // Align faces using landmarks if available, otherwise use as-is
+  const c1Aligned = isLandmarkAvailable('parent1')
+    ? alignFace(canvas1, globalLandmarks.parent1, 55, 95, 100)
+    : canvas1;
+  const c2Aligned = isLandmarkAvailable('parent2')
+    ? alignFace(canvas2, globalLandmarks.parent2, 55, 95, 100)
+    : canvas2;
 
-  const tmpCanvas1 = (typeof document !== 'undefined') ? document.createElement('canvas') : null;
-  const tmpCanvas2 = (typeof document !== 'undefined') ? document.createElement('canvas') : null;
-
+  // Draw each parent onto temp canvases with baby tone background
   let d1, d2;
-  if (tmpCanvas1 && tmpCanvas2) {
-    tmpCanvas1.width = SIZE; tmpCanvas1.height = SIZE;
-    tmpCanvas2.width = SIZE; tmpCanvas2.height = SIZE;
-    const tc1 = tmpCanvas1.getContext('2d');
-    const tc2 = tmpCanvas2.getContext('2d');
+  if (typeof document !== 'undefined') {
+    const tmp1 = document.createElement('canvas');
+    const tmp2 = document.createElement('canvas');
+    tmp1.width = SIZE; tmp1.height = SIZE;
+    tmp2.width = SIZE; tmp2.height = SIZE;
+
+    const tc1 = tmp1.getContext('2d');
+    const tc2 = tmp2.getContext('2d');
+
     tc1.fillStyle = `rgb(${babyTone.r},${babyTone.g},${babyTone.b})`;
     tc1.fillRect(0, 0, SIZE, SIZE);
     tc1.drawImage(c1Aligned, 0, 0, SIZE, SIZE);
+
     tc2.fillStyle = `rgb(${babyTone.r},${babyTone.g},${babyTone.b})`;
     tc2.fillRect(0, 0, SIZE, SIZE);
     tc2.drawImage(c2Aligned, 0, 0, SIZE, SIZE);
+
     d1 = tc1.getImageData(0, 0, SIZE, SIZE);
     d2 = tc2.getImageData(0, 0, SIZE, SIZE);
   } else {
@@ -224,7 +273,7 @@ function blendImages(canvas1, canvas2, outputCanvas) {
 
   const out = ctx.createImageData(SIZE, SIZE);
 
-  // Randomize which parent contributes to which zone
+  // Random seed for which parent donates which feature
   const seed = Math.random();
   const p1Eyes = seed > 0.5;
   const p1Mouth = seed <= 0.5;
@@ -233,38 +282,38 @@ function blendImages(canvas1, canvas2, outputCanvas) {
     for (let x = 0; x < SIZE; x++) {
       const i = (y * SIZE + x) * 4;
       const cx = SIZE / 2, cy = SIZE / 2;
-      const dx = x - cx, dy = y - cy;
-      const dist = Math.sqrt(dx*dx + dy*dy) / (SIZE / 2);
+      const rdx = x - cx, rdy = y - cy;
+      const dist = Math.sqrt(rdx*rdx + rdy*rdy) / (SIZE / 2);
 
-      // Facial zone weights — EVEN blend (closer to 50/50) makes it look less like either parent
+      // Facial zone weights
       let p1Weight;
-      const isEyeRegion = (dy < -5 && dy > -45 && Math.abs(dx) < 55);
-      const isMouthRegion = (dy > 15 && dy < 55 && Math.abs(dx) < 35);
-      const isNoseRegion = (Math.abs(dy) < 20 && Math.abs(dx) < 20);
+      const isEyeRegion = (rdy < -5 && rdy > -50 && Math.abs(rdx) < 55);
+      const isMouthRegion = (rdy > 15 && rdy < 55 && Math.abs(rdx) < 35);
+      const isNoseRegion = (Math.abs(rdy) < 20 && Math.abs(rdx) < 22);
 
       if (isEyeRegion) {
-        p1Weight = p1Eyes ? 0.6 : 0.4;
+        p1Weight = p1Eyes ? 0.65 : 0.35;
       } else if (isMouthRegion) {
-        p1Weight = p1Mouth ? 0.6 : 0.4;
+        p1Weight = p1Mouth ? 0.65 : 0.35;
       } else if (isNoseRegion) {
         p1Weight = 0.5;
       } else {
         p1Weight = 0.5;
       }
 
-      // Face oval fade  
-      const faceFade = dist > 0.55 ? Math.min(1, (dist - 0.55) / 0.25) : 0;
+      // Fade-out toward edges (no transparency — fade to baby skin tone)
+      const faceFade = dist > 0.52 ? Math.min(1, (dist - 0.52) / 0.28) : 0;
 
-      // Blend the two parent images
+      // Blend the two parent pixels
       let r = d1.data[i] * p1Weight + d2.data[i] * (1 - p1Weight);
       let g = d1.data[i+1] * p1Weight + d2.data[i+1] * (1 - p1Weight);
       let b = d1.data[i+2] * p1Weight + d2.data[i+2] * (1 - p1Weight);
 
-      // STRONG skin tone tinting — this is the key to making it look different from parents
-      const tintStrength = 0.35;
-      r = r * (1 - tintStrength) + babyTone.r * tintStrength;
-      g = g * (1 - tintStrength) + babyTone.g * tintStrength;
-      b = b * (1 - tintStrength) + babyTone.b * tintStrength;
+      // Baby skin tint — differentiates from parents
+      const tint = 0.3;
+      r = r * (1 - tint) + babyTone.r * tint;
+      g = g * (1 - tint) + babyTone.g * tint;
+      b = b * (1 - tint) + babyTone.b * tint;
 
       // Fade edges to warm background
       r = r * (1 - faceFade) + babyTone.r * faceFade;
@@ -274,13 +323,14 @@ function blendImages(canvas1, canvas2, outputCanvas) {
       out.data[i] = Math.min(255, Math.round(r));
       out.data[i+1] = Math.min(255, Math.round(g));
       out.data[i+2] = Math.min(255, Math.round(b));
-      out.data[i+3] = 255;
+      out.data[i+3] = 255; // fully opaque always
     }
   }
 
+  // Put blended pixels first
   ctx.putImageData(out, 0, 0);
 
-  // Apply baby-ification filters (heavy blur + warmth)
+  // THEN apply baby filter (non-destructive overlay) AFTER pixels are in place
   applyBabyFilter(ctx, SIZE);
 }
 
@@ -292,13 +342,23 @@ function generateTraits() {
 function generateBaby() {
   if (typeof document === 'undefined') return;
   if (!parent1Loaded || !parent2Loaded) return;
+
+  const btn = document.getElementById('generate-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating...'; }
+
   const c1 = document.getElementById('parent1-canvas');
   const c2 = document.getElementById('parent2-canvas');
   const baby = document.getElementById('baby-canvas');
-  blendImages(c1, c2, baby);
-  const traits = generateTraits();
-  document.getElementById('baby-traits').innerHTML = traits.map(t => `<span class="trait-chip">${t}</span>`).join('');
-  document.getElementById('result-section')?.classList.remove('hidden');
+
+  // Short delay for UI feedback
+  setTimeout(() => {
+    blendImages(c1, c2, baby);
+    const traits = generateTraits();
+    const traitsEl = document.getElementById('baby-traits');
+    if (traitsEl) traitsEl.innerHTML = traits.map(t => `<span class="trait-chip">${t}</span>`).join('');
+    document.getElementById('result-section')?.classList.remove('hidden');
+    if (btn) { btn.disabled = false; btn.textContent = '👶 Generate Baby'; }
+  }, 50);
 }
 
 function downloadResult() {
@@ -318,7 +378,7 @@ function resetAll() {
     globalLandmarks[p] = null;
     const canvas = document.getElementById(p + '-canvas');
     const input = document.getElementById(p + '-input');
-    const slot = canvas?.closest('.upload-slot');
+    const slot = canvas?.closest?.('.upload-slot') || canvas?.parentElement;
     const dz = slot ? slot.querySelector('.drop-zone') : null;
     if (canvas) canvas.classList.add('hidden');
     if (dz) dz.classList.remove('hidden');
@@ -326,7 +386,7 @@ function resetAll() {
   });
   document.getElementById('result-section')?.classList.add('hidden');
   const btn = document.getElementById('generate-btn');
-  if (btn) btn.disabled = true;
+  if (btn) { btn.disabled = true; btn.textContent = '👶 Generate Baby'; }
 }
 
 function shareBaby() {
@@ -346,14 +406,14 @@ function shareBaby() {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { 
+  module.exports = {
     TRAITS, blendImages, generateTraits, generateBaby, downloadResult, resetAll, loadParent,
-    extractSkinTone, applyBabyFilter, alignFace, initFaceAPI, shareBaby,
-    getState: () => ({ parent1Loaded, parent2Loaded, globalLandmarks }), 
-    setParent1: v => { parent1Loaded = v; }, 
+    extractSkinTone, applyBabyFilter, applyWarmVignette, alignFace, initFaceAPI, shareBaby,
+    isLandmarkAvailable,
+    getState: () => ({ parent1Loaded, parent2Loaded, globalLandmarks }),
+    setParent1: v => { parent1Loaded = v; },
     setParent2: v => { parent2Loaded = v; },
     setLandmarks: (p, v) => { globalLandmarks[p] = v; },
     getDrawImageParams, updateParentState
   };
 }
-
