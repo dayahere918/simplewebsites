@@ -18,6 +18,8 @@ test_output_utf8.txt
 out.txt
 audit_coverage.js
 .gemini/
+test_report*.txt
+coverage.json
 # Terraform
 .terraform/
 *.tfstate
