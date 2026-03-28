@@ -12,7 +12,7 @@ const GUERRILLA_API = 'https://api.guerrillamail.com/ajax.php';
 let currentEmail = '';
 let currentLogin = '';
 let currentDomain = '';
-let activeProvider = 'secmail'; // 'secmail' | 'guerrilla'
+let activeProvider = 'guerrilla'; // 'guerrilla' | 'secmail'
 let guerrillaSidToken = '';
 let checkInterval = null;
 let countdownInterval = null;
@@ -24,7 +24,7 @@ const MAX_RETRIES = 3;
 
 async function init() {
   const saved = localStorage.getItem('stacky_temp_mail');
-  const provider = localStorage.getItem('stacky_temp_mail_provider') || 'secmail';
+  const provider = localStorage.getItem('stacky_temp_mail_provider') || 'guerrilla';
   activeProvider = provider;
   if (saved) {
     setAndStart(saved);
@@ -35,7 +35,7 @@ async function init() {
 
 /**
  * Generate a new email address with automatic provider fallback
- * Tries 1secmail first, falls back to guerrillamail on error
+ * Tries GuerrillaMail first (reliable CORS), falls back to 1secmail
  */
 async function generateNewEmail() {
   if (checkInterval) clearInterval(checkInterval);
@@ -44,23 +44,23 @@ async function generateNewEmail() {
   const el = document.getElementById('email-address');
   if (el) el.value = 'Generating...';
 
-  // Try 1secmail first
-  try {
-    const email = await generateSecMailAddress();
-    activeProvider = 'secmail';
-    localStorage.setItem('stacky_temp_mail_provider', 'secmail');
-    localStorage.setItem('stacky_temp_mail', email);
-    setAndStart(email);
-    return;
-  } catch (e) {
-    console.warn('1secmail failed, switching to guerrillamail:', e.message);
-  }
-
-  // Fallback to guerrillamail
+  // Try GuerrillaMail first
   try {
     const email = await generateGuerrillaMailAddress();
     activeProvider = 'guerrilla';
     localStorage.setItem('stacky_temp_mail_provider', 'guerrilla');
+    localStorage.setItem('stacky_temp_mail', email);
+    setAndStart(email);
+    return;
+  } catch (e) {
+    console.warn('GuerrillaMail failed, switching to 1secmail:', e.message);
+  }
+
+  // Fallback to 1secmail
+  try {
+    const email = await generateSecMailAddress();
+    activeProvider = 'secmail';
+    localStorage.setItem('stacky_temp_mail_provider', 'secmail');
     localStorage.setItem('stacky_temp_mail', email);
     setAndStart(email);
   } catch (e) {
@@ -196,7 +196,13 @@ async function fetchMessages(isSilent = false) {
     retryCount++;
     const status = document.getElementById('status-text');
     if (retryCount >= MAX_RETRIES) {
-      if (status) status.textContent = '❌ Connection lost. Click refresh to try again.';
+      if (status) status.textContent = '❌ Connection lost or API blocked. Click refresh to try again.';
+      if (activeProvider === 'secmail') {
+        // Auto-switch to guerrilla if secmail permanently blocked
+        console.warn('Auto-switching provider from 1secmail to GuerrillaMail due to continuous fetch failures.');
+        activeProvider = 'guerrilla';
+        generateNewEmail();
+      }
     } else {
       if (status) status.textContent = `⚠️ Retry ${retryCount}/${MAX_RETRIES}...`;
     }

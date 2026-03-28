@@ -9,7 +9,8 @@ const {
   bicubicResize, rotateCanvas, flipCanvas, cropCanvas,
   applyColorAdjustments, splitImageGrid, mergeImageLayout, createCanvas,
   handleUpload, showStatus, applyResize, downloadResult, resetToolkit,
-  setCurrentCanvas, getCurrentCanvas, getMergeImages, setMergeImages
+  setCurrentCanvas, getCurrentCanvas, getMergeImages, setMergeImages,
+  applyUpscale, applyCustomUpscale
 } = require('../app');
 
 // Mock canvas context
@@ -57,6 +58,8 @@ const DOM_HTML = `
   <input id="adj-sepia" type="range" value="0" />
   <input id="adj-grayscale" type="range" value="0" />
   <input id="adj-invert" type="range" value="0" />
+  <input id="upscale-w" type="number" value="200" />
+  <input id="upscale-h" type="number" value="200" />
   <input id="split-cols" type="number" value="2" />
   <input id="split-rows" type="number" value="2" />
   <div id="split-results" class="hidden"></div>
@@ -475,5 +478,59 @@ describe('DOM Interactions & Tools', () => {
     resetToolkit();
     expect(getCurrentCanvas()).toBeNull();
     expect(getOriginalImage()).toBeNull();
+  });
+});
+
+// ── Upscale Operations ────────────────────────────────────
+
+describe('Upscale Operations', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    resetToolkit();
+    const { canvas } = makeMockCanvas(100, 100);
+    setCurrentCanvas(canvas);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  test('applyUpscale increases canvas dims and updates UI', () => {
+    applyUpscale(2);
+    jest.advanceTimersByTime(200);
+    expect(getCurrentCanvas().width).toBe(200);
+    expect(document.getElementById('status-text').textContent).toContain('Successfully upscaled');
+  });
+
+  test('applyUpscale aborts if dimensions exceed bounds', () => {
+    applyUpscale(100); // 100x100 * 100 = 10000 > 8000
+    jest.advanceTimersByTime(200);
+    expect(getCurrentCanvas().width).toBe(100);
+    expect(document.getElementById('status-text').textContent).toContain('too large');
+  });
+
+  test('applyCustomUpscale uses inputs to resize', () => {
+    document.getElementById('upscale-w').value = '300';
+    document.getElementById('upscale-h').value = '300';
+    applyCustomUpscale();
+    jest.advanceTimersByTime(200);
+    expect(getCurrentCanvas().width).toBe(300);
+    expect(getCurrentCanvas().height).toBe(300);
+  });
+
+  test('applyCustomUpscale warns if target isn\'t larger', () => {
+    document.getElementById('upscale-w').value = '50';
+    document.getElementById('upscale-h').value = '50';
+    applyCustomUpscale();
+    expect(document.getElementById('status-text').textContent).toContain('larger than current');
+    expect(getCurrentCanvas().width).toBe(100);
+  });
+
+  test('applyCustomUpscale aborts if limits exceeded', () => {
+    document.getElementById('upscale-w').value = '9000';
+    document.getElementById('upscale-h').value = '9000';
+    applyCustomUpscale();
+    jest.advanceTimersByTime(200);
+    expect(document.getElementById('status-text').textContent).toContain('limits');
   });
 });

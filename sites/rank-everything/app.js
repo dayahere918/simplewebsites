@@ -59,6 +59,7 @@ async function loadCategory(cat) {
             if (!apiKeys.rawg) throw new Error("RAWG API Key required");
             items = await fetchGames();
         } else if (cat === 'community') {
+            await syncListsFromCloudflare();
             renderCommunityLists();
             loader.classList.add('hidden');
             return;
@@ -157,6 +158,12 @@ function createList(name, itemNames) {
     };
     lists.push(newList);
     saveListsToStorage(lists);
+    
+    // Background sync
+    fetch('/api/lists', {
+        method: 'POST', body: JSON.stringify({ action: 'create', name: newList.name, items: itemNames }), headers: { 'Content-Type': 'application/json' }
+    }).catch(e => console.error('Cloudflare sync error', e));
+
     return newList;
 }
 
@@ -170,6 +177,12 @@ function voteItem(listId, itemId, direction) {
     if (direction === 'down') item.votes = Math.max(0, (item.votes || 0) - 1);
     list.items.sort((a, b) => (b.votes || 0) - (a.votes || 0));
     saveListsToStorage(lists);
+
+    // Background sync
+    fetch('/api/lists', {
+        method: 'POST', body: JSON.stringify({ action: 'vote', listId, itemId, direction }), headers: { 'Content-Type': 'application/json' }
+    }).catch(e => console.error('Cloudflare sync error', e));
+
     return list;
 }
 
@@ -268,6 +281,24 @@ function handleExportList(listId) {
     }
 }
 
+async function syncListsFromCloudflare() {
+    try {
+        const res = await fetch('/api/lists');
+        if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+                // Merge data (CF overrides local to prevent stale items)
+                const local = loadListsFromStorage();
+                const merged = [...data];
+                for (const l of local) {
+                    if (!merged.find(ml => ml.id === l.id)) merged.push(l);
+                }
+                saveListsToStorage(merged);
+            }
+        }
+    } catch (e) { console.log('Serving from local cache only.'); }
+}
+
 if (typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
         checkApiKeys();
@@ -280,6 +311,6 @@ if (typeof module !== 'undefined' && module.exports) {
         saveApiKeys, fetchCrypto, fetchMovies, fetchGames, loadCategory, renderList, checkApiKeys,
         loadListsFromStorage, saveListsToStorage, createList, voteItem, deleteList,
         exportList, importList, toggleCreateList, submitNewList, renderCommunityLists,
-        handleExportList, STORAGE_KEY
+        handleExportList, STORAGE_KEY, syncListsFromCloudflare
     };
 }

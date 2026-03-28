@@ -6,6 +6,7 @@
 let mergeFiles = [];
 let splitFile = null;
 let splitPageCount = 0;
+let selectedSplitPages = new Set();
 
 // --- Pure Logic ---
 
@@ -101,6 +102,98 @@ function switchMode(mode) {
   if (status) status.classList.add('hidden');
 }
 
+function selectAllPages(selectAll) {
+  const grid = document.getElementById('pdf-thumbnail-grid');
+  if (!grid) return;
+  const items = grid.querySelectorAll('.pdf-thumb-item');
+  items.forEach(item => {
+    const idx = parseInt(item.dataset.index);
+    if (selectAll) {
+      item.classList.add('selected');
+      selectedSplitPages.add(idx);
+    } else {
+      item.classList.remove('selected');
+      selectedSplitPages.delete(idx);
+    }
+  });
+}
+
+function togglePageSelection(element, index) {
+  if (selectedSplitPages.has(index)) {
+    selectedSplitPages.delete(index);
+    element.classList.remove('selected');
+  } else {
+    selectedSplitPages.add(index);
+    element.classList.add('selected');
+  }
+}
+
+async function loadPdfThumbnails(file) {
+  const grid = document.getElementById('pdf-thumbnail-grid');
+  if (!grid) return;
+  
+  if (typeof pdfjsLib === 'undefined') {
+    grid.innerHTML = '<div class="text-sm text-red-500">PDF.js failed to load. Please check internet connection.</div>';
+    return;
+  }
+
+  try {
+    const buffer = await file.arrayBuffer();
+    const loadingTask = pdfjsLib.getDocument({ data: buffer });
+    const pdf = await loadingTask.promise;
+    
+    selectedSplitPages.clear();
+    grid.innerHTML = '';
+    splitPageCount = pdf.numPages;
+
+    const pageCountEl = document.getElementById('split-page-count-info');
+    if (pageCountEl) pageCountEl.textContent = `${splitPageCount} pages total`;
+
+    // Render grid dynamically
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 0.5 });
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+      const item = document.createElement('div');
+      item.className = 'pdf-thumb-item flex-col items-center justify-center p-2 cursor-pointer border-2 border-transparent transition-colors rounded-sm hover:border-muted';
+      item.dataset.index = i - 1; // 0-indexed for pdf-lib
+      item.innerHTML = `
+        <img src="${canvas.toDataURL()}" style="width:100px; box-shadow:0 2px 4px rgba(0,0,0,0.1); border:1px solid var(--border)">
+        <div class="text-xs mt-1 font-medium text-center">Page ${i}</div>
+      `;
+      
+      // Default auto-select all
+      item.classList.add('selected');
+      selectedSplitPages.add(i - 1);
+      
+      item.onclick = () => togglePageSelection(item, i - 1);
+      grid.appendChild(item);
+    }
+
+    // Add styles dynamically for selected state if they don't exist
+    if (!document.getElementById('pdf-grid-style')) {
+      const style = document.createElement('style');
+      style.id = 'pdf-grid-style';
+      style.innerHTML = `
+        .pdf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+        .pdf-thumb-item.selected { border-color: var(--accent); background: rgba(0, 150, 255, 0.1); }
+        .pdf-thumb-item { display: flex; align-items: center; border-radius: 4px; }
+      `;
+      document.head.appendChild(style);
+    }
+
+  } catch (e) {
+    console.error('Error rendering thumbnails:', e);
+    grid.innerHTML = '<div class="text-sm text-red-500">Failed to render PDF preview.</div>';
+  }
+}
+
 function handleMergeUpload(event) {
   const files = filterPdfFiles(event?.target?.files);
   if (files.length === 0) return;
@@ -155,26 +248,16 @@ async function handleSplitUpload(event) {
 
   // Try to get actual page count if pdf-lib is available
   const splitUi = document.getElementById('split-ui');
-  const pageCountEl = document.getElementById('split-page-count-info');
+  const grid = document.getElementById('pdf-thumbnail-grid');
+  if (grid) grid.innerHTML = '<div class="text-center text-muted">Loading preview... ⏳</div>';
 
-  try {
-    const PDFLibObj = typeof PDFLib !== 'undefined' ? PDFLib : (typeof global !== 'undefined' && global.PDFLib ? global.PDFLib : null);
-    if (PDFLibObj && file.arrayBuffer) {
-      const buf = await file.arrayBuffer();
-      const pdfDoc = await PDFLibObj.PDFDocument.load(buf);
-      splitPageCount = pdfDoc.getPageCount();
-      if (pageCountEl) pageCountEl.textContent = `${splitPageCount} pages total — leave blank to extract all`;
-    }
-  } catch (e) {
-    splitPageCount = 0;
-    if (pageCountEl) pageCountEl.textContent = 'Leave blank to extract all pages';
-  }
-
-  // ✅ CRITICAL FIX: Reveal the split UI (was always hidden)
   if (splitUi) splitUi.classList.remove('hidden');
 
   const btn = document.getElementById('do-split-btn');
   if (btn) btn.classList.remove('hidden');
+
+  // Trigger visual PDF.js render
+  loadPdfThumbnails(file);
 }
 
 async function executeMerge() {
@@ -232,11 +315,11 @@ async function executeSplit() {
     const pdfDoc = await PDFDocument.load(arrayBuffer);
     const total = pdfDoc.getPageCount();
 
-    // Parse user-specified page range or default to all pages
-    const pageIndices = parsePageRange(pageRangeStr, total);
+    // Use visually selected pages
+    const pageIndices = Array.from(selectedSplitPages).sort((a, b) => a - b);
 
     if (pageIndices.length === 0) {
-      if (status) status.textContent = '❌ No valid pages in range. Check your input.';
+      if (status) status.textContent = '❌ Minimum 1 page must be selected to extract.';
       return;
     }
 
@@ -287,6 +370,7 @@ if (typeof module !== 'undefined' && module.exports) {
     setSplitPageCount: (n) => { splitPageCount = n; },
     getMergeFiles: () => mergeFiles,
     getSplitFile: () => splitFile,
-    getSplitPageCount: () => splitPageCount
+    getSplitPageCount: () => splitPageCount,
+    setSelectedPages: (arr) => { selectedSplitPages = new Set(arr); }
   };
 }

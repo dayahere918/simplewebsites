@@ -273,10 +273,15 @@ function blendImages(canvas1, canvas2, outputCanvas) {
 
   const out = ctx.createImageData(SIZE, SIZE);
 
-  // Random seed for which parent donates which feature
-  const seed = Math.random();
-  const p1Eyes = seed > 0.5;
-  const p1Mouth = seed <= 0.5;
+  // Fix double-face ghosting by choosing a dominant structural parent
+  // and blending the other's features (eyes/mouth) using soft masking instead of 50/50 pixel math.
+  const baseP = Math.random() > 0.5 ? 1 : 2;
+  const baseData = baseP === 1 ? d1 : d2;
+  const featData = baseP === 1 ? d2 : d1;
+  
+  // Randomly select which features come from the other parent
+  const useFeatEyes = Math.random() > 0.4;
+  const useFeatMouth = !useFeatEyes;
 
   for (let y = 0; y < SIZE; y++) {
     for (let x = 0; x < SIZE; x++) {
@@ -285,37 +290,42 @@ function blendImages(canvas1, canvas2, outputCanvas) {
       const rdx = x - cx, rdy = y - cy;
       const dist = Math.sqrt(rdx*rdx + rdy*rdy) / (SIZE / 2);
 
-      // Facial zone weights
-      let p1Weight;
-      const isEyeRegion = (rdy < -5 && rdy > -50 && Math.abs(rdx) < 55);
-      const isMouthRegion = (rdy > 15 && rdy < 55 && Math.abs(rdx) < 35);
-      const isNoseRegion = (Math.abs(rdy) < 20 && Math.abs(rdx) < 22);
+      // Define facial zones based on standard centered alignment (eyes at ~95y, mouth at ~145y)
+      let featWeight = 0; // how much of the non-dominant parent to use
+      
+      const isEyeRegion = (rdy < -5 && rdy > -40 && Math.abs(rdx) < 55);
+      const isMouthRegion = (rdy > 20 && rdy < 60 && Math.abs(rdx) < 35);
+      const isSkinRegion = dist < 0.6; // Inner face
 
-      if (isEyeRegion) {
-        p1Weight = p1Eyes ? 0.65 : 0.35;
-      } else if (isMouthRegion) {
-        p1Weight = p1Mouth ? 0.65 : 0.35;
-      } else if (isNoseRegion) {
-        p1Weight = 0.5;
+      if (isEyeRegion && useFeatEyes) {
+        // Feathered edge for eyes
+        const centerDist = Math.abs(rdx) < 20 ? 0 : 1;
+        featWeight = 0.85; 
+      } else if (isMouthRegion && useFeatMouth) {
+        featWeight = 0.75;
+      } else if (isSkinRegion) {
+        // Blend skin tones 60/40
+        featWeight = 0.4;
       } else {
-        p1Weight = 0.5;
+        // Hair and background belong solely to the base parent to prevent ghosting
+        featWeight = 0.05; 
       }
 
-      // Fade-out toward edges (no transparency — fade to baby skin tone)
-      const faceFade = dist > 0.52 ? Math.min(1, (dist - 0.52) / 0.28) : 0;
+      // Smooth transition to baby skin tint around edges
+      const faceFade = dist > 0.65 ? Math.min(1, (dist - 0.65) / 0.15) : 0;
 
-      // Blend the two parent pixels
-      let r = d1.data[i] * p1Weight + d2.data[i] * (1 - p1Weight);
-      let g = d1.data[i+1] * p1Weight + d2.data[i+1] * (1 - p1Weight);
-      let b = d1.data[i+2] * p1Weight + d2.data[i+2] * (1 - p1Weight);
+      // Calculate final pixel values
+      let r = baseData.data[i] * (1 - featWeight) + featData.data[i] * featWeight;
+      let g = baseData.data[i+1] * (1 - featWeight) + featData.data[i+1] * featWeight;
+      let b = baseData.data[i+2] * (1 - featWeight) + featData.data[i+2] * featWeight;
 
-      // Baby skin tint — differentiates from parents
-      const tint = 0.3;
+      // Baby skin tint — warming and smoothing
+      const tint = 0.25;
       r = r * (1 - tint) + babyTone.r * tint;
       g = g * (1 - tint) + babyTone.g * tint;
       b = b * (1 - tint) + babyTone.b * tint;
 
-      // Fade edges to warm background
+      // Fade edges strictly to warm background to hide harsh cuts
       r = r * (1 - faceFade) + babyTone.r * faceFade;
       g = g * (1 - faceFade) + babyTone.g * faceFade;
       b = b * (1 - faceFade) + babyTone.b * faceFade;
@@ -323,14 +333,13 @@ function blendImages(canvas1, canvas2, outputCanvas) {
       out.data[i] = Math.min(255, Math.round(r));
       out.data[i+1] = Math.min(255, Math.round(g));
       out.data[i+2] = Math.min(255, Math.round(b));
-      out.data[i+3] = 255; // fully opaque always
+      out.data[i+3] = 255;
     }
   }
 
-  // Put blended pixels first
   ctx.putImageData(out, 0, 0);
 
-  // THEN apply baby filter (non-destructive overlay) AFTER pixels are in place
+  // Apply baby filter (softness, larger eyes illusion via brightness)
   applyBabyFilter(ctx, SIZE);
 }
 
@@ -344,21 +353,41 @@ function generateBaby() {
   if (!parent1Loaded || !parent2Loaded) return;
 
   const btn = document.getElementById('generate-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating...'; }
+  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Sequence Initiated...'; }
 
   const c1 = document.getElementById('parent1-canvas');
   const c2 = document.getElementById('parent2-canvas');
   const baby = document.getElementById('baby-canvas');
 
-  // Short delay for UI feedback
+  // Add scanning animation classes to canvases
+  if (c1) c1.classList.add('scanning');
+  if (c2) c2.classList.add('scanning');
+
+  let textStatus = ['Extracting DNA...', 'Isolating Features...', 'Morphing Genetics...', 'Finalizing Portrait...'];
+  let tick = 0;
+  
+  const scanInterval = setInterval(() => {
+    if (btn) btn.innerHTML = `🧬 ${textStatus[tick] || 'Compiling...'}`;
+    tick++;
+  }, 600);
+
+  // 2.5 second delay for "AI" generation feel
   setTimeout(() => {
+    clearInterval(scanInterval);
+    if (c1) c1.classList.remove('scanning');
+    if (c2) c2.classList.remove('scanning');
+
     blendImages(c1, c2, baby);
     const traits = generateTraits();
     const traitsEl = document.getElementById('baby-traits');
     if (traitsEl) traitsEl.innerHTML = traits.map(t => `<span class="trait-chip">${t}</span>`).join('');
     document.getElementById('result-section')?.classList.remove('hidden');
-    if (btn) { btn.disabled = false; btn.textContent = '👶 Generate Baby'; }
-  }, 50);
+    
+    // Smooth scroll to result
+    document.getElementById('result-section')?.scrollIntoView({ behavior: 'smooth' });
+
+    if (btn) { btn.disabled = false; btn.innerHTML = '👶 Generate Sibling'; }
+  }, 2500);
 }
 
 function downloadResult() {

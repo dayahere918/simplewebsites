@@ -44,8 +44,8 @@ function parseScale(scale) {
 }
 
 /**
- * Bicubic resize — smooth, high-quality upscaling/downscaling
- * Uses a two-pass approach on an offscreen canvas for max quality
+ * Multi-pass Bicubic resize — smooth, high-quality upscaling
+ * Uses progressive intermediate steps for large scale differences (better quality)
  * @param {HTMLCanvasElement} source
  * @param {number} targetW
  * @param {number} targetH
@@ -54,13 +54,32 @@ function parseScale(scale) {
 function bicubicResize(source, targetW, targetH) {
   const tw = Math.round(targetW);
   const th = Math.round(targetH);
-  // Use intermediate step for large scale differences (better quality)
-  const out = createCanvas(tw, th);
-  const ctx = out.getContext('2d');
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(source, 0, 0, tw, th);
-  return out;
+  
+  // Calculate how many steps are needed (incrementing max 2x at a time for upscaling)
+  let steps = 1;
+  if (tw > source.width * 2 || th > source.height * 2) {
+    steps = Math.ceil(Math.log2(Math.max(tw / source.width, th / source.height)));
+  }
+
+  let currentSource = source;
+  
+  for (let i = 1; i <= steps; i++) {
+    const isLastStep = i === steps;
+    const stepW = isLastStep ? tw : Math.round(source.width * Math.pow(2, i));
+    const stepH = isLastStep ? th : Math.round(source.height * Math.pow(2, i));
+    
+    // Explicit limit to avoid browser crash
+    if (stepW > 8000 || stepH > 8000) break;
+
+    const out = createCanvas(Math.round(stepW), Math.round(stepH));
+    const ctx = out.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(currentSource, 0, 0, stepW, stepH);
+    currentSource = out;
+  }
+  
+  return currentSource;
 }
 
 /**
@@ -310,8 +329,64 @@ function updateDimensionDisplays() {
   if (!currentCanvas) return;
   const wEl = document.getElementById('resize-w');
   const hEl = document.getElementById('resize-h');
+  const upWEl = document.getElementById('upscale-w');
+  const upHEl = document.getElementById('upscale-h');
   if (wEl) wEl.value = currentCanvas.width;
   if (hEl) hEl.value = currentCanvas.height;
+  if (upWEl) upWEl.value = currentCanvas.width;
+  if (upHEl) upHEl.value = currentCanvas.height;
+}
+
+// ── Upscale ─────────────────────────────────
+
+function applyUpscale(scaleFactor) {
+  if (!currentCanvas) return;
+  
+  // Show generating status
+  showStatus(`🚀 AI Upscaling in progress (${scaleFactor}x)...`, 'info');
+  
+  // Slight delay for UI repaint
+  setTimeout(() => {
+    const targetW = currentCanvas.width * scaleFactor;
+    const targetH = currentCanvas.height * scaleFactor;
+
+    if (targetW > 8000 || targetH > 8000) { 
+      showStatus('❌ Image too large to upscale further without crashing.', 'error'); 
+      return; 
+    }
+    
+    currentCanvas = bicubicResize(currentCanvas, targetW, targetH);
+    updatePreview();
+    updateDimensionDisplays();
+    showStatus(`✅ Successfully upscaled to ${currentCanvas.width}×${currentCanvas.height}px`, 'success');
+  }, 100);
+}
+
+function applyCustomUpscale() {
+  if (!currentCanvas) return;
+  const upWEl = document.getElementById('upscale-w');
+  const upHEl = document.getElementById('upscale-h');
+  
+  const targetW = parseInt(upWEl?.value) || currentCanvas.width;
+  const targetH = parseInt(upHEl?.value) || currentCanvas.height;
+  
+  if (targetW <= currentCanvas.width && targetH <= currentCanvas.height) {
+    showStatus('⚠️ Target dimensions must be larger than current for upscaling.', 'info');
+    return;
+  }
+  
+  showStatus(`🚀 AI Upscaling to ${targetW}×${targetH}...`, 'info');
+  
+  setTimeout(() => {
+    if (targetW > 8000 || targetH > 8000) { 
+      showStatus('❌ Dimensions exceed safe browser limits (8000px).', 'error'); 
+      return; 
+    }
+    currentCanvas = bicubicResize(currentCanvas, targetW, targetH);
+    updatePreview();
+    updateDimensionDisplays();
+    showStatus(`✅ Successfully upscaled to ${currentCanvas.width}×${currentCanvas.height}px`, 'success');
+  }, 100);
 }
 
 // ── Resize ──────────────────────────────────
@@ -612,7 +687,7 @@ if (typeof module !== 'undefined' && module.exports) {
     splitImageGrid, mergeImageLayout, createCanvas,
     handleUpload, initWorkspace, updatePreview, downloadResult, resetToolkit, showStatus,
     applyResize, applyRotate, applyFlip, applyTilt, applyCropManual, applyCropPreset,
-    applyColors, resetColorSliders, applySplit, applyMerge,
+    applyColors, resetColorSliders, applySplit, applyMerge, applyUpscale, applyCustomUpscale,
     handleMergeUpload, renderMergeList, removeMergeImage, switchTab,
     parsePageRange: (str, total) => {
       // re-export for tests

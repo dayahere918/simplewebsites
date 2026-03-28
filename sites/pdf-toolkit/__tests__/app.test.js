@@ -7,7 +7,7 @@ const {
   filterPdfFiles, moveItem, formatFileCount, parsePageRange,
   switchMode, handleMergeUpload, renderMergeList, removeMergeFile, reorderMergeFiles,
   handleSplitUpload, executeMerge, executeSplit, downloadBlob, resetFiles,
-  setMergeFiles, setSplitFile, setSplitPageCount, getMergeFiles, getSplitFile, getSplitPageCount
+  setMergeFiles, setSplitFile, setSplitPageCount, getMergeFiles, getSplitFile, getSplitPageCount, setSelectedPages
 } = require('../app');
 
 const DOM_HTML = `
@@ -229,21 +229,21 @@ describe('PDF Toolkit — Split Operations', () => {
     expect(getSplitFile()).toBeNull();
   });
 
-  test('executeSplit extracts all pages when field is empty', async () => {
+  test('executeSplit extracts all visually selected pages', async () => {
     const pdf = new File([''], 'test.pdf', { type: 'application/pdf' });
     pdf.arrayBuffer = () => Promise.resolve(new ArrayBuffer(8));
     setSplitFile(pdf);
-    document.getElementById('split-pages').value = '';
+    setSelectedPages([0, 1, 2, 3, 4]); // 5 pages from mock
     await executeSplit();
     expect(document.getElementById('split-results').classList.contains('hidden')).toBe(false);
     expect(document.getElementById('output-list').children.length).toBe(5); // 5 pages from mock
   });
 
-  test('executeSplit extracts only specified pages', async () => {
+  test('executeSplit extracts only specified selection', async () => {
     const pdf = new File([''], 'test.pdf', { type: 'application/pdf' });
     pdf.arrayBuffer = () => Promise.resolve(new ArrayBuffer(8));
     setSplitFile(pdf);
-    document.getElementById('split-pages').value = '1, 3';
+    setSelectedPages([0, 2]); // Pages 1 and 3 (0-indexed)
     await executeSplit();
     expect(document.getElementById('output-list').children.length).toBe(2);
   });
@@ -262,13 +262,13 @@ describe('PDF Toolkit — Split Operations', () => {
     expect(document.getElementById('processing-status').textContent).toContain('Error');
   });
 
-  test('executeSplit shows error for invalid page range', async () => {
+  test('executeSplit shows error for empty selection', async () => {
     const pdf = new File([''], 'test.pdf', { type: 'application/pdf' });
     pdf.arrayBuffer = () => Promise.resolve(new ArrayBuffer(8));
     setSplitFile(pdf);
-    document.getElementById('split-pages').value = '999'; // out of range for 5-page PDF
+    setSelectedPages([]); // No pages selected explicitly
     await executeSplit();
-    expect(document.getElementById('processing-status').textContent).toContain('No valid pages');
+    expect(document.getElementById('processing-status').textContent).toContain('Minimum 1 page must be selected');
   });
 });
 

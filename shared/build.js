@@ -276,6 +276,23 @@ function buildAll() {
 
   sites.forEach(buildSite);
 
+  // Collect functions and _headers from all sites to global dist root
+  console.log('Aggregating Cloudflare functions and _headers...');
+  sites.forEach(siteName => {
+    const siteFuncDir = path.join(SITES_DIR, siteName, 'functions');
+    if (fs.existsSync(siteFuncDir)) {
+      copyDir(siteFuncDir, path.join(GLOBAL_DIST, 'functions'));
+    }
+    
+    // Copy/Append _headers (ensuring paths are relative to root if needed, though they are usually wildcarded anyway)
+    const siteHeaders = path.join(SITES_DIR, siteName, '_headers');
+    if (fs.existsSync(siteHeaders)) {
+      const globalHeaders = path.join(GLOBAL_DIST, '_headers');
+      const content = fs.readFileSync(siteHeaders, 'utf-8');
+      fs.appendFileSync(globalHeaders, `\n# --- ${siteName} ---\n${content}\n`);
+    }
+  });
+
   // Generate a simple Index/Hub page for stacky.pages.dev root
   const hubHtml = `<!DOCTYPE html>
 <html lang="en" data-theme="dark">

@@ -7,7 +7,9 @@ yarn-error.log*
 
 # Build and Coverage
 dist/
+**/dist/
 coverage/
+**/coverage/
 .nyc_output
 coverage_report/
 coverage_report_final/
@@ -28,6 +30,11 @@ test_json*.txt
 test_rank.txt
 test_full.txt
 test_output.txt
+*.out.txt
+*.debug.txt
+*.log.txt
+pdf_out.txt
+baby_out.txt
 
 # Specialized Artifacts
 .gemini/

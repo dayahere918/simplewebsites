@@ -80,7 +80,8 @@
 
       <!-- Tab Bar -->
       <div class="tab-bar">
-        <button class="toolkit-tab active" id="tab-resize" onclick="switchTab('resize')">📐 Resize</button>
+        <button class="toolkit-tab active" id="tab-upscale" onclick="switchTab('upscale')">🚀 AI Upscale</button>
+        <button class="toolkit-tab" id="tab-resize" onclick="switchTab('resize')">📐 Resize</button>
         <button class="toolkit-tab" id="tab-crop" onclick="switchTab('crop')">✂️ Crop</button>
         <button class="toolkit-tab" id="tab-rotate" onclick="switchTab('rotate')">🔄 Rotate & Flip</button>
         <button class="toolkit-tab" id="tab-color" onclick="switchTab('color')">🎨 Colors</button>
@@ -89,8 +90,26 @@
         <button class="toolkit-tab" id="tab-download" onclick="switchTab('download')">📥 Download</button>
       </div>
 
+      <!-- ── AI UPSCALE PANEL ─────────────────── -->
+      <div class="card tab-panel" id="panel-upscale">
+        <h4 class="mb-4">🚀 AI Image Upscaling</h4>
+        <p class="hint mb-4">Upscale your image using high-quality multi-pass bicubic interpolation directly in your browser. No data leaves your machine.</p>
+        <div class="flex gap-3 flex-wrap mb-4">
+          <button class="btn btn-secondary" onclick="applyUpscale(2)">2x Scale</button>
+          <button class="btn btn-secondary" onclick="applyUpscale(4)">4x Scale</button>
+          <button class="btn btn-secondary" onclick="applyUpscale(8)">8x Scale</button>
+        </div>
+        <hr style="border-color:var(--border);margin:1rem 0">
+        <p class="text-sm font-bold mb-2">Custom Dimensions</p>
+        <div class="grid-2 mb-4">
+          <div class="form-group"><label>Target Width</label><input type="number" id="upscale-w" class="input-text w-full" min="1"></div>
+          <div class="form-group"><label>Target Height</label><input type="number" id="upscale-h" class="input-text w-full" min="1"></div>
+        </div>
+        <button class="btn btn-accent w-full" onclick="applyCustomUpscale()">🚀 Upscale Image</button>
+      </div>
+
       <!-- ── RESIZE PANEL ─────────────────── -->
-      <div class="card tab-panel" id="panel-resize">
+      <div class="card tab-panel hidden" id="panel-resize">
         <h4 class="mb-4">📐 Resize Image</h4>
         <div class="grid-2 mb-4">
           <div class="form-group">

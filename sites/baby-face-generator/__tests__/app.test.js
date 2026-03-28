@@ -65,6 +65,9 @@ function makeMockCanvas(w = 200, h = 200, pixelVal = 128) {
 beforeEach(() => {
   document.body.innerHTML = DOM_HTML;
 
+  // Mock scrollIntoView for jsdom
+  window.HTMLElement.prototype.scrollIntoView = jest.fn();
+
   // Mock canvas elements
   ['parent1-canvas', 'parent2-canvas', 'baby-canvas'].forEach(id => {
     const el = document.getElementById(id);
@@ -366,8 +369,8 @@ describe('generateBaby()', () => {
     
     expect(document.getElementById('generate-btn').disabled).toBe(true);
 
-    // Advance setTimeout inside generateBaby
-    jest.advanceTimersByTime(100);
+    // Advance setTimeout inside generateBaby (2.5s scan + buffer)
+    jest.advanceTimersByTime(3000);
 
     // Verify UI updates
     expect(document.getElementById('generate-btn').disabled).toBe(false); // Reset at end
