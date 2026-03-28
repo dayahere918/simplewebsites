@@ -18,15 +18,13 @@ function sanitizeYamlInput(str) {
   let hadTabs = false;
   let hadMissingSpaces = false;
 
-  const sanitized = str.split('\n').map(line => {
-    // 1. Fix mixed leading tabs+spaces into pure spaces (2 spaces per tab)
-    const indentMatch = line.match(/^([ \t]+)/);
-    if (indentMatch && indentMatch[1].includes('\t')) {
-      hadTabs = true;
-      const fixedIndent = indentMatch[1].replace(/\t/g, '  ');
-      line = fixedIndent + line.slice(indentMatch[1].length);
-    }
+  // 1. Aggressively replace ALL tabs with 2 spaces
+  if (str.includes('\t')) {
+    hadTabs = true;
+    str = str.replace(/\t/g, '  ');
+  }
 
+  const sanitized = str.split('\n').map(line => {
     // 2. Fix missing space after colon: key:value -> key: value
     // Target keys at start of line (allowing indents and sequence dashes)
     // IMPORTANT: Skip lines where colon is followed by // (URLs like http://)

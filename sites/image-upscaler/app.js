@@ -578,6 +578,52 @@ function downloadTileCanvas(btn, row, col) {
 
 // ── Merge ────────────────────────────────────
 
+function initMergeFlow(event) {
+  const uploadArea = document.getElementById('upload-area');
+  if (uploadArea) {
+    const dz = uploadArea.querySelector('.drop-zone');
+    if (dz) dz.innerHTML = '<div style="padding:2rem;text-align:center"><div class="animate-pulse text-accent font-bold">⏳ Loading images...</div></div>';
+  }
+
+  const files = Array.from(event?.target?.files || []).filter(f => f.type.startsWith('image/'));
+  if (!files.length) return;
+
+  const promises = files.map(f => new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(f);
+  }));
+
+  Promise.all(promises).then(results => {
+    const imgs = results.filter(img => img !== null);
+    mergeImages = [...mergeImages, ...imgs];
+    renderMergeList();
+    
+    if (!currentCanvas && mergeImages.length > 0) {
+      if (mergeImages.length === 1) {
+        originalImage = mergeImages[0];
+        initWorkspace(originalImage);
+        mergeImages = []; // clear from merge to avoid confusion
+        switchTab('upscale'); 
+        showStatus('Only 1 image selected. Switched to normal editing mode.', 'info');
+      } else {
+        originalImage = mergeImages[0];
+        initWorkspace(originalImage); // Init with first image to prevent null errors
+        switchTab('merge');
+        showStatus(`Loaded ${mergeImages.length} images. Adjust layout and click Merge.`, 'success');
+      }
+    } else {
+      switchTab('merge');
+    }
+  });
+}
+
 function handleMergeUpload(event) {
   const files = Array.from(event?.target?.files || []).filter(f => f.type.startsWith('image/'));
   if (!files.length) return;
@@ -691,7 +737,7 @@ if (typeof module !== 'undefined' && module.exports) {
     handleUpload, initWorkspace, updatePreview, downloadResult, resetToolkit, showStatus,
     applyResize, applyRotate, applyFlip, applyTilt, applyCropManual, applyCropPreset,
     applyColors, resetColorSliders, applySplit, applyMerge, applyUpscale, applyCustomUpscale,
-    handleMergeUpload, renderMergeList, removeMergeImage, switchTab,
+    initMergeFlow, handleMergeUpload, renderMergeList, removeMergeImage, switchTab,
     parsePageRange: (str, total) => {
       // re-export for tests
       if (!str) return Array.from({ length: total }, (_, i) => i);

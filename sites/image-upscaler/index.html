@@ -54,7 +54,7 @@
       <div class="mt-6">
         <p class="text-sm text-muted mb-3">Or merge multiple images:</p>
         <button class="btn btn-secondary" onclick="document.getElementById('merge-input-init').click()">📎 Select Multiple Images to Merge</button>
-        <input type="file" id="merge-input-init" accept="image/*" multiple class="hidden" onchange="handleMergeUpload(event); document.getElementById('upload-area').classList.add('hidden'); document.getElementById('workspace').classList.remove('hidden'); switchTab('merge');">
+        <input type="file" id="merge-input-init" accept="image/*" multiple class="hidden" onchange="initMergeFlow(event)">
       </div>
     </div>
 

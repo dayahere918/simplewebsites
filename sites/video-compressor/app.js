@@ -58,11 +58,19 @@ function isVideoFile(file) {
 async function initFFmpeg() {
     if (ffmpegInstance) return ffmpegInstance;
 
-    // Check multiple possible global names from different CDN builds
-    const FFmpegLib = (typeof window !== 'undefined') ? 
-      (window.FFmpegWASM || window.FFmpeg || window['@ffmpeg/ffmpeg']) : null;
+    // Wait for CDN library to be available (poll up to 5s)
+    let FFmpegLib = null;
+    let attempts = 0;
+    while (attempts < 25) {
+      FFmpegLib = (typeof window !== 'undefined') ? 
+        (window.FFmpegWASM || window.FFmpeg || window['@ffmpeg/ffmpeg']) : null;
+      if (FFmpegLib && (FFmpegLib.FFmpeg || typeof FFmpegLib === 'function')) break;
+      await new Promise(r => setTimeout(r, 200));
+      attempts++;
+    }
+
     if (!FFmpegLib || (!FFmpegLib.FFmpeg && typeof FFmpegLib !== 'function')) {
-        throw new Error('FFmpeg library not available. Please check your internet connection and refresh the page.');
+        throw new Error('FFmpeg library not available. Please check your internet connection or disable adblockers, then refresh the page.');
     }
 
     const ff = FFmpegLib.FFmpeg ? new FFmpegLib.FFmpeg() : new FFmpegLib();
@@ -171,10 +179,18 @@ async function executeCompression() {
 
     try {
         const ff = await initFFmpeg();
-        const FFmpegUtil = (typeof window !== 'undefined') ?
-          (window.FFmpegUtil || window['@ffmpeg/util']) : null;
+        
+        let FFmpegUtil = null;
+        let utilAttempts = 0;
+        while (utilAttempts < 25) {
+          FFmpegUtil = (typeof window !== 'undefined') ? (window.FFmpegUtil || window['@ffmpeg/util']) : null;
+          if (FFmpegUtil && FFmpegUtil.fetchFile) break;
+          await new Promise(r => setTimeout(r, 200));
+          utilAttempts++;
+        }
+        
         const fetchFile = FFmpegUtil?.fetchFile;
-        if (!fetchFile) throw new Error('FFmpeg utility library not available. Please refresh and try again.');
+        if (!fetchFile) throw new Error('FFmpeg utility library not available. Please enable scripts and try again.');
 
         const ext = (videoFile.name.split('.').pop() || 'mp4').toLowerCase();
         const inputName = `input.${ext}`;
@@ -238,7 +254,7 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         qualityToCRF, formatSize, calcSavings, isVideoFile,
         handleUpload, setVideoFile, setQuality, executeCompression,
-        downloadVideo, resetCompressor, showError,
+        downloadVideo, resetCompressor, showError, initFFmpeg,
         // For testing
         resetFFmpeg: () => { ffmpegInstance = null; },
         getFFmpeg: () => ffmpegInstance,

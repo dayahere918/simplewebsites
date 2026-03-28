@@ -79,11 +79,11 @@ describe('sanitizeYamlInput()', () => {
     expect(hadTabs).toBe(false);
   });
 
-  test('only replaces LEADING tabs, not mid-line tabs', () => {
+  test('replaces ALL tabs, including mid-line tabs', () => {
     const input = 'key: value\t\n\tnested: val';
     const { sanitized } = sanitizeYamlInput(input);
-    expect(sanitized).toContain('key: value\t'); // mid-line tab preserved
-    expect(sanitized).toContain('  nested: val'); // leading tab converted
+    expect(sanitized).toContain('key: value  '); // mid-line tab converted to 2 spaces
+    expect(sanitized).toContain('  nested: val'); // leading tab converted to 2 spaces
   });
 
   test('adds missing space after colon', () => {

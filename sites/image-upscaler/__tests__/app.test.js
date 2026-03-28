@@ -10,7 +10,7 @@ const {
   applyColorAdjustments, splitImageGrid, mergeImageLayout, createCanvas,
   handleUpload, showStatus, applyResize, downloadResult, resetToolkit,
   setCurrentCanvas, getCurrentCanvas, getMergeImages, setMergeImages,
-  applyUpscale, applyCustomUpscale
+  applyUpscale, applyCustomUpscale, initMergeFlow
 } = require('../app');
 
 // Mock canvas context
@@ -453,6 +453,21 @@ describe('DOM Interactions & Tools', () => {
       expect(getMergeImages().length).toBeGreaterThan(0);
       done();
     }, 50);
+  });
+
+  test('initMergeFlow adds images and switches to upscale if only 1 image', async () => {
+    const file = new File([''], 'test.png', { type: 'image/png' });
+    initMergeFlow({ target: { files: [file] } });
+    await new Promise(r => setTimeout(r, 100));
+    expect(getCurrentCanvas()).toBeTruthy(); // Workspace initialized
+  });
+
+  test('initMergeFlow adds images and switches to merge if multiple images', async () => {
+    const file1 = new File([''], 'test1.png', { type: 'image/png' });
+    const file2 = new File([''], 'test2.png', { type: 'image/png' });
+    initMergeFlow({ target: { files: [file1, file2] } });
+    await new Promise(r => setTimeout(r, 100));
+    expect(getCurrentCanvas()).toBeTruthy(); // Temporary workspace
   });
 
   test('removeMergeImage deletes from merge list', () => {

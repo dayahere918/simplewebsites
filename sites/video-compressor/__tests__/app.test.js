@@ -134,4 +134,22 @@ describe('Video Compressor — DOM Interactions', () => {
         resetFFmpeg();
         expect(getFFmpeg()).toBeNull();
     });
+
+    test('initFFmpeg resolves immediately if library is available', async () => {
+        resetFFmpeg();
+        global.window.FFmpeg = { FFmpeg: class { on() {} load() { return Promise.resolve(); } } };
+        const { initFFmpeg } = require('../app');
+        const ff = await initFFmpeg();
+        expect(ff).toBeTruthy();
+        expect(getFFmpeg()).toBeTruthy();
+    });
+
+    test('initFFmpeg rejects after polling if library is missing', async () => {
+        resetFFmpeg();
+        global.window.FFmpeg = null;
+        global.window.FFmpegWASM = null;
+        global.window['@ffmpeg/ffmpeg'] = null;
+        const { initFFmpeg } = require('../app');
+        await expect(initFFmpeg()).rejects.toThrow('FFmpeg library not available');
+    }, 10000);
 });
