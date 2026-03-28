@@ -17,9 +17,16 @@ test_output.txt
 test_output_utf8.txt
 out.txt
 audit_coverage.js
-.gemini/
 test_report*.txt
 coverage.json
+
+# Specialized Artifacts
+.gemini/
+brain/
+implementation_plan.md
+walkthrough.md
+task.md
+
 # Terraform
 .terraform/
 *.tfstate
@@ -38,9 +45,10 @@ Thumbs.db
 
 # Environment
 .env
-.env.local
-.env.production
+.env*
+!.env.example
 
 # Logs
 logs/
 *.log
+
