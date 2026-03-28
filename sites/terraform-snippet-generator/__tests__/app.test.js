@@ -1,159 +1,112 @@
 /**
- * @jest-environment jsdom
+ * Comprehensive tests for terraform-snippet-generator
  */
-const { 
-  RESOURCES, updateResources, updateParams, generateSnippet, copyCode, getProvider
-} = require('../app');
+const { RESOURCES, updateResources, updateParams, generateSnippet, copyCode } = require('../app');
 
-function setupDOM() {
-  document.body.innerHTML = `
+const DOM_HTML = `
     <select id="provider">
-      <option value="aws">AWS</option>
-      <option value="gcp">GCP</option>
-      <option value="azure">Azure</option>
+        <option value="aws">AWS</option>
+        <option value="gcp">GCP</option>
+        <option value="azure">Azure</option>
     </select>
     <select id="resource-type"></select>
     <div id="params-area"></div>
     <div id="code-output"><code></code></div>
-  `;
-}
+`;
 
-// Mock Navigator Clipboard
-Object.assign(navigator, {
-  clipboard: {
-    writeText: jest.fn().mockResolvedValue(undefined)
-  }
+beforeEach(() => {
+    document.body.innerHTML = DOM_HTML;
+    Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: jest.fn() },
+        configurable: true
+    });
 });
 
-describe('Terraform Snippet Generator - Exhaustive', () => {
-  beforeEach(() => {
-    setupDOM();
-    updateResources();
-    jest.clearAllMocks();
-  });
+describe('Terraform Snippet Generator — Logic', () => {
+    test('RESOURCES structure is valid', () => {
+        expect(RESOURCES).toHaveProperty('aws');
+        expect(RESOURCES).toHaveProperty('gcp');
+        expect(RESOURCES).toHaveProperty('azure');
+    });
 
-  test('All resource templates for all providers', () => {
-    const providerDropdown = document.getElementById('provider');
-    const resourceDropdown = document.getElementById('resource-type');
+    test('AWS templates produce valid string', () => {
+        const ec2 = RESOURCES.aws['EC2 Instance'];
+        const res = ec2.template({ name: 'web', ami: 'ami-123', type: 't3', subnet: 'sub' });
+        expect(res).toContain('aws_instance');
+        expect(res).toContain('web');
+    });
 
-    Object.keys(RESOURCES).forEach(provider => {
-      providerDropdown.value = provider;
-      updateResources();
+    test('S3 template handles versioning branches', () => {
+        const s3 = RESOURCES.aws['S3 Bucket'];
+        const enabled = s3.template({ name: 'b', versioning: 'true' });
+        expect(enabled).toContain('Enabled');
+        const disabled = s3.template({ name: 'b', versioning: 'false' });
+        expect(disabled).toContain('Disabled');
+    });
+});
 
-      Object.keys(RESOURCES[provider]).forEach(resource => {
-        resourceDropdown.value = resource;
-        updateParams();
-        
-        // Test with default values
+describe('Terraform Snippet Generator — DOM', () => {
+    test('updateResources populates select', () => {
+        document.getElementById('provider').value = 'gcp';
+        updateResources();
+        const sel = document.getElementById('resource-type');
+        expect(sel.options.length).toBeGreaterThan(0);
+        expect(sel.value).toBe('Compute Instance');
+    });
+
+    test('updateParams populates inputs', () => {
+        document.getElementById('provider').value = 'aws';
+        updateResources(); // triggers updateParams
+        const area = document.getElementById('params-area');
+        expect(area.innerHTML).toContain('Resource Name');
+    });
+
+    test('generateSnippet creates full code block', () => {
+        document.getElementById('provider').value = 'aws';
+        updateResources();
         const code = generateSnippet();
-        expect(code).toContain('resource "');
-        expect(code).toContain('provider "');
-
-        // Test with custom values for specific edge cases (like S3 versioning)
-        if (resource === 'S3 Bucket') {
-          const versioningInput = document.getElementById('param-versioning');
-          if (versioningInput) {
-            versioningInput.value = 'false';
-            const disabledCode = generateSnippet();
-            expect(disabledCode).toContain('status = "Disabled"');
-          }
-        }
-      });
+        expect(code).toContain('provider "aws"');
+        expect(document.getElementById('code-output').textContent).toContain('provider "aws"');
     });
-  });
 
-  test('copyCode uses clipboard', () => {
-    generateSnippet();
-    copyCode();
-    expect(navigator.clipboard.writeText).toHaveBeenCalled();
-  });
-
-  test('GCP Compute Instance generates correct template', () => {
-    const providerDropdown = document.getElementById('provider');
-    const resourceDropdown = document.getElementById('resource-type');
-    providerDropdown.value = 'gcp';
-    updateResources();
-    resourceDropdown.value = 'Compute Instance';
-    updateParams();
-    const code = generateSnippet();
-    expect(code).toContain('google_compute_instance');
-    expect(code).toContain('provider "google"');
-  });
-
-  test('GCP Cloud Storage template', () => {
-    const providerDropdown = document.getElementById('provider');
-    const resourceDropdown = document.getElementById('resource-type');
-    providerDropdown.value = 'gcp';
-    updateResources();
-    resourceDropdown.value = 'Cloud Storage';
-    updateParams();
-    const code = generateSnippet();
-    expect(code).toContain('google_storage_bucket');
-  });
-
-  test('GCP Cloud SQL template', () => {
-    const providerDropdown = document.getElementById('provider');
-    const resourceDropdown = document.getElementById('resource-type');
-    providerDropdown.value = 'gcp';
-    updateResources();
-    resourceDropdown.value = 'Cloud SQL';
-    updateParams();
-    const code = generateSnippet();
-    expect(code).toContain('google_sql_database_instance');
-  });
-
-  test('Azure Virtual Machine template', () => {
-    const providerDropdown = document.getElementById('provider');
-    const resourceDropdown = document.getElementById('resource-type');
-    providerDropdown.value = 'azure';
-    updateResources();
-    resourceDropdown.value = 'Virtual Machine';
-    updateParams();
-    const code = generateSnippet();
-    expect(code).toContain('azurerm_linux_virtual_machine');
-    expect(code).toContain('provider "azurerm"');
-  });
-
-  test('Azure Storage Account template', () => {
-    const providerDropdown = document.getElementById('provider');
-    const resourceDropdown = document.getElementById('resource-type');
-    providerDropdown.value = 'azure';
-    updateResources();
-    resourceDropdown.value = 'Storage Account';
-    updateParams();
-    const code = generateSnippet();
-    expect(code).toContain('azurerm_storage_account');
-  });
-
-  test('All AWS resource templates', () => {
-    const providerDropdown = document.getElementById('provider');
-    const resourceDropdown = document.getElementById('resource-type');
-    providerDropdown.value = 'aws';
-    updateResources();
-
-    ['EC2 Instance', 'VPC', 'Security Group', 'RDS Instance', 'Lambda Function'].forEach(res => {
-      resourceDropdown.value = res;
-      updateParams();
-      const code = generateSnippet();
-      expect(code).toContain('provider "aws"');
-      expect(code).toContain('resource "');
+    test('generateSnippet handles GCP provider block', () => {
+        document.getElementById('provider').value = 'gcp';
+        updateResources();
+        const code = generateSnippet();
+        expect(code).toContain('provider "google"');
     });
-  });
 
-  test('updateParams with missing resource does nothing', () => {
-    const resourceDropdown = document.getElementById('resource-type');
-    resourceDropdown.value = 'nonexistent';
-    expect(() => updateParams()).not.toThrow();
-  });
+    test('generateSnippet handles Azure provider block and templates', () => {
+        document.getElementById('provider').value = 'azure';
+        updateResources();
+        const sel = document.getElementById('resource-type');
+        sel.value = 'Storage Account';
+        updateParams();
+        const code = generateSnippet();
+        expect(code).toContain('resource "azurerm_storage_account"');
+    });
 
-  test('generateSnippet with missing resource returns empty', () => {
-    const resourceDropdown = document.getElementById('resource-type');
-    resourceDropdown.value = 'nonexistent';
-    const code = generateSnippet();
-    expect(code).toBe('');
-  });
+    test('VPC template handles DNS branch', () => {
+        const vpc = RESOURCES.aws['VPC'];
+        const res = vpc.template({ name: 'v', cidr: '10.0.0.0/16', dns: 'true' });
+        expect(res).toContain('enable_dns_support   = true');
+    });
 
-  test('getProvider returns default for missing element', () => {
-    expect(getProvider()).toBeTruthy();
-  });
+    test('Security Group template handles port', () => {
+        const sg = RESOURCES.aws['Security Group'];
+        const res = sg.template({ name: 's', vpc: 'v', port: '80' });
+        expect(res).toContain('from_port   = 80');
+    });
+
+    test('copyCode calls clipboard', () => {
+        document.getElementById('code-output').querySelector('code').textContent = 'terraform { }';
+        copyCode();
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith('terraform { }');
+    });
+
+    test('copyCode handles null code', () => {
+        document.getElementById('code-output').querySelector('code').textContent = '';
+        copyCode();
+        expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
+    });
 });

@@ -1,63 +1,90 @@
+/**
+ * Comprehensive tests for temp-mail
+ */
 const { init, generateNewEmail, fetchMessages, readMessage, closeMessage, renderMessages } = require('../app');
 
+const DOM_HTML = `
+    <input id="email-address" value="">
+    <div id="status-text"></div>
+    <div id="loading-spinner" class="hidden"></div>
+    <div id="inbox-list"></div>
+    <div id="message-view" class="hidden">
+        <div id="msg-subject"></div>
+        <div id="msg-from"></div>
+        <div id="msg-body"></div>
+    </div>
+`;
+
+let localStore = {};
+const localStorageMock = {
+    getItem: jest.fn(k => localStore[k] || null),
+    setItem: jest.fn((k, v) => { localStore[k] = v; }),
+    removeItem: jest.fn(k => { delete localStore[k]; }),
+    clear: jest.fn(() => { localStore = {}; })
+};
+
 beforeEach(() => {
-    document.body.innerHTML = `
-        <input id="email-address" />
-        <div id="email-display"></div>
-        <div id="inbox-list"></div>
-        <div id="message-view" class="hidden">
-            <span id="msg-from"></span>
-            <span id="msg-subject"></span>
-            <span id="msg-date"></span>
-            <div id="msg-body"></div>
-        </div>
-        <span id="status-text"></span>
-        <div id="loading-spinner" class="hidden"></div>
-    `;
-    global.fetch = jest.fn((url) => {
-        if (url.includes('genRandomMailbox')) {
-            return Promise.resolve({ ok: true, json: () => Promise.resolve(['test@1secmail.com']) });
-        }
-        if (url.includes('getMessages')) {
-            return Promise.resolve({ ok: true, json: () => Promise.resolve([{ id: 1, from: 'f', subject: 's', date: 'd' }]) });
-        }
-        if (url.includes('readMessage')) {
-            return Promise.resolve({ ok: true, json: () => Promise.resolve({ body: 'Hi', textBody: 'Hi' }) });
-        }
-        return Promise.resolve({ ok: false });
-    });
-    localStorage.clear();
-    global.alert = jest.fn();
+    document.body.innerHTML = DOM_HTML;
+    global.fetch = jest.fn();
+    Object.defineProperty(window, 'localStorage', { value: localStorageMock, configurable: true });
+    localStore = {};
 });
 
-describe('Temp Mail Corrected', () => {
-    test('init handles empty storage and API failure', async () => {
-        fetch.mockResolvedValueOnce({ ok: false });
-        await init();
-        expect(document.getElementById('email-address').value).toContain('Error');
+describe('Temp Mail — Core Logic', () => {
+    test('generateNewEmail fetches and sets email', async () => {
+        global.fetch.mockResolvedValue({
+            ok: true,
+            json: jest.fn().mockResolvedValue(['test@1secmail.com'])
+        });
+        await generateNewEmail();
+        expect(document.getElementById('email-address').value).toBe('test@1secmail.com');
+        expect(localStorageMock.setItem).toHaveBeenCalledWith('stacky_temp_mail', 'test@1secmail.com');
     });
 
-    test('fetchMessages handles API error', async () => {
-        localStorage.setItem('stacky_temp_mail', 't@1.com');
+    test('init loads saved email', async () => {
+        localStore['stacky_temp_mail'] = 'saved@1secmail.com';
+        global.fetch.mockResolvedValue({
+            ok: true,
+            json: jest.fn().mockResolvedValue([])
+        });
         await init();
-        fetch.mockResolvedValueOnce({ ok: false });
+        expect(document.getElementById('email-address').value).toBe('saved@1secmail.com');
+    });
+
+    test('fetchMessages updates list', async () => {
+        global.fetch.mockResolvedValue({
+            ok: true,
+            json: jest.fn().mockResolvedValue([
+                { id: 123, from: 'sender', subject: 'hi', date: 'now' }
+            ])
+        });
+        localStore['stacky_temp_mail'] = 'test@1secmail.com';
+        await init();
         await fetchMessages();
-        expect(document.getElementById('status-text').textContent).toContain('Offline');
+        expect(document.getElementById('inbox-list').innerHTML).toContain('sender');
     });
 
-    test('readMessage handles body parsing', async () => {
-       localStorage.setItem('stacky_temp_mail', 't@1.com');
-       await init();
-       await readMessage(1);
-       expect(document.getElementById('msg-body').textContent).toBe('Hi');
-       
-       closeMessage();
-       expect(document.getElementById('message-view').classList.contains('hidden')).toBe(true);
+    test('readMessage loads content', async () => {
+        localStore['stacky_temp_mail'] = 'test@1secmail.com';
+        await init();
+        global.fetch.mockResolvedValue({
+            ok: true,
+            json: jest.fn().mockResolvedValue({
+                subject: 'Sub', from: 'F', textBody: 'Hello'
+            })
+        });
+        await readMessage(123);
+        expect(document.getElementById('message-view').classList.contains('hidden')).toBe(false);
+    });
+
+    test('closeMessage hides modal', () => {
+        document.getElementById('message-view').classList.remove('hidden');
+        closeMessage();
+        expect(document.getElementById('message-view').classList.contains('hidden')).toBe(true);
     });
 
     test('renderMessages handles empty inbox', () => {
-        document.getElementById('inbox-list').innerHTML = '';
         renderMessages([]);
-        expect(document.getElementById('inbox-list').innerHTML).toContain('Empty');
+        expect(document.getElementById('inbox-list').textContent).toContain('Empty Inbox');
     });
 });

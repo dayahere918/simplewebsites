@@ -159,3 +159,35 @@ describe('Baby Face Generator — resetAll', () => {
         expect(document.getElementById('generate-btn').disabled).toBe(true);
     });
 });
+
+describe('Baby Face Generator — load / state functions', () => {
+    test('getDrawImageParams computes correct scaling', () => {
+        const { dx, dy, dw, dh } = app.getDrawImageParams(400, 200, 200);
+        expect(dw).toBe(400); 
+        expect(dh).toBe(200);
+        expect(dx).toBe(-100);
+    });
+
+    test('updateParentState updates disabled status', () => {
+        document.getElementById('generate-btn').disabled = true;
+        app.updateParentState(1, true);
+        app.updateParentState(2, true);
+        expect(document.getElementById('generate-btn').disabled).toBe(false);
+    });
+
+    test('initFaceAPI calls loads', async () => {
+        global.faceapi.nets.tinyFaceDetector.loadFromUri = jest.fn().mockResolvedValue(true);
+        global.faceapi.nets.faceLandmark68Net.loadFromUri = jest.fn().mockResolvedValue(true);
+        await app.initFaceAPI();
+        expect(global.faceapi.nets.tinyFaceDetector.loadFromUri).toHaveBeenCalled();
+    });
+
+    test('shareBaby handles fallback if share unavailable', () => {
+        delete global.navigator.share;
+        const canvas = document.createElement('canvas');
+        canvas.id = 'baby-canvas';
+        document.body.appendChild(canvas);
+        // just verify it doesn't crash as toBlob is async
+        expect(() => app.shareBaby()).not.toThrow();
+    });
+});

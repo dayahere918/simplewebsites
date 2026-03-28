@@ -30,6 +30,28 @@ if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', initFaceAPI);
 }
 
+/**
+ * Compute scaling and centering params for drawing an image onto a target square canvas
+ */
+function getDrawImageParams(imgW, imgH, targetSize) {
+    const scale = Math.max(targetSize / imgW, targetSize / imgH);
+    const w = imgW * scale;
+    const h = imgH * scale;
+    return {
+        dx: (targetSize - w) / 2,
+        dy: (targetSize - h) / 2,
+        dw: w,
+        dh: h
+    };
+}
+
+function updateParentState(num, isLoaded) {
+    if (num === 1) parent1Loaded = isLoaded;
+    if (num === 2) parent2Loaded = isLoaded;
+    const btn = typeof document !== 'undefined' ? document.getElementById('generate-btn') : null;
+    if (btn) btn.disabled = !(parent1Loaded && parent2Loaded);
+}
+
 function loadParent(event, num) {
   const file = event?.target?.files?.[0];
   if (!file || !file.type.startsWith('image/')) return;
@@ -42,11 +64,11 @@ function loadParent(event, num) {
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       canvas.width = 200; canvas.height = 200;
-      const scale = Math.max(200 / img.width, 200 / img.height);
-      const w = img.width * scale, h = img.height * scale;
-      ctx.drawImage(img, (200 - w) / 2, (200 - h) / 2, w, h);
       
-      if (window.faceapi && faceapi.nets.tinyFaceDetector.isLoaded) {
+      const { dx, dy, dw, dh } = getDrawImageParams(img.width, img.height, 200);
+      ctx.drawImage(img, dx, dy, dw, dh);
+      
+      if (typeof window !== 'undefined' && window.faceapi && faceapi.nets.tinyFaceDetector.isLoaded) {
           const detections = await faceapi.detectAllFaces(canvas, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
           if (detections.length === 0) {
               alert('No human face detected! Please upload a clear photo of a human face.');
@@ -55,7 +77,6 @@ function loadParent(event, num) {
               if(input) input.value = '';
               return;
           }
-          // Store features for morphing
           globalLandmarks[`parent${num}`] = detections[0].landmarks.positions;
       }
 
@@ -63,10 +84,7 @@ function loadParent(event, num) {
       const slot = canvas.closest('.upload-slot');
       const dz = slot ? slot.querySelector('.drop-zone') : null;
       if (dz) dz.classList.add('hidden');
-      if (num === 1) parent1Loaded = true;
-      if (num === 2) parent2Loaded = true;
-      const btn = document.getElementById('generate-btn');
-      if (btn) btn.disabled = !(parent1Loaded && parent2Loaded);
+      updateParentState(num, true);
     };
     img.src = e.target.result;
   };
@@ -334,7 +352,8 @@ if (typeof module !== 'undefined' && module.exports) {
     getState: () => ({ parent1Loaded, parent2Loaded, globalLandmarks }), 
     setParent1: v => { parent1Loaded = v; }, 
     setParent2: v => { parent2Loaded = v; },
-    setLandmarks: (p, v) => { globalLandmarks[p] = v; }
+    setLandmarks: (p, v) => { globalLandmarks[p] = v; },
+    getDrawImageParams, updateParentState
   };
 }
 
