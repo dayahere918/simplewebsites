@@ -311,13 +311,30 @@ function resetAll() {
   if (btn) btn.disabled = true;
 }
 
+function shareBaby() {
+  if (typeof navigator === 'undefined') return;
+  const canvas = document.getElementById('baby-canvas');
+  if (!canvas) return;
+  canvas.toBlob(async (blob) => {
+    const file = new File([blob], 'baby-prediction.png', { type: 'image/png' });
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'Our Baby Prediction!', text: 'Check out our AI baby prediction! 👶' });
+      } catch (e) { console.warn('Share cancelled'); }
+    } else {
+      downloadResult();
+    }
+  });
+}
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { 
     TRAITS, blendImages, generateTraits, generateBaby, downloadResult, resetAll, loadParent,
-    extractSkinTone, applyBabyFilter, alignFace, initFaceAPI,
+    extractSkinTone, applyBabyFilter, alignFace, initFaceAPI, shareBaby,
     getState: () => ({ parent1Loaded, parent2Loaded, globalLandmarks }), 
     setParent1: v => { parent1Loaded = v; }, 
     setParent2: v => { parent2Loaded = v; },
     setLandmarks: (p, v) => { globalLandmarks[p] = v; }
   };
 }
+

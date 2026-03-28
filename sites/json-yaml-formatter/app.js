@@ -1,113 +1,212 @@
 /**
  * Formatter & Validator Core Logic using js-yaml
+ * Enhanced: Diff View, pure processData, better error messages
  */
 
-function processData() {
-    const inputStr = document.getElementById('raw-input').value.trim();
-    const inputType = document.getElementById('input-type').value;
-    const outputType = document.getElementById('output-type').value;
-    
-    const outputEl = document.getElementById('formatted-output');
-    const errorBox = document.getElementById('error-box');
-    const statusLabel = document.getElementById('status-label');
-    
-    if (!inputStr) {
-        outputEl.innerHTML = '';
-        errorBox.classList.add('hidden');
-        statusLabel.textContent = 'Empty';
-        statusLabel.className = 'text-muted';
-        return;
-    }
+// --- Pure Logic (Testable, DOM-free) ---
 
-    let parsedObj = null;
+/**
+ * Parse input string based on type
+ * @param {string} inputStr
+ * @param {string} inputType - 'json' | 'yaml' | 'xml' | 'auto'
+ * @param {object} yamlLib - js-yaml library (injectable for testing)
+ * @returns {{ parsed: any, detectedType: string, error: string|null }}
+ */
+function parseInput(inputStr, inputType, yamlLib) {
+    let parsed = null;
     let detectedType = inputType;
-    let errorMsg = null;
+    let error = null;
 
-    // Phase 1: Parsing
     try {
         if (inputType === 'auto') {
-            if (inputStr.startsWith('{') || inputStr.startsWith('[')) {
-                parsedObj = JSON.parse(inputStr);
+            const trimmed = inputStr.trim();
+            if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                parsed = JSON.parse(inputStr);
                 detectedType = 'json';
-            } else if (inputStr.startsWith('<')) {
-                // simple xml check
+            } else if (trimmed.startsWith('<')) {
                 detectedType = 'xml';
                 const parser = new DOMParser();
-                const dom = parser.parseFromString(inputStr, "application/xml");
-                if(dom.querySelector("parsererror")) throw new Error("Invalid XML Syntax");
-                parsedObj = inputStr; // we don't convert XML to JSON directly here, just format
+                const dom = parser.parseFromString(inputStr, 'application/xml');
+                if (dom.querySelector('parsererror')) throw new Error('Invalid XML Syntax');
+                parsed = inputStr;
             } else {
-                parsedObj = jsyaml.load(inputStr);
+                parsed = yamlLib.load(inputStr);
                 detectedType = 'yaml';
             }
         } else if (inputType === 'json') {
-            parsedObj = JSON.parse(inputStr);
+            parsed = JSON.parse(inputStr);
         } else if (inputType === 'yaml') {
-            parsedObj = jsyaml.load(inputStr);
+            parsed = yamlLib.load(inputStr);
         } else if (inputType === 'xml') {
             const parser = new DOMParser();
-            const dom = parser.parseFromString(inputStr, "application/xml");
-            if(dom.querySelector("parsererror")) throw new Error(dom.querySelector("parsererror").textContent);
-            parsedObj = inputStr;
+            const dom = parser.parseFromString(inputStr, 'application/xml');
+            const parseErr = dom.querySelector('parsererror');
+            if (parseErr) throw new Error(parseErr.textContent || 'Invalid XML');
+            parsed = inputStr;
         }
     } catch (e) {
-        errorMsg = e.message;
+        error = e.message;
     }
 
-    // Phase 2: Show Errors or Format
-    if (errorMsg) {
-        errorBox.textContent = `❌ Parse Error: ${errorMsg}`;
-        errorBox.classList.remove('hidden');
-        statusLabel.textContent = 'Invalid';
-        statusLabel.className = 'text-red-500';
+    return { parsed, detectedType, error };
+}
+
+/**
+ * Format parsed data to output string
+ * @param {any} parsed
+ * @param {string} detectedType - 'json' | 'yaml' | 'xml'
+ * @param {string} outputType - 'json' | 'yaml' | 'min' | 'xml'
+ * @param {string} rawInput - original string (needed for xml passthrough)
+ * @param {object} yamlLib - js-yaml library
+ * @returns {{ outStr: string, langClass: string }}
+ */
+function formatOutput(parsed, detectedType, outputType, rawInput, yamlLib) {
+    let outStr = '';
+    let langClass = 'language-json';
+
+    if (detectedType === 'xml') {
+        outStr = rawInput.replace(/>(<)(\/*)(\w)/g, '>\n$1$2$3');
+        langClass = 'language-markup';
     } else {
-        errorBox.classList.add('hidden');
-        statusLabel.textContent = `Valid ${detectedType.toUpperCase()}`;
-        statusLabel.className = 'text-green-500';
-        
-        let outStr = '';
-        let langClass = 'language-json';
-
-        if (detectedType === 'xml') {
-            // Very naive XML formatting for illustration (a robust one requires more logic)
-            outStr = inputStr.replace(/(>)(<)(\/*)/g, '$1\n$2$3');
-            langClass = 'language-markup';
-        } else {
-            // JSON / YAML Outputting
-            if (outputType === 'json') {
-                outStr = JSON.stringify(parsedObj, null, 2);
-                langClass = 'language-json';
-            } else if (outputType === 'yaml') {
-                outStr = jsyaml.dump(parsedObj);
-                langClass = 'language-yaml';
-            } else if (outputType === 'min') {
-                outStr = JSON.stringify(parsedObj);
-                langClass = 'language-json';
-            }
-        }
-        
-        outputEl.textContent = outStr;
-        outputEl.className = langClass;
-        
-        if (window.Prism) {
-            Prism.highlightElement(outputEl);
+        if (outputType === 'json') {
+            outStr = JSON.stringify(parsed, null, 2);
+            langClass = 'language-json';
+        } else if (outputType === 'yaml') {
+            outStr = yamlLib.dump(parsed);
+            langClass = 'language-yaml';
+        } else if (outputType === 'min') {
+            outStr = JSON.stringify(parsed);
+            langClass = 'language-json';
         }
     }
+
+    return { outStr, langClass };
+}
+
+/**
+ * Generate a simple diff between two objects (for diff view)
+ * Returns HTML string showing differences
+ * @param {string} textA
+ * @param {string} textB
+ * @returns {string} HTML diff
+ */
+function generateDiff(textA, textB) {
+    const linesA = textA.split('\n');
+    const linesB = textB.split('\n');
+    const maxLen = Math.max(linesA.length, linesB.length);
+    
+    let html = '';
+    for (let i = 0; i < maxLen; i++) {
+        const a = linesA[i] !== undefined ? linesA[i] : '';
+        const b = linesB[i] !== undefined ? linesB[i] : '';
+        
+        if (a === b) {
+            html += `<div class="diff-same">${escapeHtml(a)}</div>`;
+        } else if (a && !b) {
+            html += `<div class="diff-removed">- ${escapeHtml(a)}</div>`;
+        } else if (!a && b) {
+            html += `<div class="diff-added">+ ${escapeHtml(b)}</div>`;
+        } else {
+            html += `<div class="diff-removed">- ${escapeHtml(a)}</div>`;
+            html += `<div class="diff-added">+ ${escapeHtml(b)}</div>`;
+        }
+    }
+    return html;
+}
+
+/**
+ * Escape HTML entities for safe display
+ */
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+// --- DOM Functions ---
+
+function processData() {
+    const rawInput = document.getElementById('raw-input');
+    const inputTypeEl = document.getElementById('input-type');
+    const outputTypeEl = document.getElementById('output-type');
+    const outputEl = document.getElementById('formatted-output');
+    const errorBox = document.getElementById('error-box');
+    const statusLabel = document.getElementById('status-label');
+
+    if (!rawInput || !outputEl) return;
+
+    const inputStr = rawInput.value.trim();
+    const inputType = inputTypeEl ? inputTypeEl.value : 'json';
+    const outputType = outputTypeEl ? outputTypeEl.value : 'json';
+
+    if (!inputStr) {
+        outputEl.innerHTML = '';
+        if (errorBox) errorBox.classList.add('hidden');
+        if (statusLabel) { statusLabel.textContent = 'Empty'; statusLabel.className = 'status-empty'; }
+        return;
+    }
+
+    const yamlLib = (typeof jsyaml !== 'undefined') ? jsyaml : (typeof global !== 'undefined' ? global.jsyaml : null);
+    if (!yamlLib) { showFormatterError(errorBox, statusLabel, 'js-yaml library not loaded'); return; }
+
+    const { parsed, detectedType, error } = parseInput(inputStr, inputType, yamlLib);
+
+    if (error) {
+        showFormatterError(errorBox, statusLabel, `Parse Error: ${error}`);
+        return;
+    }
+
+    if (errorBox) errorBox.classList.add('hidden');
+    if (statusLabel) { statusLabel.textContent = `✅ Valid ${detectedType.toUpperCase()}`; statusLabel.className = 'status-valid'; }
+
+    const { outStr, langClass } = formatOutput(parsed, detectedType, outputType, inputStr, yamlLib);
+    outputEl.textContent = outStr;
+    outputEl.className = langClass;
+
+    if (typeof window !== 'undefined' && window.Prism) {
+        window.Prism.highlightElement(outputEl);
+    }
+}
+
+function showFormatterError(errorBox, statusLabel, msg) {
+    if (errorBox) { errorBox.textContent = '❌ ' + msg; errorBox.classList.remove('hidden'); }
+    if (statusLabel) { statusLabel.textContent = 'Invalid'; statusLabel.className = 'status-error'; }
 }
 
 function copyOutput() {
-    const text = document.getElementById('formatted-output').textContent;
+    const el = document.getElementById('formatted-output');
+    const text = el ? el.textContent : '';
     if (!text) return;
-    navigator.clipboard.writeText(text);
-    const btn = event.target;
-    btn.textContent = '✅ Copied!';
-    setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+    navigator.clipboard.writeText(text).catch(() => {});
+    const btn = document.getElementById('copy-btn');
+    if (btn) {
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+    }
+}
+
+function toggleDiffView() {
+    const diffPanel = document.getElementById('diff-panel');
+    if (!diffPanel) return;
+    diffPanel.classList.toggle('hidden');
+}
+
+function runDiff() {
+    const a = document.getElementById('diff-input-a')?.value || '';
+    const b = document.getElementById('diff-input-b')?.value || '';
+    const result = document.getElementById('diff-result');
+    if (result) result.innerHTML = generateDiff(a, b);
 }
 
 if (typeof document !== 'undefined') {
-    // We bind processData in HTML via onchange/oninput
+    document.addEventListener('DOMContentLoaded', () => {
+        const rawInput = document.getElementById('raw-input');
+        if (rawInput) rawInput.addEventListener('input', processData);
+    });
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { processData, copyOutput };
+    module.exports = { processData, copyOutput, parseInput, formatOutput, generateDiff, escapeHtml, toggleDiffView, runDiff };
 }
