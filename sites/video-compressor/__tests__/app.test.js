@@ -152,4 +152,47 @@ describe('Video Compressor — DOM Interactions', () => {
         const { initFFmpeg } = require('../app');
         await expect(initFFmpeg()).rejects.toThrow('FFmpeg library not available');
     }, 10000);
+
+    test('executeCompression fails gracefully if util is missing', async () => {
+        resetFFmpeg();
+        const { setVideoFile, executeCompression } = require('../app');
+        const mockFile = { name: 'test.mp4', size: 1024, type: 'video/mp4' };
+        setVideoFile(mockFile);
+        
+        global.window.FFmpeg = { FFmpeg: class { on() {} load() { return Promise.resolve(); } } };
+        global.window.FFmpegUtil = null;
+        global.window['@ffmpeg/util'] = null;
+        
+        await executeCompression();
+        expect(document.getElementById('processing-status').textContent).toContain('Compression failed');
+    }, 15000);
+
+    test('executeCompression runs full mock flow successfully', async () => {
+        resetFFmpeg();
+        const { setVideoFile, executeCompression } = require('../app');
+        const mockFile = { name: 'test.mp4', size: 1024, type: 'video/mp4' };
+        setVideoFile(mockFile);
+        
+        // Mock FFmpeg core
+        global.window.FFmpeg = { 
+            FFmpeg: class { 
+                on() {} 
+                load() { return Promise.resolve(); } 
+                writeFile() { return Promise.resolve(); }
+                exec() { return Promise.resolve(); }
+                readFile() { return Promise.resolve(new Uint8Array(500)); } // compressed is 500 bytes
+            } 
+        };
+        // Mock util
+        global.window.FFmpegUtil = { fetchFile: () => Promise.resolve(new Uint8Array(1024)) };
+        
+        await executeCompression();
+        
+        // Success hides status panel
+        expect(document.getElementById('processing-status').classList.contains('hidden')).toBe(true);
+        // Result UI is shown
+        expect(document.getElementById('result-ui').classList.contains('hidden')).toBe(false);
+        // Saved space UI is updated (1024 -> 500 is ~51%)
+        expect(document.getElementById('saved-space').innerHTML).toContain('Saved 51%');
+    });
 });
