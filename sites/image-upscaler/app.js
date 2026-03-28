@@ -255,7 +255,12 @@ function handleUpload(event) {
   const reader = new FileReader();
   reader.onload = (e) => {
     const img = new Image();
-    img.onload = () => {
+    img.onload = async () => {
+      try {
+        if (img.decode) await img.decode();
+      } catch (err) {
+        console.warn('Image decode error', err);
+      }
       const { valid, message } = validateImageSize(img.width, img.height);
       if (!valid) { showStatus(message, 'error'); return; }
       originalImage = img;
@@ -287,7 +292,15 @@ function initWorkspace(img) {
 function updatePreview() {
   if (!currentCanvas) return;
   const preview = document.getElementById('img-preview');
-  if (preview) preview.src = currentCanvas.toDataURL();
+  if (preview) {
+    try {
+      const dataUrl = currentCanvas.toDataURL();
+      preview.src = (dataUrl === 'data:,' && originalImage) ? originalImage.src : dataUrl;
+    } catch (e) {
+      console.warn('Canvas toDataURL failed', e);
+      if (originalImage) preview.src = originalImage.src;
+    }
+  }
 
   const dimsEl = document.getElementById('current-dims');
   if (dimsEl) dimsEl.textContent = `${currentCanvas.width} × ${currentCanvas.height} px`;

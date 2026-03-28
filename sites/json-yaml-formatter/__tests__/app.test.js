@@ -53,10 +53,11 @@ describe('sanitizeYamlInput()', () => {
     expect(sanitized).toContain('  name: web');
   });
 
-  test('returns hadTabs: false for space-indented input', () => {
+  test('returns hadTabs: false and hadMissingSpaces: false for clean input', () => {
     const input = 'service:\n  name: web\n  port: 80';
-    const { sanitized, hadTabs } = sanitizeYamlInput(input);
+    const { sanitized, hadTabs, hadMissingSpaces } = sanitizeYamlInput(input);
     expect(hadTabs).toBe(false);
+    expect(hadMissingSpaces).toBe(false);
     expect(sanitized).toBe(input);
   });
 
@@ -79,10 +80,31 @@ describe('sanitizeYamlInput()', () => {
   });
 
   test('only replaces LEADING tabs, not mid-line tabs', () => {
-    const input = 'key:\tvalue\n\tnested: val';
+    const input = 'key: value\t\n\tnested: val';
     const { sanitized } = sanitizeYamlInput(input);
-    expect(sanitized).toContain('key:\tvalue'); // mid-line tab preserved
+    expect(sanitized).toContain('key: value\t'); // mid-line tab preserved
     expect(sanitized).toContain('  nested: val'); // leading tab converted
+  });
+
+  test('adds missing space after colon', () => {
+    const input = 'port:80\nenv:production';
+    const { sanitized, hadMissingSpaces } = sanitizeYamlInput(input);
+    expect(hadMissingSpaces).toBe(true);
+    expect(sanitized).toBe('port: 80\nenv: production');
+  });
+
+  test('does not add space after colon in URLs or mid-string', () => {
+    const input = 'url: http://example.com/api:v1';
+    const { sanitized, hadMissingSpaces } = sanitizeYamlInput(input);
+    expect(hadMissingSpaces).toBe(false); // No missing spaces in this input
+    expect(sanitized).toBe('url: http://example.com/api:v1');
+  });
+
+  test('fixes mixed tabs and spaces indentation', () => {
+    const input = 'a:\n \tb: 1';
+    const { sanitized, hadTabs } = sanitizeYamlInput(input);
+    expect(hadTabs).toBe(true);
+    expect(sanitized).toBe('a:\n   b: 1'); // 1 space + 1 tab(->2 spaces) = 3 spaces
   });
 });
 
@@ -127,7 +149,7 @@ describe('parseInput() — YAML', () => {
     const tabYaml = 'service:\n\tname: web';
     const { error, notice } = parseInput(tabYaml, 'yaml', mockYamlLib);
     expect(error).toBeNull();
-    expect(notice).toContain('Tab');
+    expect(notice).toContain('Tabs');
   });
 
   test('auto-detects YAML for non-JSON, non-XML input', () => {
@@ -282,7 +304,7 @@ describe('processData()', () => {
     processData();
     
     expect(document.getElementById('notice-box').classList.contains('hidden')).toBe(false);
-    expect(document.getElementById('notice-box').innerHTML).toContain('Tab');
+    expect(document.getElementById('notice-box').innerHTML).toContain('Tabs');
   });
 
   test('displays error box on invalid input', () => {

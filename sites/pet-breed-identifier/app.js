@@ -33,7 +33,9 @@ const HUMAN_KEYWORDS = [
   'person', 'man', 'woman', 'boy', 'girl', 'human', 'face', 'suit', 'shirt',
   'tie', 'jersey', 'gown', 'dress', 'hair', 'people', 'portrait', 'bodybuilder',
   'bridegroom', 'sarong', 'miniskirt', 'bikini', 'swimming cap', 'cowboy hat',
-  'mortarboard', 'academic', 'military', 'police', 'lab coat', 'apron'
+  'mortarboard', 'academic', 'military', 'police', 'lab coat', 'apron',
+  'sunglass', 'sweatshirt', 'hoodie', 't-shirt', 't shirt', 'jeans', 'denim',
+  'cap', 'hat', 'sunglasses', 'glasses'
 ];
 
 /**
@@ -56,6 +58,9 @@ function isHumanImage(predictions) {
   const topPreds = predictions.slice(0, 3);
   return topPreds.some(pred => {
     const name = (pred.className || '').toLowerCase();
+    const probability = pred.probability || 0;
+    // For human keywords, ignore very low confidence matches if there is a strong pet match later
+    if (probability < 0.05) return false;
     return HUMAN_KEYWORDS.some(kw => name.includes(kw));
   });
 }
@@ -181,30 +186,11 @@ function identifyBreed(predictions, hash) {
            scores['Bengal'] += probScore * 2;
         }
         if (predName.includes('siamese')) scores['Siamese'] += probScore * 3;
-        if (predName.includes('persian')) scores['Persian'] += probScore * 3;
+        if (predName.includes('persian') || predName.includes('egyptian cat')) {
+           scores['Persian'] += probScore * 3;
+        }
       }
     });
-
-    // Inject dynamic AI-detected breed if confident and unmatched
-    if (!matchedAny && predictions[0].probability > 0.15) {
-        const injectedName = predictions[0].className.split(',')[0].trim();
-        const formattedName = injectedName.replace(/\b\w/g, l => l.toUpperCase());
-        scores[formattedName] = Math.round(predictions[0].probability * 100 * 5);
-
-        const breedList = petType === 'dog' ? DOG_BREEDS : CAT_BREEDS;
-        if (!breedList.find(b => b.name === formattedName)) {
-            breedList.push({
-                name: formattedName,
-                size: 'Variable',
-                life: '10-15 years',
-                temperament: 'Identified by AI Model',
-                origin: 'Unknown',
-                group: 'AI Detected',
-                care: ['Routine veterinary visits', 'Regular exercise and balanced diet', 'Standard grooming based on coat type', 'Mental stimulation and training'],
-                colorProfile: { brightness: 'medium', warmth: 'neutral', contrast: 'medium' }
-            });
-        }
-    }
   }
 
   // Normalize to valid percentages

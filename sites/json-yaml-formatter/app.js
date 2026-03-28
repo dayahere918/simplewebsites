@@ -13,18 +13,35 @@
  * @returns {{ sanitized: string, hadTabs: boolean }}
  */
 function sanitizeYamlInput(str) {
-  if (typeof str !== 'string') return { sanitized: '', hadTabs: false };
+  if (typeof str !== 'string') return { sanitized: '', hadTabs: false, hadMissingSpaces: false, notice: '' };
+  
   let hadTabs = false;
+  let hadMissingSpaces = false;
+
   const sanitized = str.split('\n').map(line => {
-    // Count leading tabs and replace each with 2 spaces
-    const match = line.match(/^(\t+)/);
-    if (match) {
+    // 1. Fix mixed leading tabs+spaces into pure spaces (2 spaces per tab)
+    const indentMatch = line.match(/^([ \t]+)/);
+    if (indentMatch && indentMatch[1].includes('\t')) {
       hadTabs = true;
-      return '  '.repeat(match[1].length) + line.slice(match[1].length);
+      const fixedIndent = indentMatch[1].replace(/\t/g, '  ');
+      line = fixedIndent + line.slice(indentMatch[1].length);
+    }
+
+    // 2. Fix missing space after colon: key:value -> key: value
+    // Target keys at start of line (allowing indents and sequence dashes)
+    const colonMatch = line.match(/^([\s-]*[\w"']+):([^\s/"'])/);
+    if (colonMatch) {
+      hadMissingSpaces = true;
+      line = line.replace(/^([\s-]*[\w"']+):([^\s/"'])/, '$1: $2');
     }
     return line;
   }).join('\n');
-  return { sanitized, hadTabs };
+
+  let notices = [];
+  if (hadTabs) notices.push('Tabs replaced with spaces');
+  if (hadMissingSpaces) notices.push('Missing spaces after colons added');
+  
+  return { sanitized, hadTabs, hadMissingSpaces, notice: notices.length ? '⚠️ ' + notices.join(' & ') : '' };
 }
 
 /**
@@ -53,17 +70,17 @@ function parseInput(inputStr, inputType, yamlLib) {
         if (dom.querySelector('parsererror')) throw new Error('Invalid XML Syntax');
         parsed = inputStr;
       } else {
-        // Try YAML — auto-sanitize tabs first
-        const { sanitized, hadTabs } = sanitizeYamlInput(inputStr);
-        if (hadTabs) notice = '⚠️ Tab indentation replaced with spaces for YAML compatibility.';
+        // Try YAML — auto-sanitize tabs and formatting first
+        const { sanitized, notice: sanNotice } = sanitizeYamlInput(inputStr);
+        if (sanNotice) notice = sanNotice;
         parsed = yamlLib.load(sanitized);
         detectedType = 'yaml';
       }
     } else if (inputType === 'json') {
       parsed = JSON.parse(inputStr);
     } else if (inputType === 'yaml') {
-      const { sanitized, hadTabs } = sanitizeYamlInput(inputStr);
-      if (hadTabs) notice = '⚠️ Tab indentation replaced with spaces for YAML compatibility.';
+      const { sanitized, notice: sanNotice } = sanitizeYamlInput(inputStr);
+      if (sanNotice) notice = sanNotice;
       parsed = yamlLib.load(sanitized);
     } else if (inputType === 'xml') {
       const parser = new DOMParser();

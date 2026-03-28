@@ -58,7 +58,7 @@ function isVideoFile(file) {
 async function initFFmpeg() {
     if (ffmpegInstance) return ffmpegInstance;
 
-    const FFmpegLib = window.FFmpeg;
+    const FFmpegLib = window.FFmpegWASM;
     if (!FFmpegLib || !FFmpegLib.FFmpeg) {
         throw new Error('FFmpeg library not available. Please check your internet connection.');
     }
@@ -170,7 +170,7 @@ async function executeCompression() {
     try {
         const ff = await initFFmpeg();
         const { fetchFile } = window.FFmpegUtil || {};
-        if (!fetchFile) throw new Error('FFmpegUtil not available');
+        if (!fetchFile) throw new Error('FFmpegUtil not available. Please refresh and try again.');
 
         const ext = (videoFile.name.split('.').pop() || 'mp4').toLowerCase();
         const inputName = `input.${ext}`;

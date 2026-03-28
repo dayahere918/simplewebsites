@@ -65,7 +65,7 @@ describe('Video Compressor — DOM Interactions', () => {
     test('setVideoFile shows compress UI and hides upload', () => {
         const mockFile = { name: 'test.mp4', size: 1024 * 1024, type: 'video/mp4' };
         // Mock initFFmpeg as it requires network
-        global.window.FFmpeg = null;
+        global.window.FFmpegWASM = null;
         setVideoFile(mockFile);
         expect(document.getElementById('compress-ui').classList.contains('hidden')).toBe(false);
         expect(document.getElementById('upload-area').classList.contains('hidden')).toBe(true);

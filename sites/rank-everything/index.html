@@ -27,6 +27,20 @@
                 <button class="btn btn-primary active" id="tab-crypto" onclick="loadCategory('crypto')">🪙 Top Crypto</button>
                 <button class="btn btn-secondary" id="tab-movies" onclick="loadCategory('movies')">🎬 Top Movies</button>
                 <button class="btn btn-secondary" id="tab-games" onclick="loadCategory('games')">🎮 Top Games</button>
+                <button class="btn btn-secondary" id="tab-community" onclick="loadCategory('community')">👥 Community Lists</button>
+            </div>
+            
+            <div id="create-list-ui" class="hidden flex-col gap-4 mb-6 p-4 border border-border rounded-lg bg-surface">
+                <h3 class="mb-2 text-accent">Create a New Ranked List</h3>
+                <input type="text" id="new-list-name" class="input-text w-full" placeholder="List Name (e.g., Best Pizza Toppings)">
+                <textarea id="new-list-items" class="input-text w-full font-mono text-sm" rows="4" placeholder="Enter items to rank (one per line)..."></textarea>
+                <div class="flex gap-2">
+                    <button class="btn btn-primary" onclick="submitNewList()" id="btn-submit-list">🚀 Submit List</button>
+                    <button class="btn btn-secondary" onclick="toggleCreateList(false)">Cancel</button>
+                </div>
+            </div>
+            <div id="community-actions" class="hidden flex justify-center mb-6">
+                <button class="btn btn-primary" onclick="toggleCreateList(true)">➕ Create New List</button>
             </div>
             
             <div id="loading-spinner" class="text-center p-8 hidden animate-pulse font-bold text-accent">Fetching latest rankings...</div>

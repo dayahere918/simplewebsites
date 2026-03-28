@@ -1,0 +1,4 @@
+# Allow SharedArrayBuffer for FFmpeg WASM in the video-compressor tool only
+/video-compressor/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp

@@ -23,6 +23,11 @@ out.txt
 audit_coverage.js
 test_report*.txt
 coverage.json
+__tests_output.txt
+test_json*.txt
+test_rank.txt
+test_full.txt
+test_output.txt
 
 # Specialized Artifacts
 .gemini/
