@@ -16,6 +16,8 @@ jest_output.txt
 test_output.txt
 test_output_utf8.txt
 out.txt
+audit_coverage.js
+.gemini/
 # Terraform
 .terraform/
 *.tfstate
