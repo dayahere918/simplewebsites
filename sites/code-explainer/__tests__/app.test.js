@@ -306,3 +306,99 @@ describe('API Key management', () => {
     expect(window.localStorage.getItem('stacky_groq_key')).toBeNull();
   });
 });
+
+// ── DOM / UI Interactions ──────────────────────────────────
+
+const { executeAI } = require('../app');
+
+describe('executeAI() and copyResult()', () => {
+  beforeEach(() => {
+    setApiKey('gsk_valid_key');
+    document.getElementById('code-input').value = 'const x = 1;';
+    jest.restoreAllMocks();
+  });
+
+  test('executeAI success path updates UI and highlights code', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ choices: [{ message: { content: 'Explanation success' } }] })
+    });
+
+    window.Prism = { highlightAllUnder: jest.fn() };
+    
+    await executeAI();
+
+    expect(document.getElementById('ai-result').classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('ai-loading').classList.contains('hidden')).toBe(true);
+    expect(document.getElementById('ai-result').innerHTML).toContain('Explanation success');
+    expect(document.getElementById('ai-status-msg').textContent).toContain('✅');
+    expect(window.Prism.highlightAllUnder).toHaveBeenCalled();
+  });
+
+  test('executeAI fallback path displays 400 error message', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: async () => ({ error: { message: 'All models failed' } }),
+      statusText: 'Bad Request'
+    });
+
+    await executeAI();
+
+    expect(document.getElementById('ai-result').innerHTML).toContain('All Groq models are temporarily unavailable');
+    expect(document.getElementById('ai-loading').classList.contains('hidden')).toBe(true);
+  });
+
+  test('executeAI auth error displays 401 error message and clears key', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: async () => ({ error: { message: 'Invalid API Key' } }),
+      statusText: 'Unauthorized'
+    });
+
+    window.localStorage.setItem('stacky_groq_key', 'test');
+    await executeAI();
+
+    expect(document.getElementById('ai-result').innerHTML).toContain('Invalid API Key');
+    expect(window.localStorage.getItem('stacky_groq_key')).toBeNull(); // Key cleared
+  });
+
+  test('executeAI aborts if no API key', async () => {
+    setApiKey('');
+    global.fetch = jest.fn();
+    window.alert = jest.fn();
+    
+    await executeAI();
+    
+    expect(window.alert).toHaveBeenCalled();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  test('executeAI aborts if no code input', async () => {
+    setApiKey('key');
+    document.getElementById('code-input').value = '   ';
+    global.fetch = jest.fn();
+    
+    await executeAI();
+    
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  test('copyResult writes to clipboard and updates button', async () => {
+    document.getElementById('ai-result').textContent = 'Test text';
+    global.navigator.clipboard = { writeText: jest.fn().mockResolvedValue() };
+    jest.useFakeTimers();
+
+    copyResult();
+    
+    expect(global.navigator.clipboard.writeText).toHaveBeenCalledWith('Test text');
+    const btn = document.getElementById('copy-result-btn');
+    expect(btn.textContent).toContain('Copied');
+    
+    jest.advanceTimersByTime(2500);
+    expect(btn.textContent).toContain('Copy');
+    
+    jest.useRealTimers();
+  });
+});

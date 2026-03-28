@@ -249,3 +249,49 @@ describe('toggleDiffView() and runDiff()', () => {
     expect(document.getElementById('diff-result').innerHTML).toContain('diff-');
   });
 });
+
+// ── processData Integration ──────────────────────────────
+
+const { processData } = require('../app');
+
+describe('processData()', () => {
+  beforeEach(() => {
+    document.getElementById('raw-input').value = '';
+    document.getElementById('formatted-output').innerHTML = '';
+    document.getElementById('error-box').classList.add('hidden');
+    document.getElementById('notice-box').classList.add('hidden');
+    jest.clearAllMocks();
+  });
+
+  test('processes valid JSON input successfully', () => {
+    document.getElementById('raw-input').value = '{"test": 123}';
+    document.getElementById('input-type').value = 'json';
+    document.getElementById('output-type').value = 'json';
+    
+    processData();
+    
+    expect(document.getElementById('formatted-output').innerHTML).toContain('123');
+    expect(document.getElementById('error-box').classList.contains('hidden')).toBe(true);
+    expect(document.getElementById('status-label').textContent).toContain('JSON');
+  });
+
+  test('displays notice box when tabs are auto-converted in YAML', () => {
+    document.getElementById('raw-input').value = 'key:\n\tvalue: 123';
+    document.getElementById('input-type').value = 'yaml';
+    
+    processData();
+    
+    expect(document.getElementById('notice-box').classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('notice-box').innerHTML).toContain('Tab');
+  });
+
+  test('displays error box on invalid input', () => {
+    document.getElementById('raw-input').value = '{bad json}';
+    document.getElementById('input-type').value = 'json';
+    
+    processData();
+    
+    expect(document.getElementById('error-box').classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('formatted-output').innerHTML).toBe('');
+  });
+});

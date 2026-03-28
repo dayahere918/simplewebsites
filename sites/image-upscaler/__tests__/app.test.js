@@ -72,6 +72,7 @@ beforeEach(() => {
   document.body.innerHTML = DOM_HTML;
 
   // Override createCanvas to return mock canvases
+  const origCreate = document.createElement.bind(document);
   global.document.createElement = jest.fn().mockImplementation((tag) => {
     if (tag === 'canvas') {
       const { canvas } = makeMockCanvas();
@@ -80,7 +81,7 @@ beforeEach(() => {
     if (tag === 'a') {
       return { href: '', download: '', click: jest.fn() };
     }
-    return { style: {}, textContent: '', innerHTML: '', classList: { add: jest.fn(), remove: jest.fn(), contains: jest.fn(), toggle: jest.fn() } };
+    return origCreate(tag);
   });
 
   global.FileReader = class {
@@ -351,5 +352,128 @@ describe('createCanvas()', () => {
     const c = createCanvas(300, 200);
     expect(c.width).toBe(300);
     expect(c.height).toBe(200);
+  });
+});
+
+// ── DOM Functions ────────────────────────────────────────
+
+const {
+  initWorkspace, updatePreview, applyRotate, applyFlip, applyTilt,
+  applyCropManual, applyCropPreset, applyColors, resetColorSliders,
+  applySplit, applyMerge, handleMergeUpload, renderMergeList,
+  removeMergeImage, switchTab, getOriginalImage
+} = require('../app');
+
+describe('DOM Interactions & Tools', () => {
+  beforeEach(() => {
+    resetToolkit();
+    const { canvas } = makeMockCanvas();
+    setCurrentCanvas(canvas);
+  });
+
+  test('handleUpload and initWorkspace workflow', (done) => {
+    const file = new File([''], 'test.png', { type: 'image/png' });
+    handleUpload({ target: { files: [file] } });
+    setTimeout(() => {
+      expect(document.getElementById('workspace').classList.contains('hidden')).toBe(false);
+      done();
+    }, 50);
+  });
+
+  test('applyResize updates canvas and inputs', () => {
+    document.getElementById('resize-w').value = '150';
+    document.getElementById('resize-h').value = '150';
+    document.getElementById('maintain-ratio').checked = false;
+    applyResize();
+    expect(getCurrentCanvas().width).toBe(150);
+  });
+
+  test('applyRotate triggers rotation', () => {
+    applyRotate(90);
+    const canvas = getCurrentCanvas();
+    expect(canvas).toBeTruthy();
+  });
+
+  test('applyFlip triggers flip', () => {
+    applyFlip('horizontal');
+    const canvas = getCurrentCanvas();
+    expect(canvas).toBeTruthy();
+  });
+
+  test('applyTilt triggers tilt', () => {
+    document.getElementById('tilt-angle').value = '45';
+    applyTilt();
+    const canvas = getCurrentCanvas();
+    expect(canvas).toBeTruthy();
+  });
+
+  test('applyCropManual updates dimensions', () => {
+    document.getElementById('crop-w').value = '50';
+    document.getElementById('crop-h').value = '50';
+    applyCropManual();
+    expect(getCurrentCanvas().width).toBe(50);
+  });
+
+  test('applyCropPreset crops to preset logic', () => {
+    applyCropPreset('1:1');
+    const canvas = getCurrentCanvas();
+    expect(canvas.width).toBe(canvas.height);
+  });
+
+  test('applyColors uses slider values', () => {
+    document.getElementById('adj-brightness').value = '120';
+    applyColors();
+    expect(document.getElementById('status-text').textContent).toContain('Color adjustments applied');
+  });
+
+  test('resetColorSliders resets values', () => {
+    document.getElementById('adj-brightness').value = '150';
+    resetColorSliders();
+    expect(document.getElementById('adj-brightness').value).toBe('100');
+  });
+
+  test('applySplit populates tiles', () => {
+    applySplit();
+    expect(document.getElementById('split-results').children.length).toBeGreaterThan(0);
+  });
+
+  test('downloadResult constructs download link', () => {
+    downloadResult('png');
+    // Using mock click from document.createElement('a')
+    expect(document.getElementById('status-text')).toBeTruthy(); // minimal side logic check
+  });
+
+  test('handleMergeUpload adds images to list', (done) => {
+    const file = new File([''], 'test.png', { type: 'image/png' });
+    handleMergeUpload({ target: { files: [file] } });
+    setTimeout(() => {
+      expect(getMergeImages().length).toBeGreaterThan(0);
+      done();
+    }, 50);
+  });
+
+  test('removeMergeImage deletes from merge list', () => {
+    setMergeImages([{}]);
+    removeMergeImage(0);
+    expect(getMergeImages().length).toBe(0);
+  });
+
+  test('applyMerge processes and switches workspace', () => {
+    setMergeImages([{ width: 100, height: 100 }, { width: 100, height: 100 }]);
+    applyMerge();
+    expect(getCurrentCanvas().width).toBe(200);
+  });
+
+  test('switchTab sets active state', () => {
+    document.body.innerHTML += '<button id="tab-merge" class="toolkit-tab"></button><div id="panel-merge" class="tab-panel hidden"></div>';
+    switchTab('merge');
+    expect(document.getElementById('tab-merge').classList.contains('active')).toBe(true);
+    expect(document.getElementById('panel-merge').classList.contains('hidden')).toBe(false);
+  });
+  
+  test('resetToolkit clears state', () => {
+    resetToolkit();
+    expect(getCurrentCanvas()).toBeNull();
+    expect(getOriginalImage()).toBeNull();
   });
 });

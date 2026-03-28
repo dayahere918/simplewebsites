@@ -21,6 +21,8 @@ const DOM_HTML = `
   <div id="baby-traits"></div>
 `;
 
+const realCreateElement = document.createElement.bind(document);
+
 // Canvas mock factory
 function makeMockCanvas(w = 200, h = 200, pixelVal = 128) {
   const pixelData = new Uint8ClampedArray(w * h * 4);
@@ -30,6 +32,13 @@ function makeMockCanvas(w = 200, h = 200, pixelVal = 128) {
 
   const imageData = { data: pixelData, width: w, height: h };
   const outImageData = { data: new Uint8ClampedArray(w * h * 4), width: w, height: h };
+
+  // Use a real HTML element to satisfy DOM API checks like drawImage(canvas)
+  const canvas = realCreateElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  // Stub extra DOM methods if needed
+  canvas.closest = jest.fn().mockReturnValue(null);
 
   const ctx = {
     drawImage: jest.fn(),
@@ -45,17 +54,10 @@ function makeMockCanvas(w = 200, h = 200, pixelVal = 128) {
     translate: jest.fn(),
     rotate: jest.fn(),
     scale: jest.fn(),
+    canvas: canvas
   };
 
-  const canvas = {
-    width: w,
-    height: h,
-    getContext: jest.fn().mockReturnValue(ctx),
-    classList: { remove: jest.fn(), add: jest.fn(), contains: jest.fn() },
-    closest: jest.fn().mockReturnValue(null),
-    parentElement: null
-  };
-  ctx.canvas = canvas;
+  canvas.getContext = jest.fn().mockReturnValue(ctx);
 
   return { canvas, ctx, imageData };
 }
@@ -344,5 +346,34 @@ describe('resetAll()', () => {
     document.getElementById('result-section').classList.remove('hidden');
     resetAll();
     expect(document.getElementById('result-section').classList.contains('hidden')).toBe(true);
+  });
+});
+
+// ── generateBaby ──────────────────────────────────────────
+
+describe('generateBaby()', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('executes full pipeline without crashing', () => {
+    jest.useFakeTimers();
+    setParent1(true);
+    setParent2(true);
+    
+    // Trigger generation
+    generateBaby();
+    
+    expect(document.getElementById('generate-btn').disabled).toBe(true);
+
+    // Advance setTimeout inside generateBaby
+    jest.advanceTimersByTime(100);
+
+    // Verify UI updates
+    expect(document.getElementById('generate-btn').disabled).toBe(false); // Reset at end
+    expect(document.getElementById('result-section').classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('baby-traits').children.length).toBeGreaterThan(0);
+    
+    jest.useRealTimers();
   });
 });

@@ -30,8 +30,10 @@ beforeEach(() => {
     setItem: jest.fn(),
     removeItem: jest.fn()
   };
-  global.fetch = jest.fn();
+  global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => [] });
   global.navigator.clipboard = { writeText: jest.fn().mockResolvedValue(undefined) };
+  global.setInterval = jest.fn().mockReturnValue(12345);
+  global.clearInterval = jest.fn();
 });
 
 // ── escapeHTML ────────────────────────────────────────────
@@ -276,5 +278,147 @@ describe('copyEmail()', () => {
     copyEmail();
     await new Promise(r => setTimeout(r, 10));
     expect(global.navigator.clipboard.writeText).toHaveBeenCalledWith('mymail@test.com');
+  });
+});
+
+// ── App Initialization and Integration ────────────────────
+
+const { init } = require('../app');
+
+describe('App Initialization and Integration', () => {
+  beforeEach(async () => {
+    jest.restoreAllMocks();
+    
+    // Force activeProvider back to 'secmail'
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ['reset@1secmail.com'] });
+    await generateNewEmail();
+    jest.clearAllMocks(); // clear the fetch mock so tests can override it
+  });
+
+  test('init uses saved email if present', async () => {
+    jest.spyOn(Storage.prototype, 'getItem').mockImplementation(k => k === 'stacky_temp_mail' ? 'saved@1secmail.com' : 'secmail');
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => [] });
+    
+    await init();
+    
+    expect(document.getElementById('email-address').value).toBe('saved@1secmail.com');
+  });
+
+  test('init generates new email if no saved email', async () => {
+    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue(null);
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ['new@1secmail.com'] });
+    
+    await init();
+    
+    expect(document.getElementById('email-address').value).toBe('new@1secmail.com');
+  });
+
+  test('generateNewEmail falls back to GuerrillaMail on 1secmail failure', async () => {
+    let callCount = 0;
+    global.fetch = jest.fn().mockImplementation((url) => {
+      callCount++;
+      if (callCount === 1) { // 1secmail
+        return Promise.resolve({ ok: false, status: 500 });
+      } else { // guerrillamail
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ email_addr: 'fallback@guerrillamail.com', sid_token: '123' })
+        });
+      }
+    });
+
+    await generateNewEmail();
+    
+    expect(document.getElementById('email-address').value).toBe('fallback@guerrillamail.com');
+    expect(document.getElementById('provider-badge').textContent).toContain('GuerrillaMail');
+  });
+
+  test('generateNewEmail displays error if all providers fail', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 500 });
+    
+    await generateNewEmail();
+    
+    expect(document.getElementById('email-address').value).toContain('Error');
+    expect(document.getElementById('status-text').textContent).toContain('Check your connection');
+  });
+
+  test('readMessage from secmail updates DOM with HTML body', async () => {
+    setAndStart('user@1secmail.com');
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        id: '123',
+        subject: 'Welcome',
+        from: 'admin@test.com',
+        htmlBody: '<b>Hello</b>'
+      })
+    });
+
+    await readMessage('123');
+
+    expect(document.getElementById('message-view').classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('msg-subject').textContent).toBe('Welcome');
+    expect(document.getElementById('msg-from').textContent).toBe('admin@test.com');
+    expect(document.getElementById('msg-body').innerHTML).toContain('<b>Hello</b>');
+  });
+
+  test('readMessage from guerrillamail maps fields and formats DOM', async () => {
+    // Generate guerrilla mail
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ email_addr: 'g@guerrillamail.com', sid_token: 'x' })
+    });
+    await generateNewEmail(); // sets activeProvider to guerrilla
+
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        mail_id: 'g1',
+        mail_subject: 'Guerrilla Msg',
+        mail_from: 'bot@g.com',
+        mail_body: '<p>Guerrilla HTML</p>'
+      })
+    });
+
+    await readMessage('g1');
+
+    expect(document.getElementById('msg-subject').textContent).toBe('Guerrilla Msg');
+    expect(document.getElementById('msg-body').innerHTML).toContain('<p>Guerrilla HTML</p>');
+  });
+
+  test('fetchMessages updates DOM and increments seen messages', async () => {
+    global.fetch = jest.fn().mockImplementation((url) => {
+      if (typeof url === 'string' && url.includes('guerrillamail')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            list: [{ mail_id: '1', mail_from: 'a', mail_subject: 's', mail_timestamp: 1000 }]
+          })
+        });
+      }
+      // secmail default
+      return Promise.resolve({
+        ok: true,
+        json: async () => [{ id: '1', from: 'a', subject: 's', date: 'd' }]
+      });
+    });
+
+    setAndStart('user@1secmail.com');
+    await fetchMessages();
+
+    expect(getState().allMessages.length).toBe(1);
+    expect(document.getElementById('inbox-list').innerHTML).toContain('a'); // from address
+
+    // Call again, should not add duplicates (1 seen)
+    await fetchMessages();
+    expect(getState().allMessages.length).toBe(1);
+  });
+
+  test('fetchMessages handles errors and updates retry count', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 500 });
+    setAndStart('user@1secmail.com');
+    
+    await fetchMessages();
+    expect(document.getElementById('status-text').textContent).toContain('Retry');
   });
 });

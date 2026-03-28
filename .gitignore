@@ -13,8 +13,11 @@ coverage_report/
 coverage_report_final/
 jest_output.json
 jest_output.txt
-test_output.txt
+# test results
 test_results.txt
+test_result.json
+jest_errors.txt
+temp_errors.txt
 test_output_utf8.txt
 out.txt
 audit_coverage.js
