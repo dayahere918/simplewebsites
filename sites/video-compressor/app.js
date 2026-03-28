@@ -58,12 +58,14 @@ function isVideoFile(file) {
 async function initFFmpeg() {
     if (ffmpegInstance) return ffmpegInstance;
 
-    const FFmpegLib = window.FFmpegWASM;
-    if (!FFmpegLib || !FFmpegLib.FFmpeg) {
-        throw new Error('FFmpeg library not available. Please check your internet connection.');
+    // Check multiple possible global names from different CDN builds
+    const FFmpegLib = (typeof window !== 'undefined') ? 
+      (window.FFmpegWASM || window.FFmpeg || window['@ffmpeg/ffmpeg']) : null;
+    if (!FFmpegLib || (!FFmpegLib.FFmpeg && typeof FFmpegLib !== 'function')) {
+        throw new Error('FFmpeg library not available. Please check your internet connection and refresh the page.');
     }
 
-    const ff = new FFmpegLib.FFmpeg();
+    const ff = FFmpegLib.FFmpeg ? new FFmpegLib.FFmpeg() : new FFmpegLib();
     
     ff.on('log', ({ message }) => {
         const logEl = document.getElementById('ffmpeg-log');
@@ -169,8 +171,10 @@ async function executeCompression() {
 
     try {
         const ff = await initFFmpeg();
-        const { fetchFile } = window.FFmpegUtil || {};
-        if (!fetchFile) throw new Error('FFmpegUtil not available. Please refresh and try again.');
+        const FFmpegUtil = (typeof window !== 'undefined') ?
+          (window.FFmpegUtil || window['@ffmpeg/util']) : null;
+        const fetchFile = FFmpegUtil?.fetchFile;
+        if (!fetchFile) throw new Error('FFmpeg utility library not available. Please refresh and try again.');
 
         const ext = (videoFile.name.split('.').pop() || 'mp4').toLowerCase();
         const inputName = `input.${ext}`;

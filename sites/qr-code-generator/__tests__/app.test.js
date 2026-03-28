@@ -4,7 +4,7 @@
  */
 const {
   debounceGenerate, handleLogoUpload, clearLogo, generateQR, downloadQR,
-  roundRectFallback, showQrError, showQrSuccess
+  roundRectFallback, showQrError, showQrSuccess, showQrLoading, waitForQRLib
 } = require('../app');
 
 const DOM_HTML = `
@@ -119,11 +119,17 @@ describe('generateQR()', () => {
     );
   });
 
-  test('shows error when QRCode library is undefined', async () => {
+  test('shows loading then error when QRCode library is undefined', async () => {
     global.QRCode = undefined;
-    await generateQR();
+    // waitForQRLib polls every 200ms, max 25 attempts. We use fake timers.
+    jest.useFakeTimers();
+    const p = generateQR();
+    // Advance enough for 25 polls (5 seconds)
+    for (let i = 0; i < 25; i++) jest.advanceTimersByTime(200);
+    await p;
+    jest.useRealTimers();
     const el = document.getElementById('qr-status');
-    expect(el.textContent).toContain('not loaded');
+    expect(el.textContent).toContain('failed to load');
     expect(el.classList.contains('hidden')).toBe(false);
   });
 

@@ -2853,10 +2853,580 @@ const TOOLS_DATA = [
                 "desc": "The absolute massive comprehensive tightly gathered completely deeply structured intelligence directory."
             }
         ]
+    },
+    {
+        "category": "Brain Training",
+        "icon": "🧠",
+        "description": "Sharpen cognitive skills with puzzles, memory games, and logic challenges.",
+        "tools": [
+            {
+                "name": "Lumosity",
+                "url": "https://www.lumosity.com/",
+                "desc": "Personalized brain training program backed by neuroscience research."
+            },
+            {
+                "name": "Peak",
+                "url": "https://www.peak.net/",
+                "desc": "Fun brain workouts designed with Cambridge and Yale academics."
+            },
+            {
+                "name": "Elevate",
+                "url": "https://www.elevateapp.com/",
+                "desc": "Brain training app focused on communication and analytical skills."
+            },
+            {
+                "name": "BrainHQ",
+                "url": "https://www.brainhq.com/",
+                "desc": "Clinically proven brain exercises from Posit Science."
+            },
+            {
+                "name": "Chess.com",
+                "url": "https://www.chess.com/",
+                "desc": "The world's largest chess community with puzzles, lessons, and AI play."
+            },
+            {
+                "name": "Lichess",
+                "url": "https://lichess.org/",
+                "desc": "100% free, open-source chess server with zero ads."
+            },
+            {
+                "name": "Dual N-Back",
+                "url": "https://brainscale.net/dual-n-back",
+                "desc": "Free working memory training game proven to boost fluid intelligence."
+            },
+            {
+                "name": "Brilliant",
+                "url": "https://brilliant.org/",
+                "desc": "Interactive learning for math, science, and computer science (Free tier)."
+            },
+            {
+                "name": "Cognifit",
+                "url": "https://www.cognifit.com/",
+                "desc": "Cognitive assessment and brain training program for all ages."
+            },
+            {
+                "name": "Human Benchmark",
+                "url": "https://humanbenchmark.com/",
+                "desc": "Measure your abilities with reaction time, memory, and verbal tests."
+            }
+        ]
+    },
+    {
+        "category": "Kids & Education",
+        "icon": "👶",
+        "description": "Safe, engaging, and free learning platforms for children of all ages.",
+        "tools": [
+            {
+                "name": "Khan Academy Kids",
+                "url": "https://learn.khanacademy.org/khan-academy-kids/",
+                "desc": "Joyful, free learning app for ages 2-8 with no ads or subscriptions."
+            },
+            {
+                "name": "Scratch",
+                "url": "https://scratch.mit.edu/",
+                "desc": "MIT's free coding platform where kids create stories, games, and animations."
+            },
+            {
+                "name": "Tinkercad",
+                "url": "https://www.tinkercad.com/",
+                "desc": "Free 3D design, electronics, and coding tool for students and hobbyists."
+            },
+            {
+                "name": "Code.org",
+                "url": "https://code.org/",
+                "desc": "Free coding courses for K-12 students with hour-of-code activities."
+            },
+            {
+                "name": "PBS Kids Games",
+                "url": "https://pbskids.org/games/",
+                "desc": "Free educational games from PBS featuring beloved characters."
+            },
+            {
+                "name": "National Geographic Kids",
+                "url": "https://kids.nationalgeographic.com/",
+                "desc": "Explore animals, science, and the world with fun games and videos."
+            },
+            {
+                "name": "Cool Math Games",
+                "url": "https://www.coolmathgames.com/",
+                "desc": "Brain-teasing math and logic games that make learning fun."
+            },
+            {
+                "name": "TypingClub",
+                "url": "https://www.typingclub.com/",
+                "desc": "Free touch typing curriculum used by schools worldwide."
+            },
+            {
+                "name": "SplashLearn",
+                "url": "https://www.splashlearn.com/",
+                "desc": "Adaptive math and reading program for PreK-Grade 5."
+            },
+            {
+                "name": "GCompris",
+                "url": "https://gcompris.net/",
+                "desc": "Free, open-source educational activity suite for children aged 2 to 10."
+            }
+        ]
+    },
+    {
+        "category": "Meditation & Wellness",
+        "icon": "🧘",
+        "description": "Free mindfulness, meditation, and mental health support tools.",
+        "tools": [
+            {
+                "name": "Insight Timer",
+                "url": "https://insighttimer.com/",
+                "desc": "World's largest free library of guided meditations and music."
+            },
+            {
+                "name": "Medito",
+                "url": "https://meditofoundation.org/",
+                "desc": "100% free meditation app built by a nonprofit foundation."
+            },
+            {
+                "name": "Smiling Mind",
+                "url": "https://www.smilingmind.com.au/",
+                "desc": "Free evidence-based mindfulness app for all ages developed by psychologists."
+            },
+            {
+                "name": "UCLA Mindful",
+                "url": "https://www.uclahealth.org/programs/marc/free-guided-meditations",
+                "desc": "Free guided meditations from UCLA's Mindful Awareness Research Center."
+            },
+            {
+                "name": "MyNoise",
+                "url": "https://mynoise.net/",
+                "desc": "Online background noise generator with calibrated soundscapes."
+            },
+            {
+                "name": "Calm (Free Features)",
+                "url": "https://www.calm.com/",
+                "desc": "Sleep stories, breathing exercises, and mindfulness (select free content)."
+            },
+            {
+                "name": "Waking Up (Free Access)",
+                "url": "https://www.wakingup.com/",
+                "desc": "Sam Harris's meditation app with free scholarship access for anyone."
+            },
+            {
+                "name": "Do Nothing for 2 Min",
+                "url": "https://donothingfor2minutes.com/",
+                "desc": "Simple web challenge: do absolutely nothing for 2 minutes to decompress."
+            },
+            {
+                "name": "Rainy Mood",
+                "url": "https://rainymood.com/",
+                "desc": "Ambient rain sounds for focus, relaxation, and sleep."
+            },
+            {
+                "name": "Tide",
+                "url": "https://tide.fm/",
+                "desc": "Focus timer and sleep sounds inspired by nature."
+            }
+        ]
+    },
+    {
+        "category": "Data Visualization",
+        "icon": "📊",
+        "description": "Turn raw data into beautiful, interactive charts and dashboards.",
+        "tools": [
+            {
+                "name": "RAWGraphs",
+                "url": "https://rawgraphs.io/",
+                "desc": "Open-source, free data visualization framework for complex data."
+            },
+            {
+                "name": "Datawrapper",
+                "url": "https://www.datawrapper.de/",
+                "desc": "Create charts, maps, and tables with no coding (Free tier)."
+            },
+            {
+                "name": "Flourish",
+                "url": "https://flourish.studio/",
+                "desc": "Beautiful, animated data stories without coding (Free for public projects)."
+            },
+            {
+                "name": "Apache Superset",
+                "url": "https://superset.apache.org/",
+                "desc": "Modern, enterprise-ready open-source BI web application."
+            },
+            {
+                "name": "Redash",
+                "url": "https://redash.io/",
+                "desc": "Open source tool to query databases and visualize results."
+            },
+            {
+                "name": "Metabase",
+                "url": "https://www.metabase.com/",
+                "desc": "Open-source business intelligence tool anyone can use (Free self-hosted)."
+            },
+            {
+                "name": "Observable",
+                "url": "https://observablehq.com/",
+                "desc": "Collaborative data visualization notebooks using JavaScript (Free tier)."
+            },
+            {
+                "name": "Plotly Chart Studio",
+                "url": "https://chart-studio.plotly.com/",
+                "desc": "Create interactive, shareable charts and dashboards online (Free tier)."
+            },
+            {
+                "name": "Grafana",
+                "url": "https://grafana.com/",
+                "desc": "The open-source analytics and monitoring platform (Free self-hosted)."
+            },
+            {
+                "name": "Chartbrew",
+                "url": "https://chartbrew.com/",
+                "desc": "Open-source platform to create live dashboards from any data source."
+            }
+        ]
+    },
+    {
+        "category": "Research & Academic",
+        "icon": "🔬",
+        "description": "Find papers, track citations, and access knowledge freely.",
+        "tools": [
+            {
+                "name": "Semantic Scholar",
+                "url": "https://www.semanticscholar.org/",
+                "desc": "AI-powered research tool for scientific literature search."
+            },
+            {
+                "name": "Connected Papers",
+                "url": "https://www.connectedpapers.com/",
+                "desc": "Visual tool to explore connected academic papers in a graph."
+            },
+            {
+                "name": "CORE",
+                "url": "https://core.ac.uk/",
+                "desc": "World's largest collection of open access research papers."
+            },
+            {
+                "name": "Unpaywall",
+                "url": "https://unpaywall.org/",
+                "desc": "Browser extension that finds free, legal versions of research papers."
+            },
+            {
+                "name": "BASE Search",
+                "url": "https://www.base-search.net/",
+                "desc": "One of the world's most voluminous search engines for academic web resources."
+            },
+            {
+                "name": "DOAJ",
+                "url": "https://doaj.org/",
+                "desc": "Directory of Open Access Journals with 19,000+ peer-reviewed journals."
+            },
+            {
+                "name": "arXiv",
+                "url": "https://arxiv.org/",
+                "desc": "Open-access archive for scholarly articles in STEM fields."
+            },
+            {
+                "name": "ResearchGate",
+                "url": "https://www.researchgate.net/",
+                "desc": "Professional network for scientists and researchers to share papers."
+            },
+            {
+                "name": "Google Scholar",
+                "url": "https://scholar.google.com/",
+                "desc": "Freely accessible search engine for scholarly literature."
+            },
+            {
+                "name": "Zotero",
+                "url": "https://www.zotero.org/",
+                "desc": "Free, open-source reference management software for researchers."
+            }
+        ]
+    },
+    {
+        "category": "Music Discovery",
+        "icon": "🎵",
+        "description": "Discover new music, explore genres, and find rare recordings.",
+        "tools": [
+            {
+                "name": "Every Noise at Once",
+                "url": "https://everynoise.com/",
+                "desc": "Algorithmically-generated scatter-plot of every music genre."
+            },
+            {
+                "name": "MusicBrainz",
+                "url": "https://musicbrainz.org/",
+                "desc": "Open music encyclopedia and the community-maintained music database."
+            },
+            {
+                "name": "Discogs",
+                "url": "https://www.discogs.com/",
+                "desc": "Crowdsourced music database and marketplace for collectors."
+            },
+            {
+                "name": "Rate Your Music",
+                "url": "https://rateyourmusic.com/",
+                "desc": "Community music database with reviews, ratings, and custom lists."
+            },
+            {
+                "name": "Album of the Year",
+                "url": "https://www.albumoftheyear.org/",
+                "desc": "Aggregate music review scores and discover critically acclaimed albums."
+            },
+            {
+                "name": "Bandcamp",
+                "url": "https://bandcamp.com/",
+                "desc": "Platform where artists share music directly and fans discover new sounds."
+            },
+            {
+                "name": "Radio Garden",
+                "url": "https://radio.garden/",
+                "desc": "Listen to live radio stations from around the world on a 3D globe."
+            },
+            {
+                "name": "Radiooooo",
+                "url": "https://radiooooo.com/",
+                "desc": "Musical time machine: listen to music from any decade and country."
+            },
+            {
+                "name": "Mixcloud",
+                "url": "https://www.mixcloud.com/",
+                "desc": "Platform for DJ mixes, podcasts, and radio shows worldwide."
+            },
+            {
+                "name": "Music-Map",
+                "url": "https://www.music-map.com/",
+                "desc": "Find similar artists in an interactive graph — type any artist name."
+            }
+        ]
+    },
+    {
+        "category": "Stock Media",
+        "icon": "📸",
+        "description": "Free, high-quality photos, videos, and illustrations for any project.",
+        "tools": [
+            {
+                "name": "Unsplash",
+                "url": "https://unsplash.com/",
+                "desc": "Beautiful, free images and photos gifted by the world's best photographers."
+            },
+            {
+                "name": "Pexels",
+                "url": "https://www.pexels.com/",
+                "desc": "Free stock photos, royalty free images, and videos shared by creators."
+            },
+            {
+                "name": "Pixabay",
+                "url": "https://pixabay.com/",
+                "desc": "Over 4 million free, high-quality stock images, videos, and music."
+            },
+            {
+                "name": "Burst",
+                "url": "https://www.shopify.com/stock-photos",
+                "desc": "Free stock photos for commercial use from Shopify."
+            },
+            {
+                "name": "StockSnap",
+                "url": "https://stocksnap.io/",
+                "desc": "Beautiful free stock photos with no attribution required."
+            },
+            {
+                "name": "Reshot",
+                "url": "https://www.reshot.com/",
+                "desc": "Handpicked, non-stocky free icons, illustrations, and photos."
+            },
+            {
+                "name": "Life of Pix",
+                "url": "https://www.lifeofpix.com/",
+                "desc": "Free high-resolution photography donated by a creative agency."
+            },
+            {
+                "name": "Gratisography",
+                "url": "https://gratisography.com/",
+                "desc": "Quirky, creative, always-free stock photos you won't find anywhere else."
+            },
+            {
+                "name": "Coverr",
+                "url": "https://coverr.co/",
+                "desc": "Beautiful free stock video footage for your homepage or project."
+            },
+            {
+                "name": "unDraw",
+                "url": "https://undraw.co/",
+                "desc": "Open-source illustrations for any idea with customizable colors."
+            }
+        ]
+    },
+    {
+        "category": "Keyboard & Typing",
+        "icon": "⌨️",
+        "description": "Master touch typing with speed tests, practice, and gamified challenges.",
+        "tools": [
+            {
+                "name": "Monkeytype",
+                "url": "https://monkeytype.com/",
+                "desc": "Minimalistic, customizable typing test with tons of options."
+            },
+            {
+                "name": "Keybr",
+                "url": "https://www.keybr.com/",
+                "desc": "AI-adaptive typing practice that generates lessons based on your weaknesses."
+            },
+            {
+                "name": "TypingTest.com",
+                "url": "https://www.typingtest.com/",
+                "desc": "Quick typing speed test with WPM tracking and history."
+            },
+            {
+                "name": "10FastFingers",
+                "url": "https://10fastfingers.com/",
+                "desc": "Online typing speed test with multiplayer competitions."
+            },
+            {
+                "name": "TypeRacer",
+                "url": "https://play.typeracer.com/",
+                "desc": "Competitive typing game where you race others by typing quotes."
+            },
+            {
+                "name": "ZType",
+                "url": "https://zty.pe/",
+                "desc": "Space-themed typing game where you destroy words to save your ship."
+            },
+            {
+                "name": "Typing.com",
+                "url": "https://www.typing.com/",
+                "desc": "Free typing tutor with structured lessons and digital literacy courses."
+            },
+            {
+                "name": "Ratatype",
+                "url": "https://www.ratatype.com/",
+                "desc": "Free online typing tutor with touch typing course and certification."
+            },
+            {
+                "name": "NitroType",
+                "url": "https://www.nitrotype.com/",
+                "desc": "Competitive typing game with car racing mechanics and team play."
+            },
+            {
+                "name": "Speed Coder",
+                "url": "https://www.speedcoder.net/",
+                "desc": "Typing practice specifically designed for programmers and code syntax."
+            }
+        ]
+    },
+    {
+        "category": "Language Learning",
+        "icon": "🌍",
+        "description": "Learn new languages for free with spaced-repetition and immersion tools.",
+        "tools": [
+            {
+                "name": "Duolingo",
+                "url": "https://www.duolingo.com/",
+                "desc": "The world's most popular free language-learning platform with gamification."
+            },
+            {
+                "name": "Anki",
+                "url": "https://apps.ankiweb.net/",
+                "desc": "Powerful, open-source flashcard app using spaced repetition algorithm."
+            },
+            {
+                "name": "Clozemaster",
+                "url": "https://www.clozemaster.com/",
+                "desc": "Gamified language learning through mass exposure to vocabulary in context."
+            },
+            {
+                "name": "LingQ",
+                "url": "https://www.lingq.com/",
+                "desc": "Learn languages from content you love — import books, podcasts, and more."
+            },
+            {
+                "name": "Tandem",
+                "url": "https://www.tandem.net/",
+                "desc": "Language exchange app connecting you with native speakers worldwide."
+            },
+            {
+                "name": "HelloTalk",
+                "url": "https://www.hellotalk.com/",
+                "desc": "Chat with native speakers and learn languages through conversation."
+            },
+            {
+                "name": "Busuu (Free Tier)",
+                "url": "https://www.busuu.com/",
+                "desc": "Language courses with native speaker corrections (Free basic access)."
+            },
+            {
+                "name": "Memrise",
+                "url": "https://www.memrise.com/",
+                "desc": "Learn languages with real-world videos and spaced-repetition flashcards."
+            },
+            {
+                "name": "Readlang",
+                "url": "https://readlang.com/",
+                "desc": "Web reader that translates words as you read — builds vocabulary naturally."
+            },
+            {
+                "name": "Language Reactor",
+                "url": "https://www.languagereactor.com/",
+                "desc": "Learn languages while watching Netflix and YouTube with dual subtitles."
+            }
+        ]
+    },
+    {
+        "category": "Fitness & Workout",
+        "icon": "🏋️",
+        "description": "Free exercise libraries, workout trackers, and fitness programs.",
+        "tools": [
+            {
+                "name": "DAREBEE",
+                "url": "https://darebee.com/",
+                "desc": "Hundreds of free, no-equipment workouts, programs, and challenges."
+            },
+            {
+                "name": "MuscleWiki",
+                "url": "https://musclewiki.com/",
+                "desc": "Click a muscle to see exercises — the simplest exercise encyclopedia."
+            },
+            {
+                "name": "Hevy",
+                "url": "https://www.hevyapp.com/",
+                "desc": "Free gym workout tracker and planner with social features."
+            },
+            {
+                "name": "FitOn",
+                "url": "https://fitonapp.com/",
+                "desc": "Free workout app with celebrity trainer-led classes."
+            },
+            {
+                "name": "wger",
+                "url": "https://wger.de/",
+                "desc": "Free, open-source web app for tracking workouts, nutrition, and body weight."
+            },
+            {
+                "name": "Hasfit",
+                "url": "https://hasfit.com/",
+                "desc": "Free full-length workout videos for every fitness level."
+            },
+            {
+                "name": "Nike Training Club",
+                "url": "https://www.nike.com/ntc-app",
+                "desc": "Free workout programs from Nike's world-class trainers."
+            },
+            {
+                "name": "JEFIT",
+                "url": "https://www.jefit.com/",
+                "desc": "Free workout tracker with huge exercise database and routines."
+            },
+            {
+                "name": "Fitness Blender",
+                "url": "https://www.fitnessblender.com/",
+                "desc": "600+ free full-length workout videos for every level and goal."
+            },
+            {
+                "name": "Workout.lol",
+                "url": "https://workout.lol/",
+                "desc": "Open-source exercise picker — choose equipment and muscles, get a workout."
+            }
+        ]
     }
 ];
 
-// Re-map to 50 unique categories if there are overlaps
+// Re-map to 60 unique categories if there are overlaps
 const uniqueCategories = Array.from(new Set(TOOLS_DATA.map(d => d.category)));
 
 function init() {

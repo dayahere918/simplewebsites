@@ -1,32 +1,28 @@
 /**
  * Temp Mail Core Logic
- * Primary: 1secmail API | Fallback: guerrillamail API
- * Recommended approach: Show email prominently with copy button,
- * try 1secmail first (free, disposable), guerrillamail as fallback.
- * Both provide working inbox APIs — users can read mail directly in-app.
+ * Uses Cloudflare Worker proxy (/api/mail) for 1secmail API to bypass CORS.
+ * Fallback: Direct 1secmail API (works in some browsers), then client-generated email.
  */
 
+const PROXY_API = '/api/mail';
 const SECMAIL_API = 'https://www.1secmail.com/api/v1/';
-const GUERRILLA_API = 'https://api.guerrillamail.com/ajax.php';
+const SECMAIL_DOMAINS = ['1secmail.com', '1secmail.org', '1secmail.net', 'kzccv.com', 'qiott.com', 'wuuvo.com', 'icznn.com', 'yeezmail.com'];
 
 let currentEmail = '';
 let currentLogin = '';
 let currentDomain = '';
-let activeProvider = 'guerrilla'; // 'guerrilla' | 'secmail'
-let guerrillaSidToken = '';
 let checkInterval = null;
 let countdownInterval = null;
 let secondsLeft = 10;
 let seenMessageIds = new Set();
 let allMessages = [];
 let retryCount = 0;
+let useProxy = true; // Try proxy first
 const MAX_RETRIES = 3;
 
 async function init() {
   const saved = localStorage.getItem('stacky_temp_mail');
-  const provider = localStorage.getItem('stacky_temp_mail_provider') || 'guerrilla';
-  activeProvider = provider;
-  if (saved) {
+  if (saved && saved.includes('@')) {
     setAndStart(saved);
     return;
   }
@@ -34,8 +30,10 @@ async function init() {
 }
 
 /**
- * Generate a new email address with automatic provider fallback
- * Tries GuerrillaMail first (reliable CORS), falls back to 1secmail
+ * Generate a new email address with layered fallbacks:
+ * 1. Cloudflare Worker proxy (always works, no CORS)
+ * 2. Direct 1secmail API (may work in some browsers)
+ * 3. Client-side generated address (guaranteed)
  */
 async function generateNewEmail() {
   if (checkInterval) clearInterval(checkInterval);
@@ -44,65 +42,57 @@ async function generateNewEmail() {
   const el = document.getElementById('email-address');
   if (el) el.value = 'Generating...';
 
-  // Try GuerrillaMail first
+  const status = document.getElementById('status-text');
+
+  // Strategy 1: Proxy
   try {
-    const email = await generateGuerrillaMailAddress();
-    activeProvider = 'guerrilla';
-    localStorage.setItem('stacky_temp_mail_provider', 'guerrilla');
-    localStorage.setItem('stacky_temp_mail', email);
-    setAndStart(email);
-    return;
+    const res = await fetchWithTimeout(`${PROXY_API}?action=generate&provider=secmail`, 5000);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data[0]) {
+        useProxy = true;
+        const email = data[0];
+        localStorage.setItem('stacky_temp_mail', email);
+        setAndStart(email);
+        return;
+      }
+    }
   } catch (e) {
-    console.warn('GuerrillaMail failed, switching to 1secmail:', e.message);
+    console.warn('Proxy unavailable, trying direct API:', e.message);
   }
 
-  // Fallback to 1secmail
+  // Strategy 2: Direct 1secmail API
   try {
-    const email = await generateSecMailAddress();
-    activeProvider = 'secmail';
-    localStorage.setItem('stacky_temp_mail_provider', 'secmail');
-    localStorage.setItem('stacky_temp_mail', email);
-    setAndStart(email);
+    const res = await fetchWithTimeout(`${SECMAIL_API}?action=genRandomMailbox&count=1`, 5000);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data[0]) {
+        useProxy = false;
+        const email = data[0];
+        localStorage.setItem('stacky_temp_mail', email);
+        setAndStart(email);
+        return;
+      }
+    }
   } catch (e) {
-    console.error('All mail providers failed:', e);
-    if (el) el.value = 'Error — Please refresh to try again';
-    const status = document.getElementById('status-text');
-    if (status) status.textContent = '❌ Unable to generate email. Check your connection.';
+    console.warn('Direct 1secmail failed:', e.message);
   }
+
+  // Strategy 3: Client-generated email (guaranteed to work)
+  const randomStr = Math.random().toString(36).substring(2, 10) + Math.floor(Date.now() / 1000).toString(36);
+  const domain = SECMAIL_DOMAINS[Math.floor(Math.random() * SECMAIL_DOMAINS.length)];
+  const email = `${randomStr}@${domain}`;
+  useProxy = true; // Try proxy for mail checking
+  localStorage.setItem('stacky_temp_mail', email);
+  setAndStart(email);
+
+  if (status) status.textContent = '⚠️ Generated offline address. Mail checking may be limited.';
 }
 
-/**
- * Generate address via 1secmail API
- */
-async function generateSecMailAddress() {
+function fetchWithTimeout(url, timeoutMs) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000);
-  try {
-    const res = await fetch(`${SECMAIL_API}?action=genRandomMailbox&count=1`, {
-      signal: controller.signal
-    });
-    clearTimeout(timeout);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (!data || !data[0]) throw new Error('Invalid response');
-    return data[0];
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-/**
- * Generate address via guerrillamail API
- */
-async function generateGuerrillaMailAddress() {
-  const res = await fetch(`${GUERRILLA_API}?f=get_email_address`, {
-    headers: { 'Accept': 'application/json' }
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  if (!data.email_addr) throw new Error('No email returned from guerrillamail');
-  guerrillaSidToken = data.sid_token || '';
-  return data.email_addr;
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timeout));
 }
 
 function setAndStart(email) {
@@ -118,10 +108,8 @@ function setAndStart(email) {
   // Update provider badge
   const badge = document.getElementById('provider-badge');
   if (badge) {
-    badge.textContent = activeProvider === 'guerrilla' ? '📡 GuerrillaMail' : '⚡ 1secMail';
-    badge.title = activeProvider === 'guerrilla'
-      ? 'Using GuerrillaMail (1secmail unavailable)'
-      : 'Using 1secMail';
+    badge.textContent = useProxy ? '⚡ 1secMail (Proxy)' : '📡 1secMail (Direct)';
+    badge.title = useProxy ? 'Using Cloudflare proxy for reliability' : 'Direct API connection';
   }
 
   seenMessageIds.clear();
@@ -164,7 +152,6 @@ function copyEmail() {
       setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
     }
   }).catch(() => {
-    // Fallback for environments without clipboard API
     const el = document.getElementById('email-address');
     if (el) { el.select(); document.execCommand('copy'); }
   });
@@ -178,11 +165,26 @@ async function fetchMessages(isSilent = false) {
 
   try {
     let messages;
-    if (activeProvider === 'guerrilla') {
-      messages = await fetchGuerrillaMessages();
+    
+    if (useProxy) {
+      // Use Cloudflare proxy
+      const res = await fetchWithTimeout(
+        `${PROXY_API}?action=getMessages&provider=secmail&login=${encodeURIComponent(currentLogin)}&domain=${encodeURIComponent(currentDomain)}`,
+        8000
+      );
+      if (!res.ok) throw new Error('Proxy error');
+      messages = await res.json();
     } else {
-      messages = await fetchSecMailMessages();
+      // Direct API
+      const res = await fetchWithTimeout(
+        `${SECMAIL_API}?action=getMessages&login=${encodeURIComponent(currentLogin)}&domain=${encodeURIComponent(currentDomain)}`,
+        8000
+      );
+      if (!res.ok) throw new Error('API Error');
+      messages = await res.json();
     }
+
+    if (!Array.isArray(messages)) messages = [];
 
     const newMsgs = messages.filter(m => !seenMessageIds.has(m.id));
     if (newMsgs.length > 0) {
@@ -196,12 +198,13 @@ async function fetchMessages(isSilent = false) {
     retryCount++;
     const status = document.getElementById('status-text');
     if (retryCount >= MAX_RETRIES) {
-      if (status) status.textContent = '❌ Connection lost or API blocked. Click refresh to try again.';
-      if (activeProvider === 'secmail') {
-        // Auto-switch to guerrilla if secmail permanently blocked
-        console.warn('Auto-switching provider from 1secmail to GuerrillaMail due to continuous fetch failures.');
-        activeProvider = 'guerrilla';
-        generateNewEmail();
+      // Try switching strategy
+      if (useProxy) {
+        console.warn('Proxy seems down, attempting direct API...');
+        useProxy = false;
+        retryCount = 0;
+      } else {
+        if (status) status.textContent = '❌ Connection lost. Click refresh to try again.';
       }
     } else {
       if (status) status.textContent = `⚠️ Retry ${retryCount}/${MAX_RETRIES}...`;
@@ -209,27 +212,6 @@ async function fetchMessages(isSilent = false) {
   } finally {
     if (loader) loader.classList.add('hidden');
   }
-}
-
-async function fetchSecMailMessages() {
-  const res = await fetch(`${SECMAIL_API}?action=getMessages&login=${currentLogin}&domain=${currentDomain}`);
-  if (!res.ok) throw new Error('API Error');
-  return res.json();
-}
-
-async function fetchGuerrillaMessages() {
-  const url = `${GUERRILLA_API}?f=check_email&seq=0${guerrillaSidToken ? `&sid_token=${encodeURIComponent(guerrillaSidToken)}` : ''}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Guerrilla API error');
-  const data = await res.json();
-  if (!data.list) return [];
-  // Normalize guerrillamail format to match secmail format
-  return data.list.map(m => ({
-    id: m.mail_id,
-    from: m.mail_from,
-    subject: m.mail_subject,
-    date: new Date(m.mail_timestamp * 1000).toLocaleString()
-  }));
 }
 
 function renderMessages(messages) {
@@ -267,16 +249,12 @@ async function readMessage(id) {
 
   try {
     let msg;
-    if (activeProvider === 'guerrilla') {
-      const res = await fetch(`${GUERRILLA_API}?f=fetch_email&email_id=${id}${guerrillaSidToken ? `&sid_token=${encodeURIComponent(guerrillaSidToken)}` : ''}`);
-      msg = await res.json();
-      msg.htmlBody = msg.mail_body;
-      msg.subject = msg.mail_subject;
-      msg.from = msg.mail_from;
-    } else {
-      const res = await fetch(`${SECMAIL_API}?action=readMessage&login=${currentLogin}&domain=${currentDomain}&id=${id}`);
-      msg = await res.json();
-    }
+    const apiUrl = useProxy
+      ? `${PROXY_API}?action=readMessage&provider=secmail&login=${encodeURIComponent(currentLogin)}&domain=${encodeURIComponent(currentDomain)}&id=${id}`
+      : `${SECMAIL_API}?action=readMessage&login=${encodeURIComponent(currentLogin)}&domain=${encodeURIComponent(currentDomain)}&id=${id}`;
+
+    const res = await fetchWithTimeout(apiUrl, 8000);
+    msg = await res.json();
 
     const sub = document.getElementById('msg-subject');
     if (sub) sub.textContent = msg.subject || 'No Subject';
@@ -305,7 +283,6 @@ function escapeHTML(str) {
 }
 
 function sanitizeHtml(html) {
-  // Remove script/iframe tags only, preserve formatting
   return html
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
     .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
@@ -317,9 +294,9 @@ if (typeof document !== 'undefined') {
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
-    init, generateNewEmail, generateSecMailAddress, generateGuerrillaMailAddress,
-    fetchMessages, fetchSecMailMessages, fetchGuerrillaMessages,
-    readMessage, closeMessage, renderMessages, setAndStart, copyEmail, escapeHTML, sanitizeHtml,
-    getState: () => ({ currentEmail, currentLogin, currentDomain, activeProvider, seenMessageIds, allMessages })
+    init, generateNewEmail, fetchMessages, readMessage, closeMessage,
+    renderMessages, setAndStart, copyEmail, escapeHTML, sanitizeHtml,
+    fetchWithTimeout,
+    getState: () => ({ currentEmail, currentLogin, currentDomain, useProxy, seenMessageIds, allMessages })
   };
 }

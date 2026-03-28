@@ -190,7 +190,20 @@ async function loadPdfThumbnails(file) {
 
   } catch (e) {
     console.error('Error rendering thumbnails:', e);
-    grid.innerHTML = '<div class="text-sm text-red-500">Failed to render PDF preview.</div>';
+    grid.innerHTML = `<div class="text-sm" style="color:var(--red,#ef4444)">
+      <p>⚠️ PDF preview unavailable. You can still split by entering page numbers below.</p>
+    </div>`;
+    // Set splitPageCount from pdf-lib as fallback
+    try {
+      const PDFLibObj = typeof PDFLib !== 'undefined' ? PDFLib : null;
+      if (PDFLibObj) {
+        const buffer = await file.arrayBuffer();
+        const doc = await PDFLibObj.PDFDocument.load(buffer);
+        splitPageCount = doc.getPageCount();
+        const pageCountEl = document.getElementById('split-page-count-info');
+        if (pageCountEl) pageCountEl.textContent = `${splitPageCount} pages total (enter page numbers below)`;
+      }
+    } catch (e2) { console.warn('pdf-lib fallback also failed:', e2); }
   }
 }
 
@@ -315,12 +328,17 @@ async function executeSplit() {
     const pdfDoc = await PDFDocument.load(arrayBuffer);
     const total = pdfDoc.getPageCount();
 
-    // Use visually selected pages
-    const pageIndices = Array.from(selectedSplitPages).sort((a, b) => a - b);
+    // Use visually selected pages, or fall back to text input
+    let pageIndices = Array.from(selectedSplitPages).sort((a, b) => a - b);
 
+    // If no visual selection, try text-based page range input
+    if (pageIndices.length === 0 && pageRangeStr) {
+      pageIndices = parsePageRange(pageRangeStr, total);
+    }
+    
+    // If still empty, select all pages
     if (pageIndices.length === 0) {
-      if (status) status.textContent = '❌ Minimum 1 page must be selected to extract.';
-      return;
+      pageIndices = Array.from({ length: total }, (_, i) => i);
     }
 
     const splitCountEl = document.getElementById('split-page-count');

@@ -35,7 +35,10 @@ const HUMAN_KEYWORDS = [
   'bridegroom', 'sarong', 'miniskirt', 'bikini', 'swimming cap', 'cowboy hat',
   'mortarboard', 'academic', 'military', 'police', 'lab coat', 'apron',
   'sunglass', 'sweatshirt', 'hoodie', 't-shirt', 't shirt', 'jeans', 'denim',
-  'cap', 'hat', 'sunglasses', 'glasses'
+  'cap', 'hat', 'sunglasses', 'glasses', 'selfie', 'smile', 'beard', 'mustache',
+  'lipstick', 'mask', 'wig', 'bald', 'turban', 'scarf', 'necklace', 'earring',
+  'bracelet', 'watch', 'ring', 'pants', 'shorts', 'skirt', 'jacket', 'coat',
+  'baby', 'infant', 'toddler', 'child', 'teenager', 'adult', 'elderly'
 ];
 
 /**
@@ -44,7 +47,12 @@ const HUMAN_KEYWORDS = [
 const NON_PET_KEYWORDS = [
   'car', 'truck', 'vehicle', 'building', 'house', 'food', 'pizza', 'burger',
   'tree', 'plant', 'phone', 'computer', 'laptop', 'table', 'chair', 'desk',
-  'television', 'screen', 'aircraft', 'ship', 'boat', 'weapon', 'gun'
+  'television', 'screen', 'aircraft', 'ship', 'boat', 'weapon', 'gun',
+  'bicycle', 'motorcycle', 'train', 'bus', 'airplane', 'helicopter',
+  'book', 'bottle', 'cup', 'knife', 'fork', 'spoon', 'bowl', 'banana',
+  'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'cake',
+  'keyboard', 'mouse', 'remote', 'cell phone', 'microwave', 'oven',
+  'toaster', 'refrigerator', 'clock', 'vase', 'scissors', 'teddy bear'
 ];
 
 /**
@@ -54,13 +62,21 @@ const NON_PET_KEYWORDS = [
  */
 function isHumanImage(predictions) {
   if (!predictions || predictions.length === 0) return false;
-  // Check top 3 predictions (highest confidence)
-  const topPreds = predictions.slice(0, 3);
+  // Check top 5 predictions (wider scan for accuracy)
+  const topPreds = predictions.slice(0, 5);
+  
+  // Core human terms — lower threshold (very likely human even at low confidence)
+  const coreHumanTerms = ['person', 'man', 'woman', 'boy', 'girl', 'human', 'face', 'people', 'portrait', 'selfie', 'baby', 'infant', 'child'];
+  
   return topPreds.some(pred => {
     const name = (pred.className || '').toLowerCase();
     const probability = pred.probability || 0;
-    // For human keywords, ignore very low confidence matches if there is a strong pet match later
-    if (probability < 0.05) return false;
+    
+    // Core human terms: flag even at very low confidence (0.01)
+    if (probability >= 0.01 && coreHumanTerms.some(kw => name.includes(kw))) return true;
+    
+    // Clothing/accessory terms: require slightly higher confidence
+    if (probability < 0.03) return false;
     return HUMAN_KEYWORDS.some(kw => name.includes(kw));
   });
 }
@@ -72,11 +88,11 @@ function isHumanImage(predictions) {
  */
 function isNonPetImage(predictions) {
   if (!predictions || predictions.length === 0) return false;
-  const topPreds = predictions.slice(0, 2);
-  // Only flag non-pet if confidence is high (>50%) and no animal-like terms
+  const topPreds = predictions.slice(0, 3);
+  // Flag non-pet if confidence is significant (>30%) and no animal-like terms
   return topPreds.some(pred => {
     const name = (pred.className || '').toLowerCase();
-    const isHighConf = pred.probability > 0.5;
+    const isHighConf = pred.probability > 0.3;
     return isHighConf && NON_PET_KEYWORDS.some(kw => name.includes(kw));
   });
 }
@@ -258,13 +274,17 @@ async function identifyFromImage(canvas) {
   // ✅ HUMAN/NON-PET DETECTION GUARD
   if (predictions) {
     if (isHumanImage(predictions)) {
-      showNoPetDetected('Human face detected. Please upload a photo of a dog or cat.');
+      showNoPetDetected('Human detected. Please upload a photo of a dog or cat — not a person.');
       return;
     }
     if (isNonPetImage(predictions)) {
-      showNoPetDetected('No animal detected in this image. Please upload a pet photo.');
+      showNoPetDetected('No animal detected in this image. Please upload a clear photo of a pet.');
       return;
     }
+  } else {
+    // MobileNet not loaded — cannot make any identification
+    showNoPetDetected('⚠️ AI model could not load. Please check your internet connection and refresh to use breed identification.');
+    return;
   }
 
   const scores = identifyBreed(predictions, hash);

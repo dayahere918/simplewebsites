@@ -29,10 +29,11 @@ function sanitizeYamlInput(str) {
 
     // 2. Fix missing space after colon: key:value -> key: value
     // Target keys at start of line (allowing indents and sequence dashes)
-    const colonMatch = line.match(/^([\s-]*[\w"']+):([^\s/"'])/);
+    // IMPORTANT: Skip lines where colon is followed by // (URLs like http://)
+    const colonMatch = line.match(/^([\s-]*[\w"']+):([^\s/:"'])/);
     if (colonMatch) {
       hadMissingSpaces = true;
-      line = line.replace(/^([\s-]*[\w"']+):([^\s/"'])/, '$1: $2');
+      line = line.replace(/^([\s-]*[\w"']+):([^\s/:"'])/, '$1: $2');
     }
     return line;
   }).join('\n');
@@ -195,8 +196,10 @@ function processData() {
     return;
   }
 
-  const yamlLib = (typeof jsyaml !== 'undefined') ? jsyaml : (typeof global !== 'undefined' ? global.jsyaml : null);
-  if (!yamlLib) { showFormatterError(errorBox, statusLabel, 'js-yaml library not loaded'); return; }
+  const yamlLib = (typeof jsyaml !== 'undefined') ? jsyaml
+    : (typeof window !== 'undefined' && window.jsyaml) ? window.jsyaml
+    : (typeof global !== 'undefined' && global.jsyaml) ? global.jsyaml : null;
+  if (!yamlLib) { showFormatterError(errorBox, statusLabel, 'js-yaml library not loaded. Please refresh the page.'); return; }
 
   const { parsed, detectedType, error, notice } = parseInput(inputStr, inputType, yamlLib);
 

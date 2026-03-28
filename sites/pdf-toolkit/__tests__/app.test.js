@@ -262,13 +262,15 @@ describe('PDF Toolkit — Split Operations', () => {
     expect(document.getElementById('processing-status').textContent).toContain('Error');
   });
 
-  test('executeSplit shows error for empty selection', async () => {
+  test('executeSplit extracts all pages when selection is empty (fallback behavior)', async () => {
     const pdf = new File([''], 'test.pdf', { type: 'application/pdf' });
     pdf.arrayBuffer = () => Promise.resolve(new ArrayBuffer(8));
     setSplitFile(pdf);
-    setSelectedPages([]); // No pages selected explicitly
+    setSelectedPages([]); // No pages selected — should default to all pages
     await executeSplit();
-    expect(document.getElementById('processing-status').textContent).toContain('Minimum 1 page must be selected');
+    // Should extract all 5 pages (from mock), not show an error
+    expect(document.getElementById('split-results').classList.contains('hidden')).toBe(false);
+    expect(document.getElementById('output-list').children.length).toBe(5);
   });
 });
 

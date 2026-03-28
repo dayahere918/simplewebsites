@@ -93,13 +93,25 @@ describe('isHumanImage()', () => {
     expect(isHumanImage(null)).toBe(false);
   });
 
-  test('only checks top 3 predictions', () => {
-    // Person is prediction #4 — should not trigger
+  test('checks top 5 predictions', () => {
+    // Person at position 4 — should now trigger (was top 3, now top 5)
     const preds = [
       { className: 'golden retriever', probability: 0.5 },
       { className: 'beagle', probability: 0.3 },
       { className: 'poodle', probability: 0.15 },
       { className: 'person', probability: 0.05 }
+    ];
+    expect(isHumanImage(preds)).toBe(true);
+  });
+
+  test('does not detect when human keyword is beyond top 5', () => {
+    const preds = [
+      { className: 'golden retriever', probability: 0.5 },
+      { className: 'beagle', probability: 0.3 },
+      { className: 'poodle', probability: 0.08 },
+      { className: 'labrador', probability: 0.06 },
+      { className: 'husky', probability: 0.04 },
+      { className: 'person', probability: 0.02 }
     ];
     expect(isHumanImage(preds)).toBe(false);
   });
@@ -112,6 +124,20 @@ describe('isHumanImage()', () => {
     ];
     expect(isHumanImage(preds)).toBe(true);
   });
+
+  test('detects core human terms at very low confidence (0.01)', () => {
+    const preds = [
+      { className: 'person', probability: 0.01 }
+    ];
+    expect(isHumanImage(preds)).toBe(true);
+  });
+
+  test('ignores clothing keywords below 0.03 threshold', () => {
+    const preds = [
+      { className: 'jersey', probability: 0.02 }
+    ];
+    expect(isHumanImage(preds)).toBe(false);
+  });
 });
 
 // ── isNonPetImage ────────────────────────────────────────
@@ -122,7 +148,8 @@ describe('isNonPetImage()', () => {
   });
 
   test('returns false for low-confidence non-pet prediction', () => {
-    expect(isNonPetImage([{ className: 'car', probability: 0.3 }])).toBe(false);
+    // Threshold is >0.3, so exactly 0.3 should be false  
+    expect(isNonPetImage([{ className: 'car', probability: 0.25 }])).toBe(false);
   });
 
   test('returns false for pet predictions', () => {

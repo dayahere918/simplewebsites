@@ -271,23 +271,26 @@ function handleUpload(event) {
   const file = event?.target?.files?.[0];
   if (!file || !file.type.startsWith('image/')) return;
 
+  // Show loading state immediately
+  const uploadArea = document.getElementById('upload-area');
+  if (uploadArea) {
+    const dz = uploadArea.querySelector('.drop-zone');
+    if (dz) dz.innerHTML = '<div style="padding:2rem;text-align:center"><div class="animate-pulse text-accent font-bold">⏳ Loading image...</div></div>';
+  }
+
   const reader = new FileReader();
   reader.onload = (e) => {
     const img = new Image();
-    img.onload = async () => {
-      try {
-        if (img.decode) await img.decode();
-      } catch (err) {
-        console.warn('Image decode error', err);
-      }
+    img.onload = () => {
       const { valid, message } = validateImageSize(img.width, img.height);
       if (!valid) { showStatus(message, 'error'); return; }
       originalImage = img;
       initWorkspace(img);
     };
-    img.onerror = () => showStatus('Failed to load image', 'error');
+    img.onerror = () => showStatus('Failed to load image. Try a different file.', 'error');
     img.src = e.target.result;
   };
+  reader.onerror = () => showStatus('Failed to read file.', 'error');
   reader.readAsDataURL(file);
 }
 
@@ -295,13 +298,13 @@ function initWorkspace(img) {
   // Draw to working canvas
   currentCanvas = createCanvas(img.width, img.height);
   const ctx = currentCanvas.getContext('2d');
-  ctx.drawImage(img, 0, 0);
+  if (ctx.drawImage) ctx.drawImage(img, 0, 0);
 
-  // Show workspace
+  // Show workspace — use both classList and explicit style for reliability
   const uploadArea = document.getElementById('upload-area');
   const workspace = document.getElementById('workspace');
-  if (uploadArea) uploadArea.classList.add('hidden');
-  if (workspace) workspace.classList.remove('hidden');
+  if (uploadArea) { uploadArea.classList.add('hidden'); uploadArea.style.display = 'none'; }
+  if (workspace) { workspace.classList.remove('hidden'); workspace.style.display = ''; }
 
   updatePreview();
   updateDimensionDisplays();

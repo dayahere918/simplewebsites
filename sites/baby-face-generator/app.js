@@ -230,11 +230,11 @@ function blendImages(canvas1, canvas2, outputCanvas) {
   const tone1 = extractSkinTone(canvas1, SIZE);
   const tone2 = extractSkinTone(canvas2, SIZE);
 
-  // Baby skin tone — average of parents with slight warmth boost
+  // Baby skin tone — blended average with warmth boost for infant appearance
   const babyTone = {
-    r: Math.min(255, Math.round((tone1.r + tone2.r) / 2 + 8)),
-    g: Math.min(255, Math.round((tone1.g + tone2.g) / 2 + 5)),
-    b: Math.min(255, Math.round((tone1.b + tone2.b) / 2))
+    r: Math.min(255, Math.round((tone1.r * 0.5 + tone2.r * 0.5) + 12)),
+    g: Math.min(255, Math.round((tone1.g * 0.5 + tone2.g * 0.5) + 8)),
+    b: Math.min(255, Math.round((tone1.b * 0.5 + tone2.b * 0.5) + 3))
   };
 
   // Align faces using landmarks if available, otherwise use as-is
@@ -273,67 +273,52 @@ function blendImages(canvas1, canvas2, outputCanvas) {
 
   const out = ctx.createImageData(SIZE, SIZE);
 
-  // Fix double-face ghosting by choosing a dominant structural parent
-  // and blending the other's features (eyes/mouth) using soft masking instead of 50/50 pixel math.
-  const baseP = Math.random() > 0.5 ? 1 : 2;
-  const baseData = baseP === 1 ? d1 : d2;
-  const featData = baseP === 1 ? d2 : d1;
-  
-  // Randomly select which features come from the other parent
-  const useFeatEyes = Math.random() > 0.4;
-  const useFeatMouth = !useFeatEyes;
+  // Use 70/30 dominant parent approach — one parent provides structure, the other provides accents
+  // This prevents the "double face" ghosting that 50/50 blending causes
+  const dominantWeight = 0.70;
+  const accentWeight = 0.30;
+  const baseData = d1;
+  const featData = d2;
+
+  // Gaussian weight function for smooth radial blending
+  const gaussian = (x, mu, sigma) => Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
 
   for (let y = 0; y < SIZE; y++) {
     for (let x = 0; x < SIZE; x++) {
       const i = (y * SIZE + x) * 4;
       const cx = SIZE / 2, cy = SIZE / 2;
       const rdx = x - cx, rdy = y - cy;
-      const dist = Math.sqrt(rdx*rdx + rdy*rdy) / (SIZE / 2);
+      const dist = Math.sqrt(rdx * rdx + rdy * rdy) / (SIZE / 2);
 
-      // Define facial zones based on standard centered alignment (eyes at ~95y, mouth at ~145y)
-      let featWeight = 0; // how much of the non-dominant parent to use
-      
-      const isEyeRegion = (rdy < -5 && rdy > -40 && Math.abs(rdx) < 55);
-      const isMouthRegion = (rdy > 20 && rdy < 60 && Math.abs(rdx) < 35);
-      const isSkinRegion = dist < 0.6; // Inner face
+      // Smooth Gaussian-weighted blending based on radial distance from center
+      // Center face region gets more accent parent influence, edges get less
+      const centralBlend = gaussian(dist, 0, 0.45); // peaks at center, fades at edges
+      const accentInfluence = accentWeight * centralBlend;
+      const baseInfluence = 1.0 - accentInfluence;
 
-      if (isEyeRegion && useFeatEyes) {
-        // Feathered edge for eyes
-        const centerDist = Math.abs(rdx) < 20 ? 0 : 1;
-        featWeight = 0.85; 
-      } else if (isMouthRegion && useFeatMouth) {
-        featWeight = 0.75;
-      } else if (isSkinRegion) {
-        // Blend skin tones 60/40
-        featWeight = 0.4;
-      } else {
-        // Hair and background belong solely to the base parent to prevent ghosting
-        featWeight = 0.05; 
-      }
+      // Smooth face-edge fade to baby skin tone
+      const faceFade = dist > 0.55 ? Math.min(1, (dist - 0.55) / 0.20) : 0;
 
-      // Smooth transition to baby skin tint around edges
-      const faceFade = dist > 0.65 ? Math.min(1, (dist - 0.65) / 0.15) : 0;
+      // Blend pixels from both parents
+      let r = baseData.data[i] * baseInfluence + featData.data[i] * accentInfluence;
+      let g = baseData.data[i + 1] * baseInfluence + featData.data[i + 1] * accentInfluence;
+      let b = baseData.data[i + 2] * baseInfluence + featData.data[i + 2] * accentInfluence;
 
-      // Calculate final pixel values
-      let r = baseData.data[i] * (1 - featWeight) + featData.data[i] * featWeight;
-      let g = baseData.data[i+1] * (1 - featWeight) + featData.data[i+1] * featWeight;
-      let b = baseData.data[i+2] * (1 - featWeight) + featData.data[i+2] * featWeight;
-
-      // Baby skin tint — warming and smoothing
-      const tint = 0.25;
+      // Baby skin tint — stronger warming for realism
+      const tint = 0.30;
       r = r * (1 - tint) + babyTone.r * tint;
       g = g * (1 - tint) + babyTone.g * tint;
       b = b * (1 - tint) + babyTone.b * tint;
 
-      // Fade edges strictly to warm background to hide harsh cuts
+      // Fade edges to warm background to create clean oval face shape
       r = r * (1 - faceFade) + babyTone.r * faceFade;
       g = g * (1 - faceFade) + babyTone.g * faceFade;
       b = b * (1 - faceFade) + babyTone.b * faceFade;
 
-      out.data[i] = Math.min(255, Math.round(r));
-      out.data[i+1] = Math.min(255, Math.round(g));
-      out.data[i+2] = Math.min(255, Math.round(b));
-      out.data[i+3] = 255;
+      out.data[i] = Math.min(255, Math.max(0, Math.round(r)));
+      out.data[i + 1] = Math.min(255, Math.max(0, Math.round(g)));
+      out.data[i + 2] = Math.min(255, Math.max(0, Math.round(b)));
+      out.data[i + 3] = 255;
     }
   }
 

@@ -1,10 +1,34 @@
 /**
  * QR Code Generator Core Logic using node-qrcode (browser build)
- * Fixed: roundRect browser compatibility, error feedback, logo embed
+ * Fixed: Library load timing, roundRect compatibility, clear UX instructions
  */
 
 let logoImage = null;
 let generateTimer = null;
+let qrLibReady = false;
+
+/**
+ * Wait for QRCode library to be available (CDN load timing)
+ * Polls every 200ms, max 25 attempts (5 seconds)
+ * @returns {Promise<boolean>}
+ */
+function waitForQRLib(maxAttempts = 25) {
+  return new Promise((resolve) => {
+    if (typeof QRCode !== 'undefined') { qrLibReady = true; resolve(true); return; }
+    let attempts = 0;
+    const poll = setInterval(() => {
+      attempts++;
+      if (typeof QRCode !== 'undefined') {
+        clearInterval(poll);
+        qrLibReady = true;
+        resolve(true);
+      } else if (attempts >= maxAttempts) {
+        clearInterval(poll);
+        resolve(false);
+      }
+    }, 200);
+  });
+}
 
 function debounceGenerate() {
   clearTimeout(generateTimer);
@@ -41,19 +65,12 @@ function clearLogo() {
 /**
  * Cross-browser roundRect fallback using arc()
  * ctx.roundRect() is only supported in Chrome 99+/Firefox 112+
- * @param {CanvasRenderingContext2D} ctx
- * @param {number} x
- * @param {number} y
- * @param {number} w
- * @param {number} h
- * @param {number} r - corner radius
  */
 function roundRectFallback(ctx, x, y, w, h, r) {
   if (typeof ctx.roundRect === 'function') {
     ctx.roundRect(x, y, w, h, r);
     return;
   }
-  // Polyfill using arc
   ctx.moveTo(x + r, y);
   ctx.lineTo(x + w - r, y);
   ctx.arcTo(x + w, y, x + w, y + r, r);
@@ -80,6 +97,15 @@ function showQrSuccess() {
   if (statusEl) statusEl.classList.add('hidden');
 }
 
+function showQrLoading(msg) {
+  const statusEl = document.getElementById('qr-status');
+  if (statusEl) {
+    statusEl.textContent = msg || '⏳ Loading QR engine...';
+    statusEl.style.color = 'var(--accent, #6366f1)';
+    statusEl.classList.remove('hidden');
+  }
+}
+
 async function generateQR() {
   const dataEl = document.getElementById('qr-data');
   const darkEl = document.getElementById('qr-dark');
@@ -94,8 +120,12 @@ async function generateQR() {
   const ctx = canvas.getContext('2d');
 
   if (typeof QRCode === 'undefined') {
-    showQrError('QR library not loaded. Please check your internet connection.');
-    return;
+    showQrLoading('⏳ Loading QR library...');
+    const loaded = await waitForQRLib();
+    if (!loaded) {
+      showQrError('QR library failed to load. Please refresh the page.');
+      return;
+    }
   }
 
   try {
@@ -146,12 +176,20 @@ function downloadQR() {
 }
 
 if (typeof document !== 'undefined') {
-  document.addEventListener('DOMContentLoaded', generateQR);
+  document.addEventListener('DOMContentLoaded', async () => {
+    showQrLoading('⏳ Initializing QR engine...');
+    const loaded = await waitForQRLib();
+    if (loaded) {
+      generateQR();
+    } else {
+      showQrError('QR library failed to load. Please check your internet connection and refresh.');
+    }
+  });
 }
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     debounceGenerate, handleLogoUpload, clearLogo, generateQR, downloadQR,
-    roundRectFallback, showQrError, showQrSuccess
+    roundRectFallback, showQrError, showQrSuccess, showQrLoading, waitForQRLib
   };
 }
